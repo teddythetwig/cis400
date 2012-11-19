@@ -32,7 +32,15 @@ module CIS400
     # The default locale is :en and all translations from config/locales/*.rb,yml are auto loaded.
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
-
+    
+    # Sets the default template to haml
+    config.generators do |g| 
+      g.template_engine :haml 
+    end 
+    
+    # Forces the application to not access the DB or load models when precompiling your assets. From Devise
+    config.assets.initialize_on_precompile = false
+    
     # Configure the default encoding used in templates for Ruby 1.9.
     config.encoding = "utf-8"
 
