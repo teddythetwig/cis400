@@ -1,7 +1,10 @@
 CIS400::Application.routes.draw do
-  devise_for :users
-
-  root :to => 'user#index'
+  devise_for :users, :path => 'accounts'
+    
+  resources :users do
+    resources :servers
+  end
+  root :to => "users#index"
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

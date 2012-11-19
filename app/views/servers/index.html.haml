@@ -1,0 +1,9 @@
+%h1 Your Servers
+%p Find me in app/views/server/index.html.haml
+- @servers.each do |s|
+  =link_to s.name, user_server_path(current_user,s)
+  =link_to("Delete", user_server_path(current_user,s), :method => :delete, :confirm => "are you sure?")
+  %br/
+  
+=link_to "Create Server", new_user_server_path(current_user)
+
