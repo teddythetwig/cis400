@@ -27,6 +27,10 @@ gem 'json'
 gem 'haml'
 gem 'haml-rails'
 gem 'devise'
+
+gem 'therubyracer'
+gem 'less-rails'
+gem 'twitter-bootstrap-rails'
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
 
