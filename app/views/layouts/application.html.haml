@@ -7,7 +7,7 @@
     = csrf_meta_tags
   %body
     %p.status
-      =user_signed_in? ? "Hello #{current_user.email}" : link_to("Login",new_user_session_path)
+      =user_signed_in? ? "Hello #{current_user.email}" : link_to("Login",new_account_session_path)
       =user_signed_in? ?  link_to("Logout",destroy_user_session_path) : ""
     %p.notice= notice
     %p.alert= alert
