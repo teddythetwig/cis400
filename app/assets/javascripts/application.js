@@ -26,22 +26,27 @@ function table(name){
 	if(uniqueTable(name)){
 		this.name = name;
 	} else{
-		return;
+		return -1;
 	}
 	this.properties = new Array();
 	this.properties.push(name + "id");
-	this.square = new Rect(0, 0, 100, 100);
-	this.square.addTo(stage);d
-	this.square.fill('red');
-	
-	tables.push(this);	
+	this.connections = new Array();
+	tables.push(this);
+	return (tables.length - 1);
 }
 
 //Property constructor
 function property(name){
 	this.name = name;
 	this.type = null;
+	this.connected = -1;
 	props.push(this);
+	return (props.length - 1);
+}
+
+//TODO Check if tables are connected
+function tablesConnected(tableAId, tableBId){
+	
 }
 
 
@@ -54,7 +59,8 @@ function uniqueTable(name){
 	return true;
 }
 
-function uniqueProperty(table, name){
+function uniqueProperty(tableId, name){
+	var table = tables[tableId];
 	for(var i = 0; i < table.properties.length; i++){
 		if(table.properties[i].name == name){
 			return false;
@@ -63,7 +69,8 @@ function uniqueProperty(table, name){
 	return true;
 }
 
-function addPropToTable(table, propId){
+function addPropToTable(tableId, propId){
+	var table = tables[tableId];
 	var property= props[propId];
 	if(uniqueProperty(table, property.name)){
 		table.properties.push(property);
@@ -72,4 +79,17 @@ function addPropToTable(table, propId){
 		return false;
 	}
 }
+
+function connectTables(tableAId, tableBId){
+	if(tablesConnected(tableAId, tableBId)){
+		tableA.connections.push(tableBId);
+		tableB.connections.push(tableAId);
+	}
+	
+}
+
+
+/////////////////////
+// Bonsai JS
+////////////////////
 
