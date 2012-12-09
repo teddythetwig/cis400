@@ -3,15 +3,18 @@
 var x, y;
 
 // Text variable
-currentTxt = new Text("Name");
+currTxt = new Text("Name");
 
-//List of tables
+// List of tables
 tables = new Array();
 
-//Unlinked Properties
+// Unlinked Properties
 props = new Array();
 
-//Button creation
+// Figure variable
+currFig = new Rect(0, 0, 100, 100);
+
+// Button creation
 var button_connect = new Group().addTo(stage);
 
 button_connect.bg = new Rect(50, 50, 100, 40, 5).attr({
@@ -60,10 +63,11 @@ function addTable(name){
 		tables.push(rect);
 		
 		rect.on('click', function(data){
-		    new Text("Name: " + this.name).addTo(stage).attr({
+		    currTxt = new Text("Name: " + this.name).attr({
      		fontFamily: 'Arial, sans-serif',
     	  	fontSize: '20'
     		});
+    		currTxt.addTo(stage);
 		});
 
 		rect.on('multi:pointerdown', function(e) {
@@ -79,8 +83,9 @@ function addTable(name){
 				y: y + e.diffY
 			});
 		});
+		currFig = rect;
 
-		stage.addChild(rect);
+		stage.addChild(currFig);
 	//} else{
 	//	return -1; //Show some visual error
 	//}
