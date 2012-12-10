@@ -144,3 +144,40 @@ function connectTables(tableAId, tableBId){
 	}
 	
 }
+
+// begin modal functions
+function saveNewTable(e) {
+  var tableName = document.getElementById("newTableName");
+  if(tableName.value != "") {
+    $('#newTableModal').modal('hide'); // hide modal on save
+    alert("New table name: " + tableName.value);
+  }
+}
+
+function saveNewAttr(e) {
+  var attrName = document.getElementById("newAttrName");
+  var attrType = document.getElementById("newAttrType");
+  if(attrName.value != "") {
+    $('#newAttributeModal').modal('hide'); // hide modal on save
+    alert("New attr name: " + attrName.value + "\nAttr type: " + attrType.options[attrType.selectedIndex].value);
+  }
+}
+
+function saveEditTable(e) {
+  var tableName = document.getElementById("editTableName");
+  if(tableName.value != "") {
+    $('#editTableModal').modal('hide'); // hide modal on save
+    alert("Edited table name: " + tableName.value);
+  }
+}
+
+function saveEditAttr(e) {
+  var attrName = document.getElementById("editAttrName");
+  var attrType = document.getElementById("editAttrType");
+  if(attrName.value != "") {
+    $('#editAttributeModal').modal('hide'); // hide modal on save
+    alert("Edited attr name: " + attrName.value + "\nAttr type: " + attrType.options[attrType.selectedIndex].value);
+  }
+}
+// end modal functions
+

@@ -42,48 +42,6 @@
     });
   </script>
 
-  <script>
-    function saveNewTable(e) {
-      var tableName = document.getElementById("newTableName");
-      if(tableName.value != "") {
-	$('#newTableModal').modal('hide'); // hide modal on save
-	alert("New table name: " + tableName.value);
-      }
-    }
-  </script>
-
-  <script>
-    function saveNewAttr(e) {
-      var attrName = document.getElementById("newAttrName");
-      var attrType = document.getElementById("newAttrType");
-      if(attrName.value != "") {
-	$('#newAttributeModal').modal('hide'); // hide modal on save
-	alert("New attr name: " + attrName.value + "\nAttr type: " ++ attrType.value);
-      }
-    }
-  </script>
-
-  <script>
-    function saveEditTable(e) {
-      var tableName = document.getElementById("editTableName");
-      if(tableName.value != "") {
-	$('#editTableModal').modal('hide'); // hide modal on save
-	alert("Edited table name: " + tableName.value);
-      }
-    }
-  </script>
-
-  <script>
-    function saveEditAttr(e) {
-      var attrName = document.getElementById("editAttrName");
-      var attrType = document.getElementById("editAttrType");
-      if(attrName.value != "") {
-	$('#editAttributeModal').modal('hide'); // hide modal on save
-	alert("Edited attr name: " + attrName.value + "\nAttr type: " ++ attrType.value);
-      }
-    }
-  </script>
-
   <!-- newTableModal -->
   <div id="newTableModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="newTableModalLabel" aria-hidden="true">
     <div class="modal-header">
