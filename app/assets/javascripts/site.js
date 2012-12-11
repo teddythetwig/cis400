@@ -1,3 +1,4 @@
+/* Global Variables */
 
 // Position of current object
 var x, y;
@@ -54,8 +55,9 @@ button_connect.text = new Text('New Table').attr({
 
 //Table constructor
 function addTable(name){
+	    
 	//if(uniqueTable(name)){
-		var rect = bonsai.Path.rect(150, 150, 150, 150).attr({fillColor: 'blue'});
+		var rect = new Rect(150, 150, 150, 150).fill('blue');
 		rect.name = name;
 		rect.properties = new Array();
 	    rect.properties.push(name + "id");
@@ -151,6 +153,7 @@ function saveNewTable(e) {
   if(tableName.value != "") {
     $('#newTableModal').modal('hide'); // hide modal on save
     alert("New table name: " + tableName.value);
+    addTable(tableName.value);
   }
 }
 
