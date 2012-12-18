@@ -1,0 +1,59 @@
+<!-- Navbar -->
+<div class="navbar navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container-fluid">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </a>
+      <a href="/users" class="brand">SIQL</a>
+      <div class="nav-collapse collapse">
+        <div class="nav pull-right">
+          <li class="divider-vertical"></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a href="##">Help</a>
+            </li>
+            <li>
+              <%= link_to 'Logout', destroy_user_session_path, method: :delete %>
+            </li>
+        </li>
+        </div>
+      </div>
+    </div> <!--/.container-fluid -->
+  </div> <!--/.navbar-inner -->
+</div> <!--/.navbar-fixed-top -->
+
+<div class="page-header">
+  <h1> Database Creation </h1>
+</div>
+<div class="container">
+  <div id="movie"></div>
+  <script>
+    bonsai.run(document.getElementById('movie'), {
+  url: '/assets/demo.js',
+  width:800,
+  height:450
+    });
+  </script>
+  
+<table class= "table table-bordered">
+  <tr>
+    <td>Table Name: </td>
+    <td>Employees</td>
+  </tr>
+  <tr>
+    <td rowspan="2">Attributes: </td>
+    <td>name</td>
+  </tr>
+  <tr>
+    <td>hire_date<td>
+  <tr>
+</table>
+</div>
