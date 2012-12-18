@@ -28,6 +28,9 @@ gem 'haml'
 gem 'haml-rails'
 gem 'devise'
 
+gem 'aws-sdk', :require => 'aws'
+gem 'mysql2'
+
 gem 'therubyracer'
 gem 'less-rails'
 gem 'twitter-bootstrap-rails'
