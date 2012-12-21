@@ -1,10 +1,15 @@
 CIS400::Application.routes.draw do
   devise_for :users, :path => 'accounts'
-    
+  
   resources :users do
     resources :servers
   end
   root :to => "users#index"
+
+  controller :nlp do
+    get '/nlp' => :index
+    post '/nlp' => :post
+  end
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

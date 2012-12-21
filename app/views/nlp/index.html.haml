@@ -1,0 +1,13 @@
+%h1 Simple NLP
+= form_tag do
+  %fieldset
+    .control-group
+      .controls
+        = text_area_tag :query, 'Get all employees who were hired before August 2011 and have been paid more than $1,000 since September 2012', :rows => 2
+    .control-group
+      .controls
+        = text_area_tag :db_json, '{"tables":[{"name":"employees","fields":[{"name":"firstname","type":"string"},{"name":"id","type":"int"}]},{"name":"payroll_transactions","fields":[{"name":"amount","type":"int"},{"name":"id","type":"int"}]}', :rows => 10
+    .control-group
+      .controls
+        %input{:type => "submit", :value => "Convert >>"}
+
