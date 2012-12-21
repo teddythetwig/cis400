@@ -3,6 +3,8 @@ class NlpController < ApplicationController
     text = params[:query]
     tgr = EngTagger.new
     tagged = tgr.add_tags(text)
-    @result = tgr.get_readable(text)
+    @results = []
+    @results << tgr.get_readable(text)
+    @results << tgr.get_nouns(tagged)
   end
 end
