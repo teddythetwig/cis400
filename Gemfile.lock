@@ -36,6 +36,7 @@ GEM
       uuidtools (~> 2.1)
     bcrypt-ruby (3.0.1)
     builder (3.0.4)
+    chronic (0.9.0)
     coffee-rails (3.2.2)
       coffee-script (>= 2.2.0)
       railties (~> 3.2.0)
@@ -53,6 +54,7 @@ GEM
     erubis (2.7.0)
     execjs (1.4.0)
       multi_json (~> 1.0)
+    fast-stemmer (1.0.1)
     haml (3.1.7)
     haml-rails (0.3.5)
       actionpack (>= 3.1, < 4.1)
@@ -74,6 +76,7 @@ GEM
     less-rails (2.2.6)
       actionpack (>= 3.1)
       less (~> 2.2.0)
+    libv8 (3.11.8.4)
     mail (2.4.4)
       i18n (>= 0.4.0)
       mime-types (~> 1.16)
@@ -146,14 +149,17 @@ PLATFORMS
 
 DEPENDENCIES
   aws-sdk
+  chronic
   coffee-rails (~> 3.2.1)
   devise
   engtagger
+  fast-stemmer
   haml
   haml-rails
   jquery-rails
   json
   less-rails
+  libv8
   mysql2
   pg
   rails (= 3.2.2)

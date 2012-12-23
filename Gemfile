@@ -31,11 +31,14 @@ gem 'devise'
 gem 'aws-sdk', :require => 'aws'
 gem 'mysql2'
 
+gem 'libv8'
 gem 'therubyracer'
 gem 'less-rails'
 gem 'twitter-bootstrap-rails'
 
 gem 'engtagger'
+gem 'fast-stemmer'
+gem 'chronic'
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
 
