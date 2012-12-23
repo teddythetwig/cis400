@@ -6,7 +6,7 @@
         = text_area_tag :query, 'Get all employees who were hired before August 2011 and have been paid more than $1,000 since September 2012 also 9/11/2011 are Sept 9 2008 some Dec 12, 2001 dates 9th of december 2008', :rows => 10
     .control-group
       .controls
-        = text_area_tag :db_json, '{"tables":[{"name":"employees","fields":[{"name":"firstname","type":"string"},{"name":"id","type":"int"}]},{"name":"payroll_transactions","fields":[{"name":"amount","type":"int"},{"name":"id","type":"int"}]}', :rows => 10
+        = text_area_tag :db_json, '{"tables":[{"name":"employees","fields":[{"name":"first_name","type":"string"},{"name":"id","type":"int"}]},{"name":"payroll_transactions","fields":[{"name":"amount","type":"int"},{"name":"id","type":"int"}]}', :rows => 10
     .control-group
       .controls
         %input{:type => "submit", :value => "Convert >>"}
