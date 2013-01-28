@@ -11,3 +11,7 @@
  *= require_self
  *= require_tree .
 */
+
+#container {
+    border: 1px solid #000;
+}
