@@ -35,5 +35,14 @@ class Server < ActiveRecord::Base
   def db_json=(value)
     self[:db_json] = ActiveSupport::JSON.encode(value)
   end
+  
+  # Executes query on remote server
+  def execute query
+    if check_status == "available"
+    
+    else
+    
+    end
+  end
 
 end
