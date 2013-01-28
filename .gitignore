@@ -17,4 +17,4 @@
 *~
 
 # Ignore Gemfile.lock
-.lock
+*.lock
