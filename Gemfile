@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rails', '3.2.2'
+gem 'rails', '3.2.11'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
@@ -31,14 +31,19 @@ gem 'devise'
 gem 'aws-sdk', :require => 'aws'
 gem 'mysql2'
 
-gem 'libv8'
-gem 'therubyracer'
+gem 'libv8', '~> 3.11.8.12' 
+gem 'therubyracer', '>=0.11.3'
 gem 'less-rails'
 gem 'twitter-bootstrap-rails'
 
 gem 'engtagger'
 gem 'fast-stemmer'
 gem 'chronic'
+
+# Dependencies for Kinetic JS
+gem 'thor'
+gem 'json_pure'
+
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
 

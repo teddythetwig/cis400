@@ -30,11 +30,124 @@
   </div> <!--/.navbar-inner -->
 </div> <!--/.navbar-fixed-top -->
 
+<br />
+<br />
 <div class="page-header">
   <h1> Database Creation </h1>
 </div>
 <div class="container">
-  <div id="movie"></div>
+  <div id="container"></div>
+  <script src="http://www.html5canvastutorials.com/libraries/kinetic-v4.3.0-beta2.js"></script>
+  <!-- <script src="../../../public/javascripts/graphics.js"></script> -->
+  <script type="text/javascript">
+
+/* Global Variables */
+
+// Position of current object
+var x, y;
+
+// List of tables
+tables = new Array();
+
+//Graphics variables
+var stage = new Kinetic.Stage({
+  container: 'container',
+  //width: 578,
+  //height: 200 });
+  width: 1150,
+  height: 500 });
+var layer = new Kinetic.Layer();
+var currGroup = new Kinetic.Group();
+
+/* 
+* Creates table
+* Note: Check table name is unique before calling.
+*
+*/
+function createTable(inputTxt) {
+  var rectX = stage.getWidth() / 2 - 50;
+  var rectY = stage.getHeight() / 2 - 25;
+    
+  var group = new Kinetic.Group({draggable: true});
+    
+  var complexText = new Kinetic.Text({
+     name: 'text',
+     x: rectX,
+     y: rectY,
+     text: inputTxt,
+     fontSize: 16,
+     fontFamily: 'Calibri',
+     fill: 'white',
+     width: 100,
+     padding: 20,
+     align: 'center',
+  });
+
+  var rect = new Kinetic.Rect({
+    name: 'shape',
+    x: rectX,
+    y: rectY,
+    stroke: 'black',
+    strokeWidth: 4,
+    fill: 'mediumblue',
+    width: 100,
+    height: complexText.getHeight(),
+    shadowColor: 'black',
+    shadowBlur: 10,
+    shadowOffset: [10, 10],
+    shadowOpacity: 0.2,
+    cornerRadius: 10
+  });
+  
+  //Add Elements to group  
+  group.add(rect);
+  group.add(complexText);
+    
+  // Event handling
+  group.on('mouseover', function() {
+    document.body.style.cursor = 'pointer';
+  });
+  group.on('mouseout', function() {
+    document.body.style.cursor = 'default';
+  });  
+  group.on('mousedown', function() {
+    if(currGroup.getChildren().length > 0)
+        currGroup.get('.shape')[0].setStroke('black');
+    currGroup = group;
+    document.getElementById('name').innerHTML = group.get('.text')[0].getText();
+    group.get('.shape')[0].setStroke('lightsteelblue');
+      
+    //TODO: Find attributes
+    document.getElementById('attribute').innerHTML = 'None';
+  }); 
+    
+  //Add group to table array  
+  tables.push(group);
+    
+  //Add group to stage
+  layer.add(group);
+  stage.add(layer);  
+}
+
+/*
+* Checks for unique table name.
+*
+*/
+function uniqueTableName(name){
+	for(var i = 0; i < tables.length; i++){
+		if(name.toLowerCase() == tables[i].get('.text')[0].getText().toLowerCase()){
+            alert('test');
+			return false;
+		}
+	}
+	return true;
+}
+
+  </script>
+
+
+
+<!--   <div id="movie"></div>
   <script>
     bonsai.run(document.getElementById('movie'), {
   url: '/assets/demo.js',
@@ -54,6 +167,29 @@
   </tr>
   <tr>
     <td>hire_date<td>
-  <tr>
-</table>
+  </tr>
+</table> -->
+
+
+  <br />
+  <div class="row">
+    <div class="span8">
+      <table class= "table table-bordered">
+        <tr>
+          <td>Table Name: </td>
+          <td><div id="name">None</div></td>
+        </tr>
+        <tr>
+          <td>Attributes: </td>
+          <td><div id="attribute">None</div></td>
+        </tr>
+      </table>
+    </div>
+    <div class="span4">
+      <button class="btn btn-primary" onClick="createTable('test')">Create Table</button>
+      <button class="btn btn-success" onClick="">Create Attribute</button>
+      <button class="btn btn-danger" onclick="">Connect Tables</button>
+    </div>
+  </div>
+
 </div>

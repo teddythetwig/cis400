@@ -6,6 +6,7 @@ var x, y;
 // Text variable
 currTxt = new Text("Name");
 
+
 // List of tables
 tables = new Array();
 
@@ -13,7 +14,7 @@ tables = new Array();
 props = new Array();
 
 // Figure variable
-currFig = new Rect(0, 0, 100, 100);
+var currFig = new Rect(0, 0, 100, 100);
 
 // Button creation
 var button_connect = new Group().addTo(stage);
