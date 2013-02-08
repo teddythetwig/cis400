@@ -52,6 +52,9 @@ tables = new Array();
 // List of Array
 attributes = new Array();
 
+// List of Relations
+relations = new Array();
+
 //Graphics variables
 var stage = new Kinetic.Stage({
   container: 'container',
@@ -223,6 +226,21 @@ function createAttr(name, type, tableName) {
 }
 
 /*
+* Creates Relations
+*
+*/
+function createRelation(rname, tableName1, tableName2){
+    // Finds the table
+    table1 = findTable(tableName1);
+    table2 = findTable(tableName2);
+    
+    var group = new Kinetic.Group();
+    group.tablea = tableName1;
+    group.tableb = tableName2;
+    relations.push(group);
+}
+
+/*
 * Checks for table with inputName
 *
 */
@@ -258,6 +276,22 @@ function uniqueTableName(name){
 		}
 	}
 	return true;
+	
+/*
+* Converts current schema into xml schema
+*
+*/
+function convert() {
+    return false;
+}
+
+/*
+* Converts xml schema into current schema
+*
+*/
+function convert(schema) {
+   return false;   
+}
 }
 
 function saveNewTable(e) {
