@@ -33,7 +33,7 @@
 <br />
 <br />
 <div class="page-header">
-  <h1> Database Creation </h1>
+  <h1>Database Creation</h1>
 </div>
 <div class="container">
   <div id="container"></div>
@@ -49,7 +49,10 @@ var x, y;
 // List of tables
 tables = new Array();
 
-// List of Array
+// List of allowable data types
+datatypes = new Array("text", "number", "date");
+
+// List of attributes
 attributes = new Array();
 
 // List of Relations
@@ -276,7 +279,7 @@ function uniqueTableName(name){
 		}
 	}
 	return true;
-	
+}	
 /*
 * Converts current schema into xml schema
 *
@@ -292,7 +295,7 @@ function convert() {
 function convert(schema) {
    return false;   
 }
-}
+
 
 function saveNewTable(e) {
   var tableName = document.getElementById("newTableName").value;
@@ -328,6 +331,21 @@ function saveEditAttr(e) {
     $('#editAttributeModal').modal('hide'); // hide modal on save
   }
 }
+
+function genSelectHTML(id, arr, type) {
+  var ret = "";
+  if(type == 0) {
+    for(i=0; i<arr.length; i++) {
+      ret += "\t<option value=\"" + arr[i] + "\">" + arr[i] + "</option>\n";
+    }
+  }
+  else {
+    for(i=0; i<arr.length; i++) {
+      ret += "\t<option value=\"" + arr[i].get('.text')[0].getText() + "\">" + arr[i].get('.text')[0].getText() + "</option>\n";
+    }
+  }
+  document.getElementById(id).innerHTML = ret;
+}
 </script>
 
   <!-- newTableModal -->
@@ -347,18 +365,20 @@ function saveEditAttr(e) {
   </div>
 
   <!-- newAttributeModal -->
-  <div id="newAttributeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="newAttributeModalLabel" aria-hidden="true">
+    <div id="newAttributeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="newAttributeModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
       <h3 id="newAttributeModalLabel">Add attribute to [tablename]</h3>
     </div>
     <div class="modal-body">
+      <label for="tableName"><strong>Table name</strong></label>
+      <select id="tableName">
+      </select>
       <label for="newAttrName"><strong>Attribute name</strong></label>
       <input type="text" id="newAttrName" value="">
       <label for="newAttrType"><strong>Attribute type</strong></label>
       <select id="newAttrType">
-	<option value="text">text</option>
-	<option value="number">number</option>
+	<script>document.write(genSelectHTML('newAttrType', datatypes, 0));</script>
       </select>
     </div>
     <div class="modal-footer">
@@ -423,7 +443,7 @@ function saveEditAttr(e) {
       <a data-toggle="modal" href="#editTableModal" class="btn btn-warning">Edit table</a>
       <button class="btn btn-danger" onclick="">Delete table</button>
       <br /><br />
-      <a data-toggle="modal" href="#newAttributeModal" class="btn btn-primary">New attribute</a>
+      <a data-toggle="modal" href="#newAttributeModal" class="btn btn-primary" onclick="genSelectHTML('tableName', tables, 1)">New attribute</a>
       <a data-toggle="modal" href="#editAttributeModal" class="btn btn-warning">Edit attribute</a>
       <button class="btn btn-danger" onclick="">Delete attribute</button>
       <br /><br />
