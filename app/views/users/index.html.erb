@@ -270,26 +270,27 @@ function saveNewTable(e) {
 function saveNewAttr(e) {
   var attrName = document.getElementById("newAttrName").value;
   var attrType = document.getElementById("newAttrType");
-  if(attrName.value != "") {
+  attrType = attrType.options[attrType.selectedIndex].value;
+  if(attrName != "") {
     $('#newAttributeModal').modal('hide'); // hide modal on save
-    alert("New attr name: " + attrName + "\nAttr type: " + attrType.options[attrType.selectedIndex].value);
+    //alert("New attr name: " + attrName + "\nAttr type: " + attrType.options[attrType.selectedIndex].value);
+    //createAttr(attrName, attrType, );
   }
 }
 
 function saveEditTable(e) {
-  var tableName = document.getElementById("editTableName");
-  if(tableName.value != "") {
+  var tableName = document.getElementById("editTableName").value;
+  if(tableName != "") {
     $('#editTableModal').modal('hide'); // hide modal on save
-    alert("Edited table name: " + tableName.value);
   }
 }
 
 function saveEditAttr(e) {
   var attrName = document.getElementById("editAttrName").value;
   var attrType = document.getElementById("editAttrType");
-  if(attrName.value != "") {
+  attrType = attrType.options[attrType.selectedIndex].value;
+  if(attrName != "") {
     $('#editAttributeModal').modal('hide'); // hide modal on save
-    alert("Edited attr name: " + attrName + "\nAttr type: " + attrType.options[attrType.selectedIndex].value);
   }
 }
 </script>
