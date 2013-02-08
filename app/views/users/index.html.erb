@@ -263,7 +263,9 @@ function saveNewTable(e) {
   var tableName = document.getElementById("newTableName").value;
   if(tableName.value != "") {
     $('#newTableModal').modal('hide'); // hide modal on save
-    createTable(tableName);
+    if(uniqueTableName(tableName)) {
+      createTable(tableName);
+    }
   }
 }
 
@@ -299,7 +301,7 @@ function saveEditAttr(e) {
   <div id="newTableModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="newTableModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3 id="newTableModalLabel">Create a new table</h3>
+      <h3 id="newTableModalLabel">Create new table</h3>
     </div>
     <div class="modal-body">
       <label for="newTableName"><strong>Table name</strong></label>
@@ -315,7 +317,7 @@ function saveEditAttr(e) {
   <div id="newAttributeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="newAttributeModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3 id="newAttributeModalLabel">Add a new attribute to selected table</h3>
+      <h3 id="newAttributeModalLabel">Add attribute to [tablename]</h3>
     </div>
     <div class="modal-body">
       <label for="newAttrName"><strong>Attribute name</strong></label>
@@ -336,7 +338,7 @@ function saveEditAttr(e) {
   <div id="editTableModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="editTableModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3 id="editTableModalLabel">Edit selected table</h3>
+      <h3 id="editTableModalLabel">Edit [tablename]</h3>
     </div>
     <div class="modal-body">
       <label for="editTableName"><strong>Table name</strong></label>
@@ -352,7 +354,7 @@ function saveEditAttr(e) {
   <div id="editAttributeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="editAttributeModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3 id="editAttributeModalLabel">Edit selected table's attribute</h3>
+      <h3 id="editAttributeModalLabel">Edit [tablename] attribute</h3>
     </div>
     <div class="modal-body">
       <label for="editAttrName"><strong>Attribute name</strong></label>
@@ -386,13 +388,13 @@ function saveEditAttr(e) {
     <div class="span4">
       <a data-toggle="modal" href="#newTableModal" class="btn btn-primary">New table</a>
       <a data-toggle="modal" href="#editTableModal" class="btn btn-warning">Edit table</a>
-      <button class="btn btn-danger" onclick="">Delete Table</button>
+      <button class="btn btn-danger" onclick="">Delete table</button>
       <br /><br />
       <a data-toggle="modal" href="#newAttributeModal" class="btn btn-primary">New attribute</a>
       <a data-toggle="modal" href="#editAttributeModal" class="btn btn-warning">Edit attribute</a>
-      <button class="btn btn-danger" onclick="">Delete Attribute</button>
+      <button class="btn btn-danger" onclick="">Delete attribute</button>
       <br /><br />
-      <button class="btn btn-success" onclick="">Connect Tables</button>
+      <button class="btn btn-success" onclick="">Connect tables</button>
     </div>
   </div>
 
