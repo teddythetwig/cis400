@@ -65,6 +65,7 @@ var currGroup = new Kinetic.Group();
 *
 */
 function createTable(inputTxt) {
+  //uniqueTable(inputTxt);
   var rectX = stage.getWidth() / 2 - 50;
   var rectY = stage.getHeight() / 2 - 25;
     
@@ -102,6 +103,10 @@ function createTable(inputTxt) {
   //Add Elements to group  
   group.add(rect);
   group.add(complexText);
+  
+  //Adds an empty attributes and neighbors array
+  group.attr = new Array();
+  group.neighbors = new Array();
     
   // Event handling
   group.on('mouseover', function() {
@@ -117,8 +122,11 @@ function createTable(inputTxt) {
     document.getElementById('name').innerHTML = group.get('.text')[0].getText();
     group.get('.shape')[0].setStroke('lightsteelblue');
       
-    //TODO: Find attributes
-    document.getElementById('attribute').innerHTML = 'None';
+    //TODO: Add multiple attributes functionality
+    if(group.attr.length > 0){
+      //document.getElementById('attribute').innerHTML = group.attr[0];
+      document.getElementById('attribute').innerHTML = group.attr.length;
+    }
   }); 
     
   //Add group to table array  
@@ -140,6 +148,9 @@ function createAttr(name, type, tableName) {
   var table = findTable(tableName);
   if(table == null) {
         alert('Table not found');
+  }
+  if(!uniqueAttribute(name, tableName)) {
+        alert('Attribute not unique');
   }
   
   var group = new Kinetic.Group({draggable: true});
@@ -177,6 +188,14 @@ function createAttr(name, type, tableName) {
   group.add(rect);
   group.add(complexText);
     
+  //Adding attributes to attribute
+  group.parent = table;
+  group.type = type;
+  group.primary = false;
+    
+  //Adding attribute to table
+  table.attr.push(name);
+    
   // Event handling
   group.on('mouseover', function() {
     document.body.style.cursor = 'pointer';
@@ -188,20 +207,19 @@ function createAttr(name, type, tableName) {
     if(currGroup.getChildren().length > 0)
         currGroup.get('.shape')[0].setStroke('black');
     currGroup = group;
-    document.getElementById('name').innerHTML = group.get('.text')[0].getText();
     group.get('.shape')[0].setStroke('lightsteelblue');
       
-    //TODO: Find attributes
-    document.getElementById('attribute').innerHTML = 'None';
+      alert('Datatype: ' + group.type + ', Parent:' + group.parent.get('.text')[0].getText());
   }); 
     
-  //Add group to table array  
-  tables.push(group);
+  //Add group to attributes array  
+  attributes.push(group);
     
   //Add group to stage
   layer.add(group);
   stage.add(layer);  
 }
+
 
 
 /*
@@ -215,6 +233,18 @@ function findTable(name) {
         }
     }
     return null;
+}
+
+/*
+* Checks  for unique attribute name within a table
+*
+*/
+function uniqueAttribute(name, tname) {
+    table = findTable(tname);
+    if(table.attr.indexOf(name) > -1) {
+        return false;
+    }
+    return true;
 }
 
 /*
