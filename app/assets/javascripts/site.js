@@ -150,11 +150,11 @@ function connectTables(tableAId, tableBId){
 
 // begin modal functions
 function saveNewTable(e) {
-  var tableName = document.getElementById("newTableName");
+  var tableName = document.getElementById("newTableName").value;
   if(tableName.value != "") {
     $('#newTableModal').modal('hide'); // hide modal on save
-    alert("New table name: " + tableName.value);
-    addTable(tableName.value);
+    alert("New table name: " + tableName);
+    addTable(tableName);
   }
 }
 

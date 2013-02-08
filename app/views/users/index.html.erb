@@ -170,6 +170,115 @@ function uniqueTableName(name){
   </tr>
 </table> -->
 
+<script>
+function saveNewTable(e) {
+  var tableName = document.getElementById("newTableName").value;
+  if(tableName.value != "") {
+    $('#newTableModal').modal('hide'); // hide modal on save
+    createTable(tableName);
+  }
+}
+
+function saveNewAttr(e) {
+  var attrName = document.getElementById("newAttrName").value;
+  var attrType = document.getElementById("newAttrType");
+  if(attrName.value != "") {
+    $('#newAttributeModal').modal('hide'); // hide modal on save
+    alert("New attr name: " + attrName + "\nAttr type: " + attrType.options[attrType.selectedIndex].value);
+  }
+}
+
+function saveEditTable(e) {
+  var tableName = document.getElementById("editTableName");
+  if(tableName.value != "") {
+    $('#editTableModal').modal('hide'); // hide modal on save
+    alert("Edited table name: " + tableName.value);
+  }
+}
+
+function saveEditAttr(e) {
+  var attrName = document.getElementById("editAttrName").value;
+  var attrType = document.getElementById("editAttrType");
+  if(attrName.value != "") {
+    $('#editAttributeModal').modal('hide'); // hide modal on save
+    alert("Edited attr name: " + attrName + "\nAttr type: " + attrType.options[attrType.selectedIndex].value);
+  }
+}
+</script>
+
+  <!-- newTableModal -->
+  <div id="newTableModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="newTableModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3 id="newTableModalLabel">Create a new table</h3>
+    </div>
+    <div class="modal-body">
+      <label for="newTableName"><strong>Table name</strong></label>
+      <input type="text" id="newTableName" value="">
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Close</button>
+      <button id="newTableBtn" class="btn btn-primary" onclick="saveNewTable()">Save table</button>
+    </div>
+  </div>
+
+  <!-- newAttributeModal -->
+  <div id="newAttributeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="newAttributeModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3 id="newAttributeModalLabel">Add a new attribute to selected table</h3>
+    </div>
+    <div class="modal-body">
+      <label for="newAttrName"><strong>Attribute name</strong></label>
+      <input type="text" id="newAttrName" value="">
+      <label for="newAttrType"><strong>Attribute type</strong></label>
+      <select id="newAttrType">
+	<option value="text">text</option>
+	<option value="number">number</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Close</button>
+      <button id="newAttrBtn" class="btn btn-primary" onclick="saveNewAttr()">Save attribute</button>
+    </div>
+  </div>
+
+  <!-- editTableModal -->
+  <div id="editTableModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="editTableModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3 id="editTableModalLabel">Edit selected table</h3>
+    </div>
+    <div class="modal-body">
+      <label for="editTableName"><strong>Table name</strong></label>
+      <input type="text" id="editTableName" value="">
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Close</button>
+      <button id="editTableBtn" class="btn btn-primary" onclick="saveEditTable()">Save changes</button>
+    </div>
+  </div>
+
+  <!-- editAttributeModal -->
+  <div id="editAttributeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="editAttributeModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3 id="editAttributeModalLabel">Edit selected table's attribute</h3>
+    </div>
+    <div class="modal-body">
+      <label for="editAttrName"><strong>Attribute name</strong></label>
+      <input type="text" id="editAttrName" value="">
+      <label for="editAttrType"><strong>Attribute type</strong></label>
+      <select id="editAttrType">
+	<option value="text">text</option>
+	<option value="number">number</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Close</button>
+      <button id="editAttrBtn" class="btn btn-primary" onclick="saveEditAttr()">Save changes</button>
+    </div>
+  </div>
 
   <br />
   <div class="row">
@@ -186,9 +295,15 @@ function uniqueTableName(name){
       </table>
     </div>
     <div class="span4">
-      <button class="btn btn-primary" onClick="createTable('test')">Create Table</button>
-      <button class="btn btn-success" onClick="">Create Attribute</button>
-      <button class="btn btn-danger" onclick="">Connect Tables</button>
+      <a data-toggle="modal" href="#newTableModal" class="btn btn-primary">New table</a>
+      <a data-toggle="modal" href="#editTableModal" class="btn btn-warning">Edit table</a>
+      <button class="btn btn-danger" onclick="">Delete Table</button>
+      <br /><br />
+      <a data-toggle="modal" href="#newAttributeModal" class="btn btn-primary">New attribute</a>
+      <a data-toggle="modal" href="#editAttributeModal" class="btn btn-warning">Edit attribute</a>
+      <button class="btn btn-danger" onclick="">Delete Attribute</button>
+      <br /><br />
+      <button class="btn btn-success" onclick="">Connect Tables</button>
     </div>
   </div>
 
