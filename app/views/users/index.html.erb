@@ -68,7 +68,6 @@ var currGroup = new Kinetic.Group();
 *
 */
 function createTable(inputTxt) {
-  //uniqueTable(inputTxt);
   var rectX = stage.getWidth() / 2 - 50;
   var rectY = stage.getHeight() / 2 - 25;
     
@@ -223,8 +222,6 @@ function createAttr(name, type, tableName) {
   stage.add(layer);  
 }
 
-
-
 /*
 * Checks for table with inputName
 *
@@ -257,41 +254,12 @@ function uniqueAttribute(name, tname) {
 function uniqueTableName(name){
 	for(var i = 0; i < tables.length; i++){
 		if(name.toLowerCase() == tables[i].get('.text')[0].getText().toLowerCase()){
-            alert('test');
 			return false;
 		}
 	}
 	return true;
 }
 
-  </script>
-
-
-
-<!--   <div id="movie"></div>
-  <script>
-    bonsai.run(document.getElementById('movie'), {
-  url: '/assets/demo.js',
-  width:800,
-  height:450
-    });
-  </script>
-  
-<table class= "table table-bordered">
-  <tr>
-    <td>Table Name: </td>
-    <td>Employees</td>
-  </tr>
-  <tr>
-    <td rowspan="2">Attributes: </td>
-    <td>name</td>
-  </tr>
-  <tr>
-    <td>hire_date<td>
-  </tr>
-</table> -->
-
-<script>
 function saveNewTable(e) {
   var tableName = document.getElementById("newTableName").value;
   if(tableName.value != "") {
@@ -308,8 +276,6 @@ function saveNewAttr(e) {
   attrType = attrType.options[attrType.selectedIndex].value;
   if(attrName != "") {
     $('#newAttributeModal').modal('hide'); // hide modal on save
-    //alert("New attr name: " + attrName + "\nAttr type: " + attrType.options[attrType.selectedIndex].value);
-    //createAttr(attrName, attrType, );
   }
 }
 
