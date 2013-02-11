@@ -20,6 +20,7 @@ class Server < ActiveRecord::Base
     self[:db_json] ||= ("{\"tables\":[]}")
   end
   # Retrieves the server status from RDS server
+  # ENUMERATE POSSIBLE RESPONSES
   def check_status
     response = $RDS.describe_db_instances(:db_instance_identifier => "#{name}")
     response = response[:db_instances].first[:db_instance_status]
@@ -39,7 +40,7 @@ class Server < ActiveRecord::Base
   # Executes query on remote server
   def execute query
     if check_status == "available"
-    
+      
     else
     
     end

@@ -34,6 +34,10 @@ class ServersController < ApplicationController
   def show
     @server = Server.find(params[:id])
     @status = @server.check_status
+    if @status != "available"
+      flash[:notice] = "Server is not available yet, please try again later"
+      redirect_to user_servers_path(@user)
+    end
   end
   
   def get_user
