@@ -155,10 +155,12 @@ function createAttr(name, type, tableName) {
     
   var table = findTable(tableName);
   if(table == null) {
-        alert('Table not found');
+        alert('Table not found.');
+        return;
   }
   if(!uniqueAttribute(name, tableName)) {
-        alert('Attribute not unique');
+        alert('Attributes within a table must be unique.  Please choose a different name for your attribute.');
+        return;
   }
   
   var group = new Kinetic.Group({draggable: true});
@@ -304,31 +306,53 @@ function saveNewTable(e) {
     if(uniqueTableName(tableName)) {
       createTable(tableName);
     }
+    else {
+      alert("Table names must be unique.  Please create your table again with a different name.");
+    }
   }
 }
 
 function saveNewAttr(e) {
+  var tableName = document.getElementById("tableNameA");
+  tableName = tableName.options[tableName.selectedIndex].value;
   var attrName = document.getElementById("newAttrName").value;
   var attrType = document.getElementById("newAttrType");
   attrType = attrType.options[attrType.selectedIndex].value;
   if(attrName != "") {
     $('#newAttributeModal').modal('hide'); // hide modal on save
+    createAttr(attrName, attrType, tableName);
   }
 }
 
 function saveEditTable(e) {
-  var tableName = document.getElementById("editTableName").value;
-  if(tableName != "") {
+  var oldTableName = document.getElementById("oldTableName");
+  oldTableName = oldTableName.options[oldTableName.selectedIndex].value;
+  var editTableName = document.getElementById("editTableName").value;
+  if(editTableName != "") {
     $('#editTableModal').modal('hide'); // hide modal on save
+    if(uniqueTableName(editTableName)) {
+        var table = findTable(oldTableName);
+        table.get('.text')[0].setText(editTableName);
+    }
+    else {
+      alert("Table names must be unique.  Please choose a different name for your table.");
+    }
   }
 }
 
 function saveEditAttr(e) {
-  var attrName = document.getElementById("editAttrName").value;
-  var attrType = document.getElementById("editAttrType");
-  attrType = attrType.options[attrType.selectedIndex].value;
-  if(attrName != "") {
+  var tableName = document.getElementById("tableNameB");
+  tableName = tableName.options[tableName.selectedIndex].value;
+  var oldAttrName = document.getElementById("oldAttrName");
+  oldAttrName = oldAttrName.options[oldAttrName.selectedIndex].value;
+  var editAttrName = document.getElementById("editAttrName").value;
+  var editAttrType = document.getElementById("editAttrType");
+  editAttrType = editAttrType.options[editAttrType.selectedIndex].value;
+  if(editAttrName != "") {
     $('#editAttributeModal').modal('hide'); // hide modal on save
+    var table = findTable(tableName);
+    //table.get('.text')[0].attr
+    alert("table: " + tableName + ", oldAttr: " + oldAttrName + ", newAttr: " + editAttrName + ", type: " + editAttrType);
   }
 }
 
@@ -368,11 +392,11 @@ function genSelectHTML(id, arr, type) {
     <div id="newAttributeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="newAttributeModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3 id="newAttributeModalLabel">Add attribute to [tablename]</h3>
+      <h3 id="newAttributeModalLabel">Create new attribute</h3>
     </div>
     <div class="modal-body">
-      <label for="tableName"><strong>Table name</strong></label>
-      <select id="tableName">
+      <label for="tableNameA"><strong>Table name</strong></label>
+      <select id="tableNameA">
       </select>
       <label for="newAttrName"><strong>Attribute name</strong></label>
       <input type="text" id="newAttrName" value="">
@@ -391,10 +415,13 @@ function genSelectHTML(id, arr, type) {
   <div id="editTableModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="editTableModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3 id="editTableModalLabel">Edit [tablename]</h3>
+      <h3 id="editTableModalLabel">Edit table</h3>
     </div>
     <div class="modal-body">
-      <label for="editTableName"><strong>Table name</strong></label>
+      <label for="oldTableName"><strong>Table name</strong></label>
+      <select id="oldTableName">
+      </select>
+      <label for="editTableName"><strong>New table name</strong></label>
       <input type="text" id="editTableName" value="">
     </div>
     <div class="modal-footer">
@@ -407,15 +434,20 @@ function genSelectHTML(id, arr, type) {
   <div id="editAttributeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="editAttributeModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3 id="editAttributeModalLabel">Edit [tablename] attribute</h3>
+      <h3 id="editAttributeModalLabel">Edit attribute</h3>
     </div>
     <div class="modal-body">
-      <label for="editAttrName"><strong>Attribute name</strong></label>
+      <label for="tableNameB"><strong>Table name</strong></label>
+      <select id="tableNameB">
+      </select>
+      <label for="oldAttrName"><strong>Current attribute name</strong></label>
+      <select id="oldAttrName">
+      </select>
+      <label for="editAttrName"><strong>New attribute name</strong></label>
       <input type="text" id="editAttrName" value="">
       <label for="editAttrType"><strong>Attribute type</strong></label>
       <select id="editAttrType">
-	<option value="text">text</option>
-	<option value="number">number</option>
+	<script>document.write(genSelectHTML('editAttrType', datatypes, 0));</script>
       </select>
     </div>
     <div class="modal-footer">
@@ -440,12 +472,12 @@ function genSelectHTML(id, arr, type) {
     </div>
     <div class="span4">
       <a data-toggle="modal" href="#newTableModal" class="btn btn-primary">New table</a>
-      <a data-toggle="modal" href="#editTableModal" class="btn btn-warning">Edit table</a>
-      <button class="btn btn-danger" onclick="">Delete table</button>
+      <a data-toggle="modal" href="#editTableModal" class="btn btn-warning" onclick="genSelectHTML('oldTableName', tables, 1)">Edit table</a>
+      <button class="btn btn-danger" onclick="alert('Delete Table')">Delete table</button>
       <br /><br />
-      <a data-toggle="modal" href="#newAttributeModal" class="btn btn-primary" onclick="genSelectHTML('tableName', tables, 1)">New attribute</a>
-      <a data-toggle="modal" href="#editAttributeModal" class="btn btn-warning">Edit attribute</a>
-      <button class="btn btn-danger" onclick="">Delete attribute</button>
+      <a data-toggle="modal" href="#newAttributeModal" class="btn btn-primary" onclick="genSelectHTML('tableNameA', tables, 1)">New attribute</a>
+      <a data-toggle="modal" href="#editAttributeModal" class="btn btn-warning" onclick="genSelectHTML('tableNameB', tables, 1)">Edit attribute</a>
+      <button class="btn btn-danger" onclick="alert('Delete Attr')">Delete attribute</button>
       <br /><br />
       <button class="btn btn-success" onclick="">Connect tables</button>
     </div>
