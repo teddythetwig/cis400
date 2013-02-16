@@ -395,6 +395,7 @@ function saveEditTable(e) {
     if(uniqueTableName(editTableName)) {
         var table = findTable(oldTableName);
         table.get('.text')[0].setText(editTableName);
+        layer.draw();
     }
     else {
       alert("Table names must be unique.  Please choose a different name for your table.");
@@ -439,8 +440,13 @@ function saveEditAttr(e) {
   if(editAttrName != "") {
     $('#editAttributeModal').modal('hide'); // hide modal on save
     var table = findTable(tableName);
-    // TODO: complete edit attr functionality
-    alert("table: " + tableName + ", oldAttr: " + oldAttrName + ", newAttr: " + editAttrName + ", type: " + editAttrType);
+    for(i=0; i<table.attr.length; i++) {
+      if(table.attr[i] == oldAttrName) {
+        alert(table.attr[i].type); //.setText(editAttrName));
+        layer.draw();
+        return;
+      }
+    }
   }
 }
 </script>
