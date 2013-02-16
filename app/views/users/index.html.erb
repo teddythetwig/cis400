@@ -77,7 +77,10 @@ function createTable(inputTxt) {
   var rectX = stage.getWidth() / 2 - 50;
   var rectY = stage.getHeight() / 2 - 25;
     
-  var group = new Kinetic.Group({draggable: true});
+  var group = new Kinetic.Group({
+      draggable: true, 
+      name: inputTxt, 
+  });
     
   var complexText = new Kinetic.Text({
      name: 'text',
@@ -239,11 +242,55 @@ function createRelation(rname, tableName1, tableName2){
     table1 = findTable(tableName1);
     table2 = findTable(tableName2);
     
-    var group = new Kinetic.Group();
-    group.tablea = tableName1;
-    group.tableb = tableName2;
+    var line = new Kinetic.Line({
+        name: rname,
+        points: [table1.getX()+table1.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50, 
+                 table1.getY()+table1.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25, 
+                 table2.getX()+table2.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50,
+                 table2.getY()+table2.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25],
+        stroke: 'red',
+        strokeWidth: 5,
+        lineCap: 'round',
+        lineJoin: 'round'
+      });
+    
+    table1.on('dragstart dragmove', function(){
+        update();
+    });
+              
+    table2.on('dragstart dragmove', function(){
+        update();
+    });
+    
+    //Adding group of line and tables to realtions array
+    var group = [line, table1, table2];
     relations.push(group);
+    
+    //Add line to stage
+    layer.add(line);
+    stage.add(layer); 
+    
+    line.moveToBottom();
+    layer.draw();
 }
+
+/*
+* Updates all of teh lines in the graph
+*
+*/
+function update() {
+    for (var i = 0; i < relations.length; i++) {
+        var line = relations[i][0];
+        var table1 = relations[i][1];
+        var table2 = relations[i][2];
+        line.setPoints([table1.getX()+table1.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50, 
+                 table1.getY()+table1.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25, 
+                 table2.getX()+table2.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50,
+                 table2.getY()+table2.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25]);
+        layer.draw();
+    }
+}
+
 
 /*
 * Checks for table with inputName
@@ -251,7 +298,7 @@ function createRelation(rname, tableName1, tableName2){
 */
 function findTable(name) {
     for(var i = 0; i < tables.length; i++) {
-        if(name.toLowerCase() == tables[i].get('.text')[0].getText().toLowerCase()) {
+        if(name.toLowerCase() == tables[i].getName().toLowerCase()) {
             return tables[i];        
         }
     }
