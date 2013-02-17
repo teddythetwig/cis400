@@ -61,8 +61,6 @@ relations = new Array();
 //Graphics variables
 var stage = new Kinetic.Stage({
     container: 'container',
-    //width: 578,
-    //height: 200 });
     width: 1150,
     height: 500 });
 var layer = new Kinetic.Layer();
@@ -73,15 +71,13 @@ var currGroup = new Kinetic.Group();
 /* 
 * Creates table
 * Note: Check table name is unique before calling.
-*
 */
 function createTable(tableName) {
     var rectX = stage.getWidth() / 2 - 50;
     var rectY = stage.getHeight() / 2 - 25;
 
     var group = new Kinetic.Group({
-        draggable: true, 
-        name: tableName, 
+        draggable: true
     });
 
     var complexText = new Kinetic.Text({
@@ -153,7 +149,6 @@ function createTable(tableName) {
 
 /* 
 * Creates attribute
-*
 */
 function createAttr(name, type, tableName) {
     var rectX = stage.getWidth() / 2 - 75;
@@ -237,7 +232,6 @@ function createAttr(name, type, tableName) {
 
 /*
 * Creates Relations
-*
 */
 function createRelation(rname, tableName1, tableName2){
     // Finds the table
@@ -268,8 +262,9 @@ function createRelation(rname, tableName1, tableName2){
         update();
     });
 
-    //Adding group of line and tables to realtions array
-    var group = [line, table1, table2];
+    // Adding group of line and tables to realtions array (Line obj, FirstTable, SecondTable, Directionality)
+   // Directionality[-1:'NotDefined', 0:'one-to-one', 1:'one-to-many', 2:'many-to-many']
+    var group = [line, table1, table2, -1];
     relations.push(group);
 
     //Add line to stage
@@ -282,10 +277,9 @@ function createRelation(rname, tableName1, tableName2){
 
 /*
 * Updates all of the lines in the graph
-*
 */
 function update() {
-    for (var i = 0; i < relations.length; i++) {
+    for(var i = 0; i < relations.length; i++) {
         var line = relations[i][0];
         var table1 = relations[i][1];
         var table2 = relations[i][2];
@@ -302,11 +296,10 @@ function update() {
 
 /*
 * Checks for table with provided name
-*
 */
 function findTable(name) {
     for(var i = 0; i < tables.length; i++) {
-        if(name.toLowerCase() == tables[i].getName().toLowerCase()) {
+        if(name.toLowerCase() == tables[i].get('.text')[0].getText().toLowerCase()) {
             return tables[i];        
         }
     }
@@ -315,7 +308,6 @@ function findTable(name) {
 
 /*
 * Checks for unique table name.
-*
 */
 function uniqueTableName(name){
     for(var i = 0; i < tables.length; i++){
@@ -327,31 +319,101 @@ function uniqueTableName(name){
 }
 
 /*
-* Modifies existing table name to provided table name
+* Modifies the existing table name to the provided table name
 */
 function editTableName(oldName, newName) {
-
+    var table = findTable(oldName);
+    if(table == null) {
+        alert("Table does not exist");
+        return;
+    }
+    table.get('.text')[0].setText(newName);
+    layer.draw();
 }
 
+/*
+* Check if table has a primary key
+*/
+function hasPrimaryKey(tableName) {
+    var table = findTable(tableName);
+    for(var i = 0; i < table.attr.length; i++) {
+        var attr = findAttr(attrName, tableName);
+        if(attr[3]) {
+            return true;
+        }
+    }
+    return false;
+}
 
 /********* Attribute Functions *********/
 
 /*
 * Checks  for unique attribute name within a table
-*
 */
-function uniqueAttribute(name, tname) {
-    table = findTable(tname);
+function uniqueAttribute(attrName, tableName) {
+    var table = findTable(tname);
     if(table.attr.indexOf(name) > -1) {
         return false;
     }
     return true;
 }
 
+/*
+* Finds the provided attribute based on its name and table name
+*/
+function findAttr(attrName, tableName) {
+    for(var i = 0; i < attributes.length; i++) {
+        if((attributes[i][0].get('.text')[0].getText().toLowerCase() == attrName) &&
+            (attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName)) {
+            return attributes[i];
+        }
+    }
+    return null;
+}
+
+/*
+* Modifies the existing attribute name to the provided attribute name
+*/
+function editAttrName(oldAttrName, newAttrName, tableName) {
+    var attr = findAttr(tableName, oldAttrName);
+    var table = findTable(tableName);
+
+    attr[0].get('.text')[0].setText(newName);
+    for(var i = 0; i < table.attr.length; i++) {
+        if(table.attr[i] == oldAttrName) {
+            table.attr[i] = newAttrName;
+        }
+    }
+    layer.draw();
+}
+
+/*
+* Modifies the provided attribute datatype to the provided attribute datatype
+*/
+function editAttrType(attrName, tableName, newAttrType) {
+    var attr = findAttr(tableName, oldAttrName);
+    attr[2] = newAttrType;
+}
+
+/*
+* Modifies the primary key status of provided attribute if possible
+*/
+function editAttrPrimary(attrName, tableName) {
+    var attr = findAttr(tableName, oldAttrName);
+    if(attr[3]) {
+        attr[3] = false;
+    }
+    else {
+        if(hasPrimaryKey(tableName)) {
+            alert('Already has primary key');
+        } else {
+            attr[3] = true;
+        }
+    }
+}
 
 /*
 * Converts xml schema into current schema
-*
 */
 function convert(schema) {
    return false;   
@@ -362,7 +424,6 @@ function convert(schema) {
 /*
 * Generates HTML to dynamically populate selectors 
 * from dynamic data structures
-*
 */
 function genSelectInnerHTML(id, arr, type) {
   var ret = "";
@@ -381,7 +442,6 @@ function genSelectInnerHTML(id, arr, type) {
 
 /*
 * Returns value at current selcted index from HTML selector
-*
 */
 function getSelectVal(select) {
   return select.options[select.selectedIndex].value;
@@ -389,14 +449,12 @@ function getSelectVal(select) {
 
 /*
 * Initializes modal to create new table
-*
 */
 function initNewTable() {
 }
 
 /*
 * Saves new table if valid info from modal
-*
 */
 function saveNewTable(e) {
   var tableName = document.getElementById("newTableName").value;
@@ -413,7 +471,6 @@ function saveNewTable(e) {
 
 /*
 * Initializes modal to create new attribute
-*
 */
 function initNewAttr() {
   genSelectInnerHTML("tableNameA", tables, 1);
@@ -422,7 +479,6 @@ function initNewAttr() {
 
 /*
 * Saves new attribute if valid info from modal
-*
 */
 function saveNewAttr(e) {
   var tableName = getSelectVal(document.getElementById("tableNameA"));
@@ -436,7 +492,6 @@ function saveNewAttr(e) {
 
 /*
 * Initializes modal to edit existing table
-*
 */
 function initEditTable() {
   genSelectInnerHTML("oldTableName", tables, 1);
@@ -444,7 +499,6 @@ function initEditTable() {
 
 /*
 * Saves changes to table if valid info from modal
-*
 */
 function saveEditTable(e) {
   var oldTableName = getSelectVal(document.getElementById("oldTableName"));
@@ -464,7 +518,6 @@ function saveEditTable(e) {
 
 /*
 * Initializes modal to edit existing attribute
-*
 */
 function initEditAttr() {
   genSelectInnerHTML("tableNameB", tables, 1);
@@ -475,7 +528,6 @@ function initEditAttr() {
 
 /*
 * Updates attribute list based on table selection within modal
-*
 */
 function genAttrList() {
   var attrs = new Array();
@@ -489,7 +541,6 @@ function genAttrList() {
 
 /*
 * Saves changes to attribute if valid info from modal
-*
 */
 function saveEditAttr(e) {
   var tableName = getSelectVal(document.getElementById("tableNameB"));
