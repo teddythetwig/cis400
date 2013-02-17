@@ -160,7 +160,7 @@ function createAttr(name, type, tableName) {
         return;
     }
     if(!uniqueAttribute(name, tableName)) {
-        alert('Attributes within a table must be unique.  Please choose a different name for your attribute.');
+        alert('Attributes within a table must be unique.');
         return;
     }
 
@@ -176,7 +176,7 @@ function createAttr(name, type, tableName) {
        fill: 'white',
        width: 100,
        padding: 20,
-       align: 'center',
+       align: 'center'
     });
 
     var rect = new Kinetic.Rect({
@@ -327,8 +327,13 @@ function editTableName(oldName, newName) {
         alert("Table does not exist");
         return;
     }
-    table.get('.text')[0].setText(newName);
-    layer.draw();
+    if(uniqueTableName(newName)) {
+        table.get('.text')[0].setText(newName);
+        layer.draw();
+    }
+    else {
+        alert("Table names must be unique.");
+    }
 }
 
 /*
@@ -351,8 +356,8 @@ function hasPrimaryKey(tableName) {
 * Checks  for unique attribute name within a table
 */
 function uniqueAttribute(attrName, tableName) {
-    var table = findTable(tname);
-    if(table.attr.indexOf(name) > -1) {
+    var table = findTable(tableName);
+    if(table.attr.indexOf(attrName) > -1) {
         return false;
     }
     return true;
@@ -363,7 +368,7 @@ function uniqueAttribute(attrName, tableName) {
 */
 function findAttr(attrName, tableName) {
     for(var i = 0; i < attributes.length; i++) {
-        if((attributes[i][0].get('.text')[0].getText().toLowerCase() == attrName) &&
+        if((attributes[i][0].get('.Atext')[0].getText().toLowerCase() == attrName) &&
             (attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName)) {
             return attributes[i];
         }
@@ -375,10 +380,9 @@ function findAttr(attrName, tableName) {
 * Modifies the existing attribute name to the provided attribute name
 */
 function editAttrName(oldAttrName, newAttrName, tableName) {
-    var attr = findAttr(tableName, oldAttrName);
+    var attr = findAttr(oldAttrName, tableName);
     var table = findTable(tableName);
-
-    attr[0].get('.text')[0].setText(newName);
+    attr[0].get('.Atext')[0].setText(newAttrName);
     for(var i = 0; i < table.attr.length; i++) {
         if(table.attr[i] == oldAttrName) {
             table.attr[i] = newAttrName;
@@ -388,10 +392,10 @@ function editAttrName(oldAttrName, newAttrName, tableName) {
 }
 
 /*
-* Modifies the provided attribute datatype to the provided attribute datatype
+* Modifies the existing attribute datatype to the provided attribute datatype
 */
 function editAttrType(attrName, tableName, newAttrType) {
-    var attr = findAttr(tableName, oldAttrName);
+    var attr = findAttr(tableName, attrName);
     attr[2] = newAttrType;
 }
 
@@ -464,7 +468,7 @@ function saveNewTable(e) {
       createTable(tableName);
     }
     else {
-      alert("Table names must be unique.  Please create your table again with a different name.");
+      alert("Table names must be unique.");
     }
   }
 }
@@ -502,17 +506,10 @@ function initEditTable() {
 */
 function saveEditTable(e) {
   var oldTableName = getSelectVal(document.getElementById("oldTableName"));
-  var editTableName = document.getElementById("editTableName").value;
-  if(editTableName != "") {
+  var newTableName = document.getElementById("editTableName").value;
+  if(newTableName != "") {
     $('#editTableModal').modal('hide'); // hide modal on save
-    if(uniqueTableName(editTableName)) {
-        var table = findTable(oldTableName);
-        table.get('.text')[0].setText(editTableName);
-        layer.draw();
-    }
-    else {
-      alert("Table names must be unique.  Please choose a different name for your table.");
-    }
+    editTableName(oldTableName, newTableName);
   }
 }
 
@@ -529,14 +526,14 @@ function initEditAttr() {
 /*
 * Updates attribute list based on table selection within modal
 */
-function genAttrList() {
+function genAttrList(id1, id2) {
   var attrs = new Array();
-  var tname = getSelectVal(document.getElementById("tableNameB"));
+  var tname = getSelectVal(document.getElementById(id1));
   var table = findTable(tname);
   for(i=0; i<table.attr.length; i++) {
     attrs.push(table.attr[i]);
   }
-  genSelectInnerHTML("oldAttrName", attrs, 0);
+  genSelectInnerHTML(id2, attrs, 0);
 }
 
 /*
@@ -545,18 +542,89 @@ function genAttrList() {
 function saveEditAttr(e) {
   var tableName = getSelectVal(document.getElementById("tableNameB"));
   var oldAttrName = getSelectVal(document.getElementById("oldAttrName"));
-  var editAttrName = document.getElementById("editAttrName").value;
-  var editAttrType = getSelectVal(document.getElementById("editAttrType"));
-  if(editAttrName != "") {
+  var newAttrName = document.getElementById("editAttrName").value;
+  var newAttrType = getSelectVal(document.getElementById("editAttrType"));
+  if(newAttrName != "") {
     $('#editAttributeModal').modal('hide'); // hide modal on save
-    var table = findTable(tableName);
-    for(i=0; i<table.attr.length; i++) {
-      if(table.attr[i] == oldAttrName) {
-        alert(table.attr[i].type); //.setText(editAttrName));
-        layer.draw();
-        return;
-      }
-    }
+    editAttrName(oldAttrName, newAttrName, tableName);
+    editAttrType(newAttrName, tableName, newAttrType);
+  }
+}
+
+/*
+* Initializes modal to delete existing table
+*/
+function initDelTable() {
+  genSelectInnerHTML("delTableName", tables, 1);
+}
+
+/*
+* Deletes table specified by modal
+*/
+function deleteTable(e) {
+  var tableName = getSelectVal(document.getElementById("delTableName"));
+  if(tableName != "") {
+    $('#deleteTableModal').modal('hide'); // hide modal on save
+    alert('Delete table: ' + tableName);
+  }
+}
+
+/*
+* Initializes modal to delete existing attribute
+*/
+function initDelAttr() {
+  genSelectInnerHTML("tableNameC", tables, 1);
+  document.getElementById("tableNameC").selectedIndex = -1;
+}
+
+/*
+* Deletes attribute specified by modal
+*/
+function deleteAttr(e) {
+  var tableName = getSelectVal(document.getElementById("tableNameC"));
+  var attrName = getSelectVal(document.getElementById("delAttrName"));
+  if(tableName != "" && attrName != "") {
+    $('#deleteAttributeModal').modal('hide'); // hide modal on save
+    alert('Delete attribute: ' + tableName + '.' + attrName);
+  }
+}
+
+/*
+* Initializes modal to create new relation
+*/
+function initNewRelation() {
+  genSelectInnerHTML("tableNameR1", tables, 1);
+  genSelectInnerHTML("tableNameR2", tables, 1);
+}
+
+/*
+* Saves new relation if valid info from modal
+*/
+function saveNewRelation(e) {
+  var relName = document.getElementById("relNameA").value;
+  var tableName1 = getSelectVal(document.getElementById("tableNameR1"));
+  var tableName2 = getSelectVal(document.getElementById("tableNameR2"));
+  if(relName != "") {
+    $('#newRelationModal').modal('hide'); // hide modal on save
+    createRelation(relName, tableName1, tableName2);
+  }
+}
+
+/*
+* Initializes modal to delete existing relation
+*/
+function initDelRelation() {
+  genSelectInnerHTML("relNameB", relations, 1);
+}
+
+/*
+* Deletes relation specified by modal
+*/
+function deleteRelation(e) {
+  var relName = document.getElementById("relNameB").value;
+  if(relName != "") {
+    $('#deleteRelationModal').modal('hide'); // hide modal on save
+    alert('Delete relation: ' + relName);
   }
 }
 </script>
@@ -626,7 +694,7 @@ function saveEditAttr(e) {
     </div>
     <div class="modal-body">
       <label for="tableNameB"><strong>Table name</strong></label>
-      <select id="tableNameB" onchange="genAttrList()">
+      <select id="tableNameB" onchange="genAttrList('tableNameB', 'oldAttrName')">
       </select>
       <label for="oldAttrName"><strong>Current attribute name</strong></label>
       <select id="oldAttrName">
@@ -646,6 +714,81 @@ function saveEditAttr(e) {
   <br />
   <div class="row">  
  
+  <!-- deleteTableModal -->
+  <div id="deleteTableModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="deleteTableModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3 id="deleteTableModalLabel">Delete table</h3>
+    </div>
+    <div class="modal-body">
+      <label for="delTableName"><strong>Table name</strong></label>
+      <select id="delTableName">
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Close</button>
+      <button id="delTableBtn" class="btn btn-danger" onclick="deleteTable()">Delete table</button>
+    </div>
+    </div>
+
+    <!-- deleteAttributeModal -->
+    <div id="deleteAttributeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="deleteAttributeModalLabel" aria-hidden="true">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 id="deleteAttributeModalLabel">Delete attribute</h3>
+      </div>
+      <div class="modal-body">
+        <label for="tableNameC"><strong>Table name</strong></label>
+        <select id="tableNameC" onchange="genAttrList('tableNameC', 'delAttrName')">
+        </select>
+        <label for="delAttrName"><strong>Attribute name</strong></label>
+        <select id="delAttrName">
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Close</button>
+        <button id="delAttrBtn" class="btn btn-danger" onclick="deleteAttr()">Delete attribute</button>
+      </div>
+    </div>
+
+  <!-- newRelationModal -->
+  <div id="newRelationModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="newRelationModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3 id="newRelationModalLabel">Connect tables</h3>
+    </div>
+    <div class="modal-body">
+      <label for="relNameA"><strong>Relation name</strong></label>
+      <input type="text" id="relNameA" value="">
+      <label for="tableNameR1"><strong>Table name #1</strong></label>
+      <select id="tableNameR1">
+      </select>
+      <label for="tableNameR2"><strong>Table name #2</strong></label>
+      <select id="tableNameR2">
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Close</button>
+      <button id="newRelBtn" class="btn btn-primary" onclick="saveNewRelation()">Save relation</button>
+    </div>
+    </div>
+
+    <!-- deleteRelationModal -->
+    <div id="deleteRelationModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="deleteRelationModalLabel" aria-hidden="true">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 id="deleteRelationModalLabel">Delete attribute</h3>
+      </div>
+      <div class="modal-body">
+        <label for="relNameB"><strong>Relation name</strong></label>
+        <input type="text" id="relNameB" value="">
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Close</button>
+        <button id="delRelBtn" class="btn btn-danger" onclick="deleteRelation()">Delete relation</button>
+      </div>
+    </div>
+
     <!-- table info display -->
     <div class="span8">
       <table class= "table table-bordered">
@@ -664,13 +807,14 @@ function saveEditAttr(e) {
     <div class="span4">
       <a data-toggle="modal" href="#newTableModal" class="btn btn-primary" onclick="initNewTable()">New table</a>
       <a data-toggle="modal" href="#editTableModal" class="btn btn-warning" onclick="initEditTable()">Edit table</a>
-      <button class="btn btn-danger" onclick="alert('Delete Table')">Delete table</button>
+      <a data-toggle="modal" href="#deleteTableModal"  class="btn btn-danger" onclick="initDelTable()">Delete table</a>
       <br /><br />
       <a data-toggle="modal" href="#newAttributeModal" class="btn btn-primary" onclick="initNewAttr()">New attribute</a>
       <a data-toggle="modal" href="#editAttributeModal" class="btn btn-warning" onclick="initEditAttr()">Edit attribute</a>
-      <button class="btn btn-danger" onclick="alert('Delete Attr')">Delete attribute</button>
+      <a data-toggle="modal" href="#deleteAttributeModal" class="btn btn-danger" onclick="initDelAttr()">Delete attribute</a>
       <br /><br />
-      <button class="btn btn-success" onclick="">Connect tables</button>
+      <a data-toggle="modal" href="#newRelationModal" class="btn btn-success" onclick="initNewRelation()">Connect tables</a>
+      <a data-toggle="modal" href="#deleteRelationModal" class="btn btn-warning" onclick="initDelRelation()">Disconnect tables</a>
     </div>
 
   </div>
