@@ -1,6 +1,6 @@
 class Server < ActiveRecord::Base
   belongs_to :user
-  validates_presence_of :name
+  validates_presence_of :name, :user
   validates_uniqueness_of :name
   
   # These two callbacks ensure that the application server is syncronized with the RDS server in terms
@@ -15,7 +15,7 @@ class Server < ActiveRecord::Base
   after_destroy do |s|
     $RDS.delete_db_instance(:db_instance_identifier => "#{name}", :skip_final_snapshot => true)
   end
-
+  #Have to do this because some empty json bug
   before_save do |s|
     self[:db_json] ||= ("{\"tables\":[]}")
   end
@@ -23,9 +23,16 @@ class Server < ActiveRecord::Base
   # ENUMERATE POSSIBLE RESPONSES
   def check_status
     response = $RDS.describe_db_instances(:db_instance_identifier => "#{name}")
-    response = response[:db_instances].first[:db_instance_status]
+    status = response[:db_instances].first[:db_instance_status]
+    if status = "available"
+      self.url = response[:db_instances].first[:endpoint][:address]
+    end
+    return status
   end
   
+  
+  attr_accessor :sql
+ 
   
   # Json values are stored in the database as a string, these methods allow working 
   # with json as an object without the intermediate step of conversion
@@ -38,12 +45,8 @@ class Server < ActiveRecord::Base
   end
   
   # Executes query on remote server
-  def execute query
-    if check_status == "available"
-      
-    else
-    
-    end
+  def make_connection
+    self.sql ||= Mysql2::Client.new(:host => self.url, :username => "username#{self.user.email}")
   end
 
 end

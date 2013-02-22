@@ -5,7 +5,9 @@ CIS400::Application.routes.draw do
     resources :servers
   end
   root :to => "users#index"
-
+  
+  post "/users/:user_id/servers/:server_id/query" => "servers#query"
+  
   controller :nlp do
     get '/nlp' => :index
     post '/nlp' => :post

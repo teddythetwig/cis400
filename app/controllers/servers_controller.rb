@@ -1,5 +1,6 @@
 class ServersController < ApplicationController
   before_filter :authenticate_user!, :get_user
+  before_filter :make_connection, :only=>:query
   def index
     @servers = Server.all
   end
@@ -15,7 +16,8 @@ class ServersController < ApplicationController
   end
 
   def create
-    @server = Server.new(params[:server],:user_id => @user.id)
+    @server = Server.new(params[:server])
+    @server.user = @user
     #handle in case there is a duplicate server on aws 
     begin
       if @server.save! 
@@ -35,12 +37,23 @@ class ServersController < ApplicationController
     @server = Server.find(params[:id])
     @status = @server.check_status
     if @status != "available"
-      flash[:notice] = "Server is not available yet, please try again later"
+      flash[:notice] = "Server Statust is: #{@status} Server is not available yet, please try again later"
       redirect_to user_servers_path(@user)
     end
   end
   
+  def query
+    @results = @user.connection.query(@user.connection.escape(params[:query]))
+    redirect_to @server
+  end
+  
   def get_user
     @user = User.find(params[:user_id])
+  end
+  
+  def make_connection
+    @server = Server.find(params[:server_id])
+    #Virtural attribute of user that is created on sign-in and destroyed on sign-out
+    @server.make_connection
   end
 end

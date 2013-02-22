@@ -1,3 +1,8 @@
-%h1 Server#show
-%p Find me in app/views/server/show.html.haml
 =@server.name
+=@server.url
+=form_tag("/users/#{@user.id}/servers/#{@server.id}/query") do
+  =text_area_tag :query
+  =submit_tag "Submit"
+-if @results
+  -@results.each do |r|
+    =r 
