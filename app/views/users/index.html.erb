@@ -55,6 +55,9 @@ datatypes = new Array("text", "number", "date");
 // List of attributes
 attributes = new Array();
 
+// List of attribute lines
+attrLines = new Array();
+
 // List of Relations
 relations = new Array();
 
@@ -219,15 +222,44 @@ function createAttr(name, type, tableName) {
         currGroup = group;
         group.get('.shape')[0].setStroke('lightsteelblue');
 
-        alert('Datatype: ' + group.type + ', Parent:' + group.parent.get('.text')[0].getText());
-    }); 
+        //alert('Datatype: ' + group.type + ', Parent:' + group.parent.get('.text')[0].getText());
+    });
+    
+    group.on('dragstart dragmove', function(){
+        update();
+    });
+
+    table.on('dragstart dragmove', function(){
+        update();
+    });
 
     //Add group to attributes array  
     attributes.push(attGroup);
+    
+    //Adds connection line
+    var line = new Kinetic.Line({
+        name: name,
+        points: [group.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50, 
+                 group.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25, 
+                 table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50,
+                 table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25],
+        stroke: 'black',
+        strokeWidth: 2,
+        lineCap: 'round',
+        lineJoin: 'round'
+    });
+    
+    var lineGroup = [line, table, group];
 
+    attrLines.push(lineGroup);
+    
     //Add group to stage
     layer.add(group);
-    stage.add(layer);  
+    layer.add(line);
+    stage.add(layer);
+    
+    line.moveToBottom();
+    layer.draw();  
 }
 
 /*
@@ -279,6 +311,7 @@ function createRelation(rname, tableName1, tableName2){
 * Updates all of the lines in the graph
 */
 function update() {
+    // Updates relation lines
     for(var i = 0; i < relations.length; i++) {
         var line = relations[i][0];
         var table1 = relations[i][1];
@@ -287,6 +320,18 @@ function update() {
                  table1.getY()+table1.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25, 
                  table2.getX()+table2.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50,
                  table2.getY()+table2.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25]);
+        layer.draw();
+    }
+    
+    // Updates attribute lines
+    for(var i = 0; i < attrLines.length; i++) {
+        var line = attrLines[i][0];
+        var table = attrLines[i][1];
+        var attr = attrLines[i][2];
+        line.setPoints([attr.getX()+attr.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50, 
+                 attr.getY()+attr.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25, 
+                 table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50,
+                 table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25]);
         layer.draw();
     }
 }
@@ -349,6 +394,38 @@ function hasPrimaryKey(tableName) {
     }
     return false;
 }
+
+//TODO Update the stage
+/*
+* Deletes table from tables array, any connected attributes, and any relations connected to table
+*/
+function deleteTable(tableName) {
+    
+    // Deletes connected attributes from attributes table
+    for(var i = 0; i < attributes.length; i++) {
+        if(attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
+            attributes.splice(i, 1);
+        }
+    }
+    
+    // Deletes relations connected with table
+     for(var i = 0; i < relations.length; i++) {
+         if((relations[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) ||
+            (relations[i][2].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
+             relations.splice(i,1);
+         }
+         
+     }
+    
+    // Delete table from tables array
+    for(var i = 0; i < tables.length; i++) {
+        if(tables[i].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
+            tables.splice(i, 1);
+            break;
+        }
+    }
+}
+
 
 /********* Attribute Functions *********/
 
@@ -415,6 +492,75 @@ function editAttrPrimary(attrName, tableName) {
         }
     }
 }
+
+//TODO Update the stage
+/*
+ * Deletes Attribute from attributes and the connected table
+ */
+function deleteAttribute(attrName, tableName) {
+    //Deletes attribute from table
+    for(var i = 0; i < tables.length; i++) {
+        if(tables[i].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
+            var table = tables[i];
+            for(var j = 0; j < table.attr.length; j++) {
+                if(table.attr[j].toLowerCase() == attrName.toLowerCase()) {
+                    table.attr.splice(j, 1);
+                }
+            }
+        }
+    }
+    
+    // Deletes attribute from attributes array
+    for(var i = 0; i < attributes.length; i++) {
+        if((attributes[i][0].get('.Atext')[0].getText().toLowerCase() == attrName.toLowerCase()) &&
+            (attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
+            attributes.splice(i, 1);
+        }
+    }
+}
+
+/********* Relation Functions *********/
+
+/*
+* Finds the provided relation based on its name
+*/
+function findRelation(relName) {
+    for(var i = 0; i < relations.length; i++) {
+        if(relations[i][0].getName().toLowerCase() == relName.toLowerCase()) {
+            return relations[i];
+        }
+    }
+    return null;
+}
+
+/*
+* Modifies the existing relation name to the provided relation name
+*/
+function editRelationName(oldRelName, newRelName) {
+    var rel = findRelation(oldRelName);
+    rel[0].setName(newRelName);
+}
+
+/*
+* Modifies the existing relation type to the provided relation type
+*/
+function editRelationType(relName, newRelType) {
+    var rel = findRelation(relName);
+    rel[3] = newRelType;
+}
+
+//TODO Update the stage
+/*
+ * Deletes relation from relations array
+ */
+function deleteRelation(relName) {
+    for(var i = 0; i < relations.length; i++) {
+        if(relations[i][0].getName().toLowerCase() == relName.toLowerCase()) {
+            relations.splice(i, 1);
+        }
+    }
+}
+
 
 /*
 * Converts xml schema into current schema
