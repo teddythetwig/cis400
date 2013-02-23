@@ -336,40 +336,6 @@ function update() {
     }
 }
 
-/*
-* Redraws all objects in layer
-*/
-function redraw() {
-    //Clear canvas tied to layer
-    layer.removeChildren();
-    layer.draw();
-    
-    //Redraw Tables
-    for(var i = 0; i < tables.length; i++) {
-        alert("Adding them tables");
-        layer.add(tables[i]);
-    }
-    
-    //Redraw Attributes
-    for(var i = 0; i < attributes.length; i++) {
-        layer.add(attributes[i][0]);
-    }
-    
-    //Redraw Attribute Lines
-    for(var i = 0; i < attrLines.length; i++) {
-        layer.add(attrLines[i][0]);
-        attrLines[i][0].moveToBottom();
-    }
-    
-    //Redraw Relations
-    for(var i = 0; i < relations.length; i++) {
-        layer.add(relations[i][0]);
-        relations[i][0].moveToBottom();
-    }
-
-    layer.draw();
-}
-
 
 /********* Table Functions *********/
 
@@ -436,7 +402,7 @@ function deleteTable(tableName) {
     // Deletes attribute lines from attrLines array
     for(var i = 0; i < attrLines.length; i++) {
         if((attrLines[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
-            attrLines[i][0].remove;
+            attrLines[i][0].remove();
             attrLines.splice(i, 1);
         }
     }
@@ -468,7 +434,6 @@ function deleteTable(tableName) {
     }
     
     layer.draw();
-    //redraw();
 }
 
 
@@ -575,7 +540,6 @@ function deleteAttribute(attrName, tableName) {
     }
     
     layer.draw();
-    //redraw();
 }
 
 /********* Relation Functions *********/
@@ -620,7 +584,6 @@ function deleteRelation(relName) {
     }
     
     layer.draw();
-    //redraw();
 }
 
 
