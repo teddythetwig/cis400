@@ -355,14 +355,17 @@ function redraw() {
     
     //Redraw Attribute Lines
     for(var i = 0; i < attrLines.length; i++) {
-        layer.add(attrLines[i][0])
+        layer.add(attrLines[i][0]);
+	attrLines[i][0].moveToBottom();
     }
     
     //Redraw Relations
     for(var i = 0; i < relations.length; i++) {
-        layer.add(relations[i][0])
+        layer.add(relations[i][0]);
+	relations[i][0].moveToBottom();
     }
     
+    layer.draw();
 }
 
 
@@ -428,14 +431,12 @@ function hasPrimaryKey(tableName) {
 * Deletes table from tables array, any connected attributes, and any relations connected to table
 */
 function deleteTable(tableName) {
-    
     // Deletes connected attributes from attributes table
     for(var i = 0; i < attributes.length; i++) {
         if(attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
             attributes.splice(i, 1);
         }
     }
-    
     // Deletes relations connected with table
      for(var i = 0; i < relations.length; i++) {
          if((relations[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) ||
@@ -444,7 +445,6 @@ function deleteTable(tableName) {
          }
          
      }
-    
     // Delete table from tables array
     for(var i = 0; i < tables.length; i++) {
         if(tables[i].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
@@ -739,7 +739,7 @@ function initDelTable() {
 /*
 * Deletes table specified by modal
 */
-function deleteTable(e) {
+function delTable(e) {
   var tableName = getSelectVal(document.getElementById("delTableName"));
   if(tableName != "") {
     $('#deleteTableModal').modal('hide'); // hide modal on save
@@ -758,7 +758,7 @@ function initDelAttr() {
 /*
 * Deletes attribute specified by modal
 */
-function deleteAttr(e) {
+function delAttr(e) {
   var tableName = getSelectVal(document.getElementById("tableNameC"));
   var attrName = getSelectVal(document.getElementById("delAttrName"));
   if(tableName != "" && attrName != "") {
@@ -905,7 +905,7 @@ function deleteRelation(e) {
     </div>
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal">Close</button>
-      <button id="delTableBtn" class="btn btn-danger" onclick="deleteTable()">Delete table</button>
+      <button id="delTableBtn" class="btn btn-danger" onclick="delTable()">Delete table</button>
     </div>
     </div>
 
@@ -925,7 +925,7 @@ function deleteRelation(e) {
       </div>
       <div class="modal-footer">
         <button class="btn" data-dismiss="modal">Close</button>
-        <button id="delAttrBtn" class="btn btn-danger" onclick="deleteAttr()">Delete attribute</button>
+        <button id="delAttrBtn" class="btn btn-danger" onclick="delAttr()">Delete attribute</button>
       </div>
     </div>
 
