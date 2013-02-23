@@ -341,10 +341,12 @@ function update() {
 */
 function redraw() {
     //Clear canvas tied to layer
-    layer.clear();
+    stage.reset();
+    layer = new Kinetic.Layer();
     
     //Redraw Tables
     for(var i = 0; i < tables.length; i++) {
+        alert("Adding them tables");
         layer.add(tables[i]);
     }
     
@@ -356,15 +358,16 @@ function redraw() {
     //Redraw Attribute Lines
     for(var i = 0; i < attrLines.length; i++) {
         layer.add(attrLines[i][0]);
-	attrLines[i][0].moveToBottom();
+        attrLines[i][0].moveToBottom();
     }
     
     //Redraw Relations
     for(var i = 0; i < relations.length; i++) {
         layer.add(relations[i][0]);
-	relations[i][0].moveToBottom();
+        relations[i][0].moveToBottom();
     }
-    
+
+    stage.add(layer);
     layer.draw();
 }
 
