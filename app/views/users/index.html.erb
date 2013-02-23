@@ -341,8 +341,8 @@ function update() {
 */
 function redraw() {
     //Clear canvas tied to layer
-    stage.reset();
-    layer = new Kinetic.Layer();
+    layer.removeChildren();
+    layer.draw();
     
     //Redraw Tables
     for(var i = 0; i < tables.length; i++) {
@@ -367,7 +367,6 @@ function redraw() {
         relations[i][0].moveToBottom();
     }
 
-    stage.add(layer);
     layer.draw();
 }
 
@@ -434,16 +433,27 @@ function hasPrimaryKey(tableName) {
 * Deletes table from tables array, any connected attributes, and any relations connected to table
 */
 function deleteTable(tableName) {
+    // Deletes attribute lines from attrLines array
+    for(var i = 0; i < attrLines.length; i++) {
+        if((attrLines[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
+            attrLines[i][0].remove;
+            attrLines.splice(i, 1);
+        }
+    }
+    
     // Deletes connected attributes from attributes table
     for(var i = 0; i < attributes.length; i++) {
         if(attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
+            attributes[i][0].remove();
             attributes.splice(i, 1);
         }
     }
+    
     // Deletes relations connected with table
      for(var i = 0; i < relations.length; i++) {
          if((relations[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) ||
             (relations[i][2].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
+             relations[i][0].remove();
              relations.splice(i,1);
          }
          
@@ -451,12 +461,14 @@ function deleteTable(tableName) {
     // Delete table from tables array
     for(var i = 0; i < tables.length; i++) {
         if(tables[i].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
+            tables[i].remove();
             tables.splice(i, 1);
             break;
         }
     }
     
-    redraw();
+    layer.draw();
+    //redraw();
 }
 
 
@@ -542,15 +554,28 @@ function deleteAttribute(attrName, tableName) {
         }
     }
     
+    // Deletes attribute lines from attrLines array
+    for(var i = 0; i < attrLines.length; i++) {
+        if((attrLines[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) &&
+            (attrLines[i][2].get('.Atext')[0].getText().toLowerCase() == attrName.toLowerCase())) {
+            attrLines[i][0].remove();
+            attrLines.splice(i, 1);
+            break;
+        }
+    }
+    
     // Deletes attribute from attributes array
     for(var i = 0; i < attributes.length; i++) {
         if((attributes[i][0].get('.Atext')[0].getText().toLowerCase() == attrName.toLowerCase()) &&
             (attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
+            attributes[i][0].remove();
             attributes.splice(i, 1);
+            break;
         }
     }
     
-    redraw();
+    layer.draw();
+    //redraw();
 }
 
 /********* Relation Functions *********/
@@ -589,11 +614,13 @@ function editRelationType(relName, newRelType) {
 function deleteRelation(relName) {
     for(var i = 0; i < relations.length; i++) {
         if(relations[i][0].getName().toLowerCase() == relName.toLowerCase()) {
+            relations[i][0].remove();
             relations.splice(i, 1);
         }
     }
     
-    redraw();
+    layer.draw();
+    //redraw();
 }
 
 
