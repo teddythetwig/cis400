@@ -743,7 +743,7 @@ function deleteTable(e) {
   var tableName = getSelectVal(document.getElementById("delTableName"));
   if(tableName != "") {
     $('#deleteTableModal').modal('hide'); // hide modal on save
-    alert('Delete table: ' + tableName);
+    deleteTable(tableName);
   }
 }
 
@@ -763,7 +763,7 @@ function deleteAttr(e) {
   var attrName = getSelectVal(document.getElementById("delAttrName"));
   if(tableName != "" && attrName != "") {
     $('#deleteAttributeModal').modal('hide'); // hide modal on save
-    alert('Delete attribute: ' + tableName + '.' + attrName);
+    deleteAttribute(attrName, tableName);
   }
 }
 

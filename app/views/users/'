@@ -1,0 +1,568 @@
+<!-- Navbar -->
+<div class="navbar navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container-fluid">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </a>
+      <a href="/users" class="brand">SIQL</a>
+      <div class="nav-collapse collapse">
+        <div class="nav pull-right">
+          <li class="divider-vertical"></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a href="##">Help</a>
+            </li>
+            <li>
+              <%= link_to 'Logout', destroy_user_session_path, method: :delete %>
+            </li>
+        </li>
+        </div>
+      </div>
+    </div> <!--/.container-fluid -->
+  </div> <!--/.navbar-inner -->
+</div> <!--/.navbar-fixed-top -->
+
+<br />
+<br />
+<div class="page-header">
+  <h1>Database Creation</h1>
+</div>
+<div class="container">
+  <div id="container"></div>
+  <script src="http://www.html5canvastutorials.com/libraries/kinetic-v4.3.0-beta2.js"></script>
+  <!-- <script src="../../../public/javascripts/graphics.js"></script> -->
+  <script type="text/javascript">
+
+/* Global Variables */
+
+// Position of current object
+var x, y;
+
+// List of tables
+tables = new Array();
+
+// List of allowable data types
+datatypes = new Array("text", "number", "date");
+
+// List of attributes
+attributes = new Array();
+
+// List of Relations
+relations = new Array();
+
+//Graphics variables
+var stage = new Kinetic.Stage({
+  container: 'container',
+  //width: 578,
+  //height: 200 });
+  width: 1150,
+  height: 500 });
+var layer = new Kinetic.Layer();
+var currGroup = new Kinetic.Group();
+
+/* 
+* Creates table
+* Note: Check table name is unique before calling.
+*
+*/
+function createTable(inputTxt) {
+  var rectX = stage.getWidth() / 2 - 50;
+  var rectY = stage.getHeight() / 2 - 25;
+    
+  var group = new Kinetic.Group({draggable: true});
+    
+  var complexText = new Kinetic.Text({
+     name: 'text',
+     x: rectX,
+     y: rectY,
+     text: inputTxt,
+     fontSize: 16,
+     fontFamily: 'Calibri',
+     fill: 'white',
+     width: 100,
+     padding: 20,
+     align: 'center',
+  });
+
+  var rect = new Kinetic.Rect({
+    name: 'shape',
+    x: rectX,
+    y: rectY,
+    stroke: 'black',
+    strokeWidth: 4,
+    fill: 'mediumblue',
+    width: 100,
+    height: complexText.getHeight(),
+    shadowColor: 'black',
+    shadowBlur: 10,
+    shadowOffset: [10, 10],
+    shadowOpacity: 0.2,
+    cornerRadius: 10
+  });
+  
+  //Add Elements to group  
+  group.add(rect);
+  group.add(complexText);
+  
+  //Adds an empty attributes and neighbors array
+  group.attr = new Array();
+  group.neighbors = new Array();
+    
+  // Event handling
+  group.on('mouseover', function() {
+    document.body.style.cursor = 'pointer';
+  });
+  group.on('mouseout', function() {
+    document.body.style.cursor = 'default';
+  });  
+  group.on('mousedown', function() {
+    if(currGroup.getChildren().length > 0)
+        currGroup.get('.shape')[0].setStroke('black');
+    currGroup = group;
+    document.getElementById('name').innerHTML = group.get('.text')[0].getText();
+    group.get('.shape')[0].setStroke('lightsteelblue');
+      
+    //TODO: Add multiple attributes functionality
+    if(group.attr.length > 0){
+      //document.getElementById('attribute').innerHTML = group.attr[0];
+      document.getElementById('attribute').innerHTML = group.attr.length;
+    }
+  }); 
+    
+  //Add group to table array  
+  tables.push(group);
+    
+  //Add group to stage
+  layer.add(group);
+  stage.add(layer);  
+}
+
+/* 
+* Creates attribute
+*
+*/
+function createAttr(name, type, tableName) {
+  var rectX = stage.getWidth() / 2 - 75;
+  var rectY = stage.getHeight() / 2 - 50;
+    
+  var table = findTable(tableName);
+  if(table == null) {
+        alert('Table not found.');
+        return;
+  }
+  if(!uniqueAttribute(name, tableName)) {
+        alert('Attributes within a table must be unique.  Please choose a different name for your attribute.');
+        return;
+  }
+  
+  var group = new Kinetic.Group({draggable: true});
+    
+  var complexText = new Kinetic.Text({
+     name: 'Atext',
+     x: rectX,
+     y: rectY,
+     text: name,
+     fontSize: 16,
+     fontFamily: 'Calibri',
+     fill: 'white',
+     width: 100,
+     padding: 20,
+     align: 'center',
+  });
+
+  var rect = new Kinetic.Rect({
+    name: 'shape',
+    x: rectX,
+    y: rectY,
+    stroke: 'black',
+    strokeWidth: 4,
+    fill: 'orangered',
+    width: 100,
+    height: complexText.getHeight(),
+    shadowColor: 'black',
+    shadowBlur: 10,
+    shadowOffset: [10, 10],
+    shadowOpacity: 0.2,
+    cornerRadius: 10
+  });
+  
+  //Add Elements to group  
+  group.add(rect);
+  group.add(complexText);
+    
+  //Adding attributes to attribute
+  group.parent = table;
+  group.type = type;
+  group.primary = false;
+    
+  //Adding attribute to table
+  table.attr.push(name);
+    
+  // Event handling
+  group.on('mouseover', function() {
+    document.body.style.cursor = 'pointer';
+  });
+  group.on('mouseout', function() {
+    document.body.style.cursor = 'default';
+  });  
+  group.on('mousedown', function() {
+    if(currGroup.getChildren().length > 0)
+        currGroup.get('.shape')[0].setStroke('black');
+    currGroup = group;
+    group.get('.shape')[0].setStroke('lightsteelblue');
+      
+      alert('Datatype: ' + group.type + ', Parent:' + group.parent.get('.text')[0].getText());
+  }); 
+    
+  //Add group to attributes array  
+  attributes.push(group);
+    
+  //Add group to stage
+  layer.add(group);
+  stage.add(layer);  
+}
+
+/*
+* Creates Relations
+*
+*/
+function createRelation(rname, tableName1, tableName2){
+    // Finds the table
+    table1 = findTable(tableName1);
+    table2 = findTable(tableName2);
+    
+    var group = new Kinetic.Group();
+    group.tablea = tableName1;
+    group.tableb = tableName2;
+    relations.push(group);
+}
+
+/*
+* Checks for table with inputName
+*
+*/
+function findTable(name) {
+    for(var i = 0; i < tables.length; i++) {
+        if(name.toLowerCase() == tables[i].get('.text')[0].getText().toLowerCase()) {
+            return tables[i];        
+        }
+    }
+    return null;
+}
+
+/*
+* Checks  for unique attribute name within a table
+*
+*/
+function uniqueAttribute(name, tname) {
+    table = findTable(tname);
+    if(table.attr.indexOf(name) > -1) {
+        return false;
+    }
+    return true;
+}
+
+/*
+* Checks for unique table name.
+*
+*/
+function uniqueTableName(name){
+	for(var i = 0; i < tables.length; i++){
+		if(name.toLowerCase() == tables[i].get('.text')[0].getText().toLowerCase()){
+			return false;
+		}
+	}
+	return true;
+}	
+/*
+* Converts current schema into xml schema
+*
+*/
+function convert() {
+    return false;
+}
+
+/*
+* Converts xml schema into current schema
+*
+*/
+function convert(schema) {
+   return false;   
+}
+
+/* HTML Helper Functions */
+
+/*
+* Generates HTML to dynamically populate selectors 
+* from dynamic data structures
+*
+*/
+function genSelectInnerHTML(id, arr, type) {
+  var ret = "";
+  if(type != 1) { // simple arrays
+    for(i=0; i<arr.length; i++) {
+      ret += "\t<option value=\"" + arr[i] + "\">" + arr[i] + "</option>\n";
+    }
+  }
+  else { // tables array
+    for(i=0; i<arr.length; i++) {
+      ret += "\t<option value=\"" + arr[i].get('.text')[0].getText() + "\">" + arr[i].get('.text')[0].getText() + "</option>\n";
+    }
+  }
+  document.getElementById(id).innerHTML = ret;
+}
+
+/*
+* Returns value at current selcted index from HTML selector
+*
+*/
+function getSelectVal(select) {
+  return select.options[select.selectedIndex].value;
+}
+
+/*
+* Initializes modal to create new table
+*
+*/
+function initNewTable() {
+}
+
+/*
+* Saves new table if valid info from modal
+*
+*/
+function saveNewTable(e) {
+  var tableName = document.getElementById("newTableName").value;
+  if(tableName.value != "") {
+    $('#newTableModal').modal('hide'); // hide modal on save
+    if(uniqueTableName(tableName)) {
+      createTable(tableName);
+    }
+    else {
+      alert("Table names must be unique.  Please create your table again with a different name.");
+    }
+  }
+}
+
+/*
+* Initializes modal to create new attribute
+*
+*/
+function initNewAttr() {
+  genSelectInnerHTML("tableNameA", tables, 1);
+  genSelectInnerHTML("newAttrType", datatypes, 0);
+}
+
+/*
+* Saves new attribute if valid info from modal
+*
+*/
+function saveNewAttr(e) {
+  var tableName = getSelectVal(document.getElementById("tableNameA"));
+  var attrName = document.getElementById("newAttrName").value;
+  var attrType = getSelectVal(document.getElementById("newAttrType"));
+  if(attrName != "") {
+    $('#newAttributeModal').modal('hide'); // hide modal on save
+    createAttr(attrName, attrType, tableName);
+  }
+}
+
+/*
+* Initializes modal to edit existing table
+*
+*/
+function initEditTable() {
+  genSelectInnerHTML("oldTableName", tables, 1);
+}
+
+/*
+* Saves changes to table if valid info from modal
+*
+*/
+function saveEditTable(e) {
+  var oldTableName = getSelectVal(document.getElementById("oldTableName"));
+  var editTableName = document.getElementById("editTableName").value;
+  if(editTableName != "") {
+    $('#editTableModal').modal('hide'); // hide modal on save
+    if(uniqueTableName(editTableName)) {
+        var table = findTable(oldTableName);
+        table.get('.text')[0].setText(editTableName);
+        layer.draw();
+    }
+    else {
+      alert("Table names must be unique.  Please choose a different name for your table.");
+    }
+  }
+}
+
+/*
+* Initializes modal to edit existing attribute
+*
+*/
+function initEditAttr() {
+  genSelectInnerHTML("tableNameB", tables, 1);
+  // set invalid default index to ensure event is triggered later
+  document.getElementById("tableNameB").selectedIndex = -1;
+  genSelectInnerHTML("editAttrType", datatypes, 0);
+}
+
+/*
+* Updates attribute list based on table selection within modal
+*
+*/
+function genAttrList() {
+  var attrs = new Array();
+  var tname = getSelectVal(document.getElementById("tableNameB"));
+  var table = findTable(tname);
+  for(i=0; i<table.attr.length; i++) {
+    attrs.push(table.attr[i]);
+  }
+  genSelectInnerHTML("oldAttrName", attrs, 0);
+}
+
+/*
+* Saves changes to attribute if valid info from modal
+*
+*/
+function saveEditAttr(e) {
+  var tableName = getSelectVal(document.getElementById("tableNameB"));
+  var oldAttrName = getSelectVal(document.getElementById("oldAttrName"));
+  var editAttrName = document.getElementById("editAttrName").value;
+  var editAttrType = getSelectVal(document.getElementById("editAttrType"));
+  if(editAttrName != "") {
+    $('#editAttributeModal').modal('hide'); // hide modal on save
+    var table = findTable(tableName);
+    for(i=0; i<table.attr.length; i++) {
+      if(table.attr[i] == oldAttrName) {
+        alert(table.attr[i].type); //.setText(editAttrName));
+        layer.draw();
+        return;
+      }
+    }
+  }
+}
+</script>
+
+  <!-- newTableModal -->
+  <div id="newTableModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="newTableModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3 id="newTableModalLabel">Create new table</h3>
+    </div>
+    <div class="modal-body">
+      <label for="newTableName"><strong>Table name</strong></label>
+      <input type="text" id="newTableName" value="">
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Close</button>
+      <button id="newTableBtn" class="btn btn-primary" onclick="saveNewTable()">Save table</button>
+    </div>
+  </div>
+
+  <!-- newAttributeModal -->
+    <div id="newAttributeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="newAttributeModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3 id="newAttributeModalLabel">Create new attribute</h3>
+    </div>
+    <div class="modal-body">
+      <label for="tableNameA"><strong>Table name</strong></label>
+      <select id="tableNameA">
+      </select>
+      <label for="newAttrName"><strong>Attribute name</strong></label>
+      <input type="text" id="newAttrName" value="">
+      <label for="newAttrType"><strong>Attribute type</strong></label>
+      <select id="newAttrType">
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Close</button>
+      <button id="newAttrBtn" class="btn btn-primary" onclick="saveNewAttr()">Save attribute</button>
+    </div>
+  </div>
+
+  <!-- editTableModal -->
+  <div id="editTableModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="editTableModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3 id="editTableModalLabel">Edit table</h3>
+    </div>
+    <div class="modal-body">
+      <label for="oldTableName"><strong>Table name</strong></label>
+      <select id="oldTableName">
+      </select>
+      <label for="editTableName"><strong>New table name</strong></label>
+      <input type="text" id="editTableName" value="">
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Close</button>
+      <button id="editTableBtn" class="btn btn-primary" onclick="saveEditTable()">Save changes</button>
+    </div>
+  </div>
+
+  <!-- editAttributeModal -->
+  <div id="editAttributeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="editAttributeModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3 id="editAttributeModalLabel">Edit attribute</h3>
+    </div>
+    <div class="modal-body">
+      <label for="tableNameB"><strong>Table name</strong></label>
+      <select id="tableNameB" onchange="genAttrList()">
+      </select>
+      <label for="oldAttrName"><strong>Current attribute name</strong></label>
+      <select id="oldAttrName">
+      </select>
+      <label for="editAttrName"><strong>New attribute name</strong></label>
+      <input type="text" id="editAttrName" value="">
+      <label for="editAttrType"><strong>Attribute type</strong></label>
+      <select id="editAttrType">
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Close</button>
+      <button id="editAttrBtn" class="btn btn-primary" onclick="saveEditAttr()">Save changes</button>
+    </div>
+  </div>
+
+  <br />
+  <div class="row">  
+ 
+    <!-- table info display -->
+    <div class="span8">
+      <table class= "table table-bordered">
+        <tr>
+          <td>Table Name: </td>
+          <td><div id="name">None</div></td>
+        </tr>
+        <tr>
+          <td>Attributes: </td>
+          <td><div id="attribute">None</div></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- GUI buttons -->
+    <div class="span4">
+      <a data-toggle="modal" href="#newTableModal" class="btn btn-primary" onclick="initNewTable()">New table</a>
+      <a data-toggle="modal" href="#editTableModal" class="btn btn-warning" onclick="initEditTable()">Edit table</a>
+      <button class="btn btn-danger" onclick="alert('Delete Table')">Delete table</button>
+      <br /><br />
+      <a data-toggle="modal" href="#newAttributeModal" class="btn btn-primary" onclick="initNewAttr()">New attribute</a>
+      <a data-toggle="modal" href="#editAttributeModal" class="btn btn-warning" onclick="initEditAttr()">Edit attribute</a>
+      <button class="btn btn-danger" onclick="alert('Delete Attr')">Delete attribute</button>
+      <br /><br />
+      <button class="btn btn-success" onclick="">Connect tables</button>
+    </div>
+
+  </div>
+
+</div>
