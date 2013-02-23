@@ -336,6 +336,35 @@ function update() {
     }
 }
 
+/*
+* Redraws all objects in layer
+*/
+function redraw() {
+    //Clear canvas tied to layer
+    layer.clear();
+    
+    //Redraw Tables
+    for(var i = 0; i < tables.length; i++) {
+        layer.add(tables[i]);
+    }
+    
+    //Redraw Attributes
+    for(var i = 0; i < attributes.length; i++) {
+        layer.add(attributes[i][0]);
+    }
+    
+    //Redraw Attribute Lines
+    for(var i = 0; i < attrLines.length; i++) {
+        layer.add(attrLines[i][0])
+    }
+    
+    //Redraw Relations
+    for(var i = 0; i < relations.length; i++) {
+        layer.add(relations[i][0])
+    }
+    
+}
+
 
 /********* Table Functions *********/
 
@@ -395,7 +424,6 @@ function hasPrimaryKey(tableName) {
     return false;
 }
 
-//TODO Update the stage
 /*
 * Deletes table from tables array, any connected attributes, and any relations connected to table
 */
@@ -424,6 +452,8 @@ function deleteTable(tableName) {
             break;
         }
     }
+    
+    redraw();
 }
 
 
@@ -493,7 +523,6 @@ function editAttrPrimary(attrName, tableName) {
     }
 }
 
-//TODO Update the stage
 /*
  * Deletes Attribute from attributes and the connected table
  */
@@ -517,6 +546,8 @@ function deleteAttribute(attrName, tableName) {
             attributes.splice(i, 1);
         }
     }
+    
+    redraw();
 }
 
 /********* Relation Functions *********/
@@ -549,7 +580,6 @@ function editRelationType(relName, newRelType) {
     rel[3] = newRelType;
 }
 
-//TODO Update the stage
 /*
  * Deletes relation from relations array
  */
@@ -559,6 +589,8 @@ function deleteRelation(relName) {
             relations.splice(i, 1);
         }
     }
+    
+    redraw();
 }
 
 
