@@ -1,6 +1,7 @@
 class NlpController < ApplicationController
   def post
     query = params[:query]
+    db_blob = JSON.parse(params[:db_json])
 
     tgr = EngTagger.new
     @results = []
@@ -17,8 +18,15 @@ class NlpController < ApplicationController
 #    @results << 'hired'.stem
 
     words = tagged.inject([]){|l,x| l + [/(.*)\/[A-Z]+$/.match(x)[1]]}
-    #@results << "words: " + words.inspect
+    @results << "words: " + words.inspect
+#    @results << "json parse test: " + JSON.parse("{\"tables\":[{\"name\":\"employees\",\"fields\":[{\"name\":\"first_name\",\"type\":\"string\"},{\"name\":\"id\",\"type\":\"int\"}]}]}").inspect
+    @results << "blob" + db_blob.inspect
     
+    table_or_field_names = []
+    for i in 0 ... words.size
+      #if 
+    end
+
     dates = []
     for i in 0 ... words.size
       for j in i ... words.size
