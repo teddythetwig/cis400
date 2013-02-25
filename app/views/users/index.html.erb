@@ -41,7 +41,7 @@
   <!-- <script src="../../../public/javascripts/graphics.js"></script> -->
   <script type="text/javascript">
 
-/* Global Variables */
+/********* Global Variables *********/
 
 // Position of current object
 var x, y;
@@ -55,197 +55,292 @@ datatypes = new Array("text", "number", "date");
 // List of attributes
 attributes = new Array();
 
+// List of attribute lines
+attrLines = new Array();
+
 // List of Relations
 relations = new Array();
 
 //Graphics variables
 var stage = new Kinetic.Stage({
-  container: 'container',
-  //width: 578,
-  //height: 200 });
-  width: 1150,
-  height: 500 });
+    container: 'container',
+    width: 1150,
+    height: 500 });
 var layer = new Kinetic.Layer();
 var currGroup = new Kinetic.Group();
+
+/********* Creation Methods *********/
 
 /* 
 * Creates table
 * Note: Check table name is unique before calling.
-*
 */
-function createTable(inputTxt) {
-  var rectX = stage.getWidth() / 2 - 50;
-  var rectY = stage.getHeight() / 2 - 25;
-    
-  var group = new Kinetic.Group({draggable: true});
-    
-  var complexText = new Kinetic.Text({
-     name: 'text',
-     x: rectX,
-     y: rectY,
-     text: inputTxt,
-     fontSize: 16,
-     fontFamily: 'Calibri',
-     fill: 'white',
-     width: 100,
-     padding: 20,
-     align: 'center',
-  });
+function createTable(tableName) {
+    var rectX = stage.getWidth() / 2 - 50;
+    var rectY = stage.getHeight() / 2 - 25;
 
-  var rect = new Kinetic.Rect({
-    name: 'shape',
-    x: rectX,
-    y: rectY,
-    stroke: 'black',
-    strokeWidth: 4,
-    fill: 'mediumblue',
-    width: 100,
-    height: complexText.getHeight(),
-    shadowColor: 'black',
-    shadowBlur: 10,
-    shadowOffset: [10, 10],
-    shadowOpacity: 0.2,
-    cornerRadius: 10
-  });
-  
-  //Add Elements to group  
-  group.add(rect);
-  group.add(complexText);
-  
-  //Adds an empty attributes and neighbors array
-  group.attr = new Array();
-  group.neighbors = new Array();
+    var group = new Kinetic.Group({
+        draggable: true
+    });
+
+    var complexText = new Kinetic.Text({
+        name: 'text',
+        x: rectX,
+        y: rectY,
+        text: tableName,
+        fontSize: 16,
+        fontFamily: 'Calibri',
+        fill: 'white',
+        width: 100,
+        padding: 20,
+        align: 'center',
+    });
+
+    var rect = new Kinetic.Rect({
+        name: 'shape',
+        x: rectX,
+        y: rectY,
+        stroke: 'black',
+        strokeWidth: 4,
+        fill: 'mediumblue',
+        width: 100,
+        height: complexText.getHeight(),
+        shadowColor: 'black',
+        shadowBlur: 10,
+        shadowOffset: [10, 10],
+        shadowOpacity: 0.2,
+        cornerRadius: 10
+    });
+
+    //Add Elements to group  
+    group.add(rect);
+    group.add(complexText);
+
+    //Adds an empty attributes and neighbors array
+    group.attr = new Array();
+    group.neighbors = new Array();
+
+    // Event handling
+    group.on('mouseover', function() {
+        document.body.style.cursor = 'pointer';
+    });
+    group.on('mouseout', function() {
+        document.body.style.cursor = 'default';
+    });  
+    group.on('mousedown', function() {
+        if(currGroup.getChildren().length > 0) {
+            currGroup.get('.shape')[0].setStroke('black');
+        }
+        currGroup = group;
+        document.getElementById('name').innerHTML = group.get('.text')[0].getText();
+        group.get('.shape')[0].setStroke('lightsteelblue');
+
+        //TODO: Add multiple attributes functionality
+        if(group.attr.length > 0){
+            //document.getElementById('attribute').innerHTML = group.attr[0];
+            document.getElementById('attribute').innerHTML = group.attr.length;
+        }
+    }); 
     
-  // Event handling
-  group.on('mouseover', function() {
-    document.body.style.cursor = 'pointer';
-  });
-  group.on('mouseout', function() {
-    document.body.style.cursor = 'default';
-  });  
-  group.on('mousedown', function() {
-    if(currGroup.getChildren().length > 0)
-        currGroup.get('.shape')[0].setStroke('black');
-    currGroup = group;
-    document.getElementById('name').innerHTML = group.get('.text')[0].getText();
-    group.get('.shape')[0].setStroke('lightsteelblue');
-      
-    //TODO: Add multiple attributes functionality
-    if(group.attr.length > 0){
-      //document.getElementById('attribute').innerHTML = group.attr[0];
-      document.getElementById('attribute').innerHTML = group.attr.length;
-    }
-  }); 
-    
-  //Add group to table array  
-  tables.push(group);
-    
-  //Add group to stage
-  layer.add(group);
-  stage.add(layer);  
+    //Add group to table array  
+    tables.push(group);
+
+    //Add group to stage
+    layer.add(group);
+    stage.add(layer);  
 }
 
 /* 
 * Creates attribute
-*
 */
 function createAttr(name, type, tableName) {
-  var rectX = stage.getWidth() / 2 - 75;
-  var rectY = stage.getHeight() / 2 - 50;
-    
-  var table = findTable(tableName);
-  if(table == null) {
-        alert('Table not found');
-  }
-  if(!uniqueAttribute(name, tableName)) {
-        alert('Attribute not unique');
-  }
-  
-  var group = new Kinetic.Group({draggable: true});
-    
-  var complexText = new Kinetic.Text({
-     name: 'Atext',
-     x: rectX,
-     y: rectY,
-     text: name,
-     fontSize: 16,
-     fontFamily: 'Calibri',
-     fill: 'white',
-     width: 100,
-     padding: 20,
-     align: 'center',
-  });
+    var rectX = stage.getWidth() / 2 - 75;
+    var rectY = stage.getHeight() / 2 - 50;
 
-  var rect = new Kinetic.Rect({
-    name: 'shape',
-    x: rectX,
-    y: rectY,
-    stroke: 'black',
-    strokeWidth: 4,
-    fill: 'orangered',
-    width: 100,
-    height: complexText.getHeight(),
-    shadowColor: 'black',
-    shadowBlur: 10,
-    shadowOffset: [10, 10],
-    shadowOpacity: 0.2,
-    cornerRadius: 10
-  });
-  
-  //Add Elements to group  
-  group.add(rect);
-  group.add(complexText);
+    var table = findTable(tableName);
+    if(table == null) {
+        alert('Table not found.');
+        return;
+    }
+    if(!uniqueAttribute(name, tableName)) {
+        alert('Attributes within a table must be unique.');
+        return;
+    }
+
+    var group = new Kinetic.Group({draggable: true});
+
+    var complexText = new Kinetic.Text({
+       name: 'Atext',
+       x: rectX,
+       y: rectY,
+       text: name,
+       fontSize: 16,
+       fontFamily: 'Calibri',
+       fill: 'white',
+       width: 100,
+       padding: 20,
+       align: 'center'
+    });
+
+    var rect = new Kinetic.Rect({
+      name: 'shape',
+      x: rectX,
+      y: rectY,
+      stroke: 'black',
+      strokeWidth: 4,
+      fill: 'orangered',
+      width: 100,
+      height: complexText.getHeight(),
+      shadowColor: 'black',
+      shadowBlur: 10,
+      shadowOffset: [10, 10],
+      shadowOpacity: 0.2,
+      cornerRadius: 10
+    });
+
+    //Add Elements to group  
+    group.add(rect);
+    group.add(complexText);
+
+    //Adding attributes to attribute (AttrGroup, ParentTable, Datatype, PrimaryKey)
+    var attGroup = [group, table, type, false];
+
+    //Adding attribute to table
+    table.attr.push(name);
+
+    // Event handling
+    group.on('mouseover', function() {
+        document.body.style.cursor = 'pointer';
+    });
+    group.on('mouseout', function() {
+        document.body.style.cursor = 'default';
+    });  
+    group.on('mousedown', function() {
+        if(currGroup.getChildren().length > 0) {
+            currGroup.get('.shape')[0].setStroke('black');
+        }
+        currGroup = group;
+        group.get('.shape')[0].setStroke('lightsteelblue');
+
+        //alert('Datatype: ' + group.type + ', Parent:' + group.parent.get('.text')[0].getText());
+    });
     
-  //Adding attributes to attribute
-  group.parent = table;
-  group.type = type;
-  group.primary = false;
+    group.on('dragstart dragmove', function(){
+        update();
+    });
+
+    table.on('dragstart dragmove', function(){
+        update();
+    });
+
+    //Add group to attributes array  
+    attributes.push(attGroup);
     
-  //Adding attribute to table
-  table.attr.push(name);
+    //Adds connection line
+    var line = new Kinetic.Line({
+        name: name,
+        points: [group.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50, 
+                 group.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25, 
+                 table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50,
+                 table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25],
+        stroke: 'black',
+        strokeWidth: 2,
+        lineCap: 'round',
+        lineJoin: 'round'
+    });
     
-  // Event handling
-  group.on('mouseover', function() {
-    document.body.style.cursor = 'pointer';
-  });
-  group.on('mouseout', function() {
-    document.body.style.cursor = 'default';
-  });  
-  group.on('mousedown', function() {
-    if(currGroup.getChildren().length > 0)
-        currGroup.get('.shape')[0].setStroke('black');
-    currGroup = group;
-    group.get('.shape')[0].setStroke('lightsteelblue');
-      
-      alert('Datatype: ' + group.type + ', Parent:' + group.parent.get('.text')[0].getText());
-  }); 
+    var lineGroup = [line, table, group];
+
+    attrLines.push(lineGroup);
     
-  //Add group to attributes array  
-  attributes.push(group);
+    //Add group to stage
+    layer.add(group);
+    layer.add(line);
+    stage.add(layer);
     
-  //Add group to stage
-  layer.add(group);
-  stage.add(layer);  
+    line.moveToBottom();
+    layer.draw();  
 }
 
 /*
 * Creates Relations
-*
 */
 function createRelation(rname, tableName1, tableName2){
     // Finds the table
     table1 = findTable(tableName1);
     table2 = findTable(tableName2);
-    
-    var group = new Kinetic.Group();
-    group.tablea = tableName1;
-    group.tableb = tableName2;
+
+    if(table1 == null || table2 == null) {
+        alert('Table not found');
+    }
+
+    var line = new Kinetic.Line({
+        name: rname,
+        points: [table1.getX()+table1.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50, 
+                 table1.getY()+table1.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25, 
+                 table2.getX()+table2.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50,
+                 table2.getY()+table2.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25],
+        stroke: 'red',
+        strokeWidth: 5,
+        lineCap: 'round',
+        lineJoin: 'round'
+      });
+
+    table1.on('dragstart dragmove', function(){
+        update();
+    });
+
+    table2.on('dragstart dragmove', function(){
+        update();
+    });
+
+    // Adding group of line and tables to realtions array (Line obj, FirstTable, SecondTable, Directionality)
+   // Directionality[-1:'NotDefined', 0:'one-to-one', 1:'one-to-many', 2:'many-to-many']
+    var group = [line, table1, table2, -1];
     relations.push(group);
+
+    //Add line to stage
+    layer.add(line);
+    stage.add(layer); 
+
+    line.moveToBottom();
+    layer.draw();
 }
 
 /*
-* Checks for table with inputName
-*
+* Updates all of the lines in the graph
+*/
+function update() {
+    // Updates relation lines
+    for(var i = 0; i < relations.length; i++) {
+        var line = relations[i][0];
+        var table1 = relations[i][1];
+        var table2 = relations[i][2];
+        line.setPoints([table1.getX()+table1.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50, 
+                 table1.getY()+table1.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25, 
+                 table2.getX()+table2.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50,
+                 table2.getY()+table2.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25]);
+        layer.draw();
+    }
+    
+    // Updates attribute lines
+    for(var i = 0; i < attrLines.length; i++) {
+        var line = attrLines[i][0];
+        var table = attrLines[i][1];
+        var attr = attrLines[i][2];
+        line.setPoints([attr.getX()+attr.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50, 
+                 attr.getY()+attr.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25, 
+                 table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50,
+                 table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25]);
+        layer.draw();
+    }
+}
+
+
+/********* Table Functions *********/
+
+/*
+* Checks for table with provided name
 */
 function findTable(name) {
     for(var i = 0; i < tables.length; i++) {
@@ -257,46 +352,285 @@ function findTable(name) {
 }
 
 /*
-* Checks  for unique attribute name within a table
-*
+* Checks for unique table name.
 */
-function uniqueAttribute(name, tname) {
-    table = findTable(tname);
-    if(table.attr.indexOf(name) > -1) {
+function uniqueTableName(name){
+    for(var i = 0; i < tables.length; i++){
+        if(name.toLowerCase() == tables[i].get('.text')[0].getText().toLowerCase()) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/*
+* Modifies the existing table name to the provided table name
+*/
+function editTableName(oldName, newName) {
+    var table = findTable(oldName);
+    if(table == null) {
+        alert("Table does not exist");
+        return;
+    }
+    if(uniqueTableName(newName)) {
+        table.get('.text')[0].setText(newName);
+        layer.draw();
+    }
+    else {
+        alert("Table names must be unique.");
+    }
+}
+
+/*
+* Check if table has a primary key
+*/
+function hasPrimaryKey(tableName) {
+    var table = findTable(tableName);
+    for(var i = 0; i < table.attr.length; i++) {
+        var attr = findAttr(attrName, tableName);
+        if(attr[3]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/*
+* Deletes table from tables array, any connected attributes, and any relations connected to table
+*/
+function deleteTable(tableName) {
+    // Deletes attribute lines from attrLines array
+    for(var i = 0; i < attrLines.length; i++) {
+        if((attrLines[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
+            attrLines[i][0].remove();
+            attrLines.splice(i, 1);
+        }
+    }
+    
+    // Deletes connected attributes from attributes table
+    for(var i = 0; i < attributes.length; i++) {
+        if(attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
+            attributes[i][0].remove();
+            attributes.splice(i, 1);
+        }
+    }
+    
+    // Deletes relations connected with table
+     for(var i = 0; i < relations.length; i++) {
+         if((relations[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) ||
+            (relations[i][2].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
+             relations[i][0].remove();
+             relations.splice(i,1);
+         }
+         
+     }
+    // Delete table from tables array
+    for(var i = 0; i < tables.length; i++) {
+        if(tables[i].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
+            tables[i].remove();
+            tables.splice(i, 1);
+            break;
+        }
+    }
+    
+    layer.draw();
+}
+
+
+/********* Attribute Functions *********/
+
+/*
+* Checks  for unique attribute name within a table
+*/
+function uniqueAttribute(attrName, tableName) {
+    var table = findTable(tableName);
+    if(table.attr.indexOf(attrName) > -1) {
         return false;
     }
     return true;
 }
 
 /*
-* Checks for unique table name.
-*
+* Finds the provided attribute based on its name and table name
 */
-function uniqueTableName(name){
-	for(var i = 0; i < tables.length; i++){
-		if(name.toLowerCase() == tables[i].get('.text')[0].getText().toLowerCase()){
-			return false;
-		}
-	}
-	return true;
-}	
-/*
-* Converts current schema into xml schema
-*
-*/
-function convert() {
-    return false;
+function findAttr(attrName, tableName) {
+    for(var i = 0; i < attributes.length; i++) {
+        if((attributes[i][0].get('.Atext')[0].getText().toLowerCase() == attrName) &&
+            (attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName)) {
+            return attributes[i];
+        }
+    }
+    return null;
 }
 
 /*
+* Modifies the existing attribute name to the provided attribute name
+*/
+function editAttrName(oldAttrName, newAttrName, tableName) {
+    var attr = findAttr(oldAttrName, tableName);
+    var table = findTable(tableName);
+    attr[0].get('.Atext')[0].setText(newAttrName);
+    for(var i = 0; i < table.attr.length; i++) {
+        if(table.attr[i] == oldAttrName) {
+            table.attr[i] = newAttrName;
+        }
+    }
+    layer.draw();
+}
+
+/*
+* Modifies the existing attribute datatype to the provided attribute datatype
+*/
+function editAttrType(attrName, tableName, newAttrType) {
+    var attr = findAttr(tableName, attrName);
+    attr[2] = newAttrType;
+}
+
+/*
+* Modifies the primary key status of provided attribute if possible
+*/
+function editAttrPrimary(attrName, tableName) {
+    var attr = findAttr(tableName, oldAttrName);
+    if(attr[3]) {
+        attr[3] = false;
+    }
+    else {
+        if(hasPrimaryKey(tableName)) {
+            alert('Already has primary key');
+        } else {
+            attr[3] = true;
+        }
+    }
+}
+
+/*
+ * Deletes Attribute from attributes and the connected table
+ */
+function deleteAttribute(attrName, tableName) {
+    //Deletes attribute from table
+    for(var i = 0; i < tables.length; i++) {
+        if(tables[i].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
+            var table = tables[i];
+            for(var j = 0; j < table.attr.length; j++) {
+                if(table.attr[j].toLowerCase() == attrName.toLowerCase()) {
+                    table.attr.splice(j, 1);
+                }
+            }
+        }
+    }
+    
+    // Deletes attribute lines from attrLines array
+    for(var i = 0; i < attrLines.length; i++) {
+        if((attrLines[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) &&
+            (attrLines[i][2].get('.Atext')[0].getText().toLowerCase() == attrName.toLowerCase())) {
+            attrLines[i][0].remove();
+            attrLines.splice(i, 1);
+            break;
+        }
+    }
+    
+    // Deletes attribute from attributes array
+    for(var i = 0; i < attributes.length; i++) {
+        if((attributes[i][0].get('.Atext')[0].getText().toLowerCase() == attrName.toLowerCase()) &&
+            (attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
+            attributes[i][0].remove();
+            attributes.splice(i, 1);
+            break;
+        }
+    }
+    
+    layer.draw();
+}
+
+/********* Relation Functions *********/
+
+/*
+* Finds the provided relation based on its name
+*/
+function findRelation(relName) {
+    for(var i = 0; i < relations.length; i++) {
+        if(relations[i][0].getName().toLowerCase() == relName.toLowerCase()) {
+            return relations[i];
+        }
+    }
+    return null;
+}
+
+/*
+* Modifies the existing relation name to the provided relation name
+*/
+function editRelationName(oldRelName, newRelName) {
+    var rel = findRelation(oldRelName);
+    rel[0].setName(newRelName);
+}
+
+/*
+* Modifies the existing relation type to the provided relation type
+*/
+function editRelationType(relName, newRelType) {
+    var rel = findRelation(relName);
+    rel[3] = newRelType;
+}
+
+/*
+ * Deletes relation from relations array
+ */
+function deleteRelation(relName) {
+    for(var i = 0; i < relations.length; i++) {
+        if(relations[i][0].getName().toLowerCase() == relName.toLowerCase()) {
+            relations[i][0].remove();
+            relations.splice(i, 1);
+        }
+    }
+    
+    layer.draw();
+}
+
+
+/*
 * Converts xml schema into current schema
-*
 */
 function convert(schema) {
    return false;   
 }
 
+/********* HTML Helper Functions *********/
 
+/*
+* Generates HTML to dynamically populate selectors 
+* from dynamic data structures
+*/
+function genSelectInnerHTML(id, arr, type) {
+  var ret = "";
+  if(type != 1) { // simple arrays
+    for(i=0; i<arr.length; i++) {
+      ret += "\t<option value=\"" + arr[i] + "\">" + arr[i] + "</option>\n";
+    }
+  }
+  else { // tables array
+    for(i=0; i<arr.length; i++) {
+      ret += "\t<option value=\"" + arr[i].get('.text')[0].getText() + "\">" + arr[i].get('.text')[0].getText() + "</option>\n";
+    }
+  }
+  document.getElementById(id).innerHTML = ret;
+}
+
+/*
+* Returns value at current selcted index from HTML selector
+*/
+function getSelectVal(select) {
+  return select.options[select.selectedIndex].value;
+}
+
+/*
+* Initializes modal to create new table
+*/
+function initNewTable() {
+}
+
+/*
+* Saves new table if valid info from modal
+*/
 function saveNewTable(e) {
   var tableName = document.getElementById("newTableName").value;
   if(tableName.value != "") {
@@ -304,47 +638,165 @@ function saveNewTable(e) {
     if(uniqueTableName(tableName)) {
       createTable(tableName);
     }
+    else {
+      alert("Table names must be unique.");
+    }
   }
 }
 
+/*
+* Initializes modal to create new attribute
+*/
+function initNewAttr() {
+  genSelectInnerHTML("tableNameA", tables, 1);
+  genSelectInnerHTML("newAttrType", datatypes, 0);
+}
+
+/*
+* Saves new attribute if valid info from modal
+*/
 function saveNewAttr(e) {
+  var tableName = getSelectVal(document.getElementById("tableNameA"));
   var attrName = document.getElementById("newAttrName").value;
-  var attrType = document.getElementById("newAttrType");
-  attrType = attrType.options[attrType.selectedIndex].value;
+  var attrType = getSelectVal(document.getElementById("newAttrType"));
   if(attrName != "") {
     $('#newAttributeModal').modal('hide'); // hide modal on save
+    createAttr(attrName, attrType, tableName);
   }
 }
 
+/*
+* Initializes modal to edit existing table
+*/
+function initEditTable() {
+  genSelectInnerHTML("oldTableName", tables, 1);
+}
+
+/*
+* Saves changes to table if valid info from modal
+*/
 function saveEditTable(e) {
-  var tableName = document.getElementById("editTableName").value;
-  if(tableName != "") {
+  var oldTableName = getSelectVal(document.getElementById("oldTableName"));
+  var newTableName = document.getElementById("editTableName").value;
+  if(newTableName != "") {
     $('#editTableModal').modal('hide'); // hide modal on save
+    editTableName(oldTableName, newTableName);
   }
 }
 
+/*
+* Initializes modal to edit existing attribute
+*/
+function initEditAttr() {
+  genSelectInnerHTML("tableNameB", tables, 1);
+  // set invalid default index to ensure event is triggered later
+  document.getElementById("tableNameB").selectedIndex = -1;
+  genSelectInnerHTML("editAttrType", datatypes, 0);
+}
+
+/*
+* Updates attribute list based on table selection within modal
+*/
+function genAttrList(id1, id2) {
+  var attrs = new Array();
+  var tname = getSelectVal(document.getElementById(id1));
+  var table = findTable(tname);
+  for(i=0; i<table.attr.length; i++) {
+    attrs.push(table.attr[i]);
+  }
+  genSelectInnerHTML(id2, attrs, 0);
+}
+
+/*
+* Saves changes to attribute if valid info from modal
+*/
 function saveEditAttr(e) {
-  var attrName = document.getElementById("editAttrName").value;
-  var attrType = document.getElementById("editAttrType");
-  attrType = attrType.options[attrType.selectedIndex].value;
-  if(attrName != "") {
+  var tableName = getSelectVal(document.getElementById("tableNameB"));
+  var oldAttrName = getSelectVal(document.getElementById("oldAttrName"));
+  var newAttrName = document.getElementById("editAttrName").value;
+  var newAttrType = getSelectVal(document.getElementById("editAttrType"));
+  if(newAttrName != "") {
     $('#editAttributeModal').modal('hide'); // hide modal on save
+    editAttrName(oldAttrName, newAttrName, tableName);
+    editAttrType(newAttrName, tableName, newAttrType);
   }
 }
 
-function genSelectHTML(id, arr, type) {
-  var ret = "";
-  if(type == 0) {
-    for(i=0; i<arr.length; i++) {
-      ret += "\t<option value=\"" + arr[i] + "\">" + arr[i] + "</option>\n";
-    }
+/*
+* Initializes modal to delete existing table
+*/
+function initDelTable() {
+  genSelectInnerHTML("delTableName", tables, 1);
+}
+
+/*
+* Deletes table specified by modal
+*/
+function delTable(e) {
+  var tableName = getSelectVal(document.getElementById("delTableName"));
+  if(tableName != "") {
+    $('#deleteTableModal').modal('hide'); // hide modal on save
+    deleteTable(tableName);
   }
-  else {
-    for(i=0; i<arr.length; i++) {
-      ret += "\t<option value=\"" + arr[i].get('.text')[0].getText() + "\">" + arr[i].get('.text')[0].getText() + "</option>\n";
-    }
+}
+
+/*
+* Initializes modal to delete existing attribute
+*/
+function initDelAttr() {
+  genSelectInnerHTML("tableNameC", tables, 1);
+  document.getElementById("tableNameC").selectedIndex = -1;
+}
+
+/*
+* Deletes attribute specified by modal
+*/
+function delAttr(e) {
+  var tableName = getSelectVal(document.getElementById("tableNameC"));
+  var attrName = getSelectVal(document.getElementById("delAttrName"));
+  if(tableName != "" && attrName != "") {
+    $('#deleteAttributeModal').modal('hide'); // hide modal on save
+    deleteAttribute(attrName, tableName);
   }
-  document.getElementById(id).innerHTML = ret;
+}
+
+/*
+* Initializes modal to create new relation
+*/
+function initNewRelation() {
+  genSelectInnerHTML("tableNameR1", tables, 1);
+  genSelectInnerHTML("tableNameR2", tables, 1);
+}
+
+/*
+* Saves new relation if valid info from modal
+*/
+function saveNewRelation(e) {
+  var relName = document.getElementById("relNameA").value;
+  var tableName1 = getSelectVal(document.getElementById("tableNameR1"));
+  var tableName2 = getSelectVal(document.getElementById("tableNameR2"));
+  if(relName != "") {
+    $('#newRelationModal').modal('hide'); // hide modal on save
+    createRelation(relName, tableName1, tableName2);
+  }
+}
+
+/*
+* Initializes modal to delete existing relation
+*/
+function initDelRelation() {
+  genSelectInnerHTML("relNameB", relations, 1);
+}
+
+/*
+* Deletes relation specified by modal
+*/
+function deleteRelation(e) {
+  var relName = document.getElementById("relNameB").value;
+  if(relName != "") {
+    $('#deleteRelationModal').modal('hide'); // hide modal on save
+    alert('Delete relation: ' + relName);
+  }
 }
 </script>
 
@@ -368,17 +820,16 @@ function genSelectHTML(id, arr, type) {
     <div id="newAttributeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="newAttributeModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3 id="newAttributeModalLabel">Add attribute to [tablename]</h3>
+      <h3 id="newAttributeModalLabel">Create new attribute</h3>
     </div>
     <div class="modal-body">
-      <label for="tableName"><strong>Table name</strong></label>
-      <select id="tableName">
+      <label for="tableNameA"><strong>Table name</strong></label>
+      <select id="tableNameA">
       </select>
       <label for="newAttrName"><strong>Attribute name</strong></label>
       <input type="text" id="newAttrName" value="">
       <label for="newAttrType"><strong>Attribute type</strong></label>
       <select id="newAttrType">
-	<script>document.write(genSelectHTML('newAttrType', datatypes, 0));</script>
       </select>
     </div>
     <div class="modal-footer">
@@ -391,10 +842,13 @@ function genSelectHTML(id, arr, type) {
   <div id="editTableModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="editTableModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3 id="editTableModalLabel">Edit [tablename]</h3>
+      <h3 id="editTableModalLabel">Edit table</h3>
     </div>
     <div class="modal-body">
-      <label for="editTableName"><strong>Table name</strong></label>
+      <label for="oldTableName"><strong>Table name</strong></label>
+      <select id="oldTableName">
+      </select>
+      <label for="editTableName"><strong>New table name</strong></label>
       <input type="text" id="editTableName" value="">
     </div>
     <div class="modal-footer">
@@ -407,15 +861,19 @@ function genSelectHTML(id, arr, type) {
   <div id="editAttributeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="editAttributeModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3 id="editAttributeModalLabel">Edit [tablename] attribute</h3>
+      <h3 id="editAttributeModalLabel">Edit attribute</h3>
     </div>
     <div class="modal-body">
-      <label for="editAttrName"><strong>Attribute name</strong></label>
+      <label for="tableNameB"><strong>Table name</strong></label>
+      <select id="tableNameB" onchange="genAttrList('tableNameB', 'oldAttrName')">
+      </select>
+      <label for="oldAttrName"><strong>Current attribute name</strong></label>
+      <select id="oldAttrName">
+      </select>
+      <label for="editAttrName"><strong>New attribute name</strong></label>
       <input type="text" id="editAttrName" value="">
       <label for="editAttrType"><strong>Attribute type</strong></label>
       <select id="editAttrType">
-	<option value="text">text</option>
-	<option value="number">number</option>
       </select>
     </div>
     <div class="modal-footer">
@@ -425,7 +883,84 @@ function genSelectHTML(id, arr, type) {
   </div>
 
   <br />
-  <div class="row">
+  <div class="row">  
+ 
+  <!-- deleteTableModal -->
+  <div id="deleteTableModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="deleteTableModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3 id="deleteTableModalLabel">Delete table</h3>
+    </div>
+    <div class="modal-body">
+      <label for="delTableName"><strong>Table name</strong></label>
+      <select id="delTableName">
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Close</button>
+      <button id="delTableBtn" class="btn btn-danger" onclick="delTable()">Delete table</button>
+    </div>
+    </div>
+
+    <!-- deleteAttributeModal -->
+    <div id="deleteAttributeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="deleteAttributeModalLabel" aria-hidden="true">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 id="deleteAttributeModalLabel">Delete attribute</h3>
+      </div>
+      <div class="modal-body">
+        <label for="tableNameC"><strong>Table name</strong></label>
+        <select id="tableNameC" onchange="genAttrList('tableNameC', 'delAttrName')">
+        </select>
+        <label for="delAttrName"><strong>Attribute name</strong></label>
+        <select id="delAttrName">
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Close</button>
+        <button id="delAttrBtn" class="btn btn-danger" onclick="delAttr()">Delete attribute</button>
+      </div>
+    </div>
+
+  <!-- newRelationModal -->
+  <div id="newRelationModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="newRelationModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3 id="newRelationModalLabel">Connect tables</h3>
+    </div>
+    <div class="modal-body">
+      <label for="relNameA"><strong>Relation name</strong></label>
+      <input type="text" id="relNameA" value="">
+      <label for="tableNameR1"><strong>Table name #1</strong></label>
+      <select id="tableNameR1">
+      </select>
+      <label for="tableNameR2"><strong>Table name #2</strong></label>
+      <select id="tableNameR2">
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Close</button>
+      <button id="newRelBtn" class="btn btn-primary" onclick="saveNewRelation()">Save relation</button>
+    </div>
+    </div>
+
+    <!-- deleteRelationModal -->
+    <div id="deleteRelationModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="deleteRelationModalLabel" aria-hidden="true">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 id="deleteRelationModalLabel">Delete attribute</h3>
+      </div>
+      <div class="modal-body">
+        <label for="relNameB"><strong>Relation name</strong></label>
+        <input type="text" id="relNameB" value="">
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Close</button>
+        <button id="delRelBtn" class="btn btn-danger" onclick="deleteRelation()">Delete relation</button>
+      </div>
+    </div>
+
+    <!-- table info display -->
     <div class="span8">
       <table class= "table table-bordered">
         <tr>
@@ -438,17 +973,21 @@ function genSelectHTML(id, arr, type) {
         </tr>
       </table>
     </div>
+
+    <!-- GUI buttons -->
     <div class="span4">
-      <a data-toggle="modal" href="#newTableModal" class="btn btn-primary">New table</a>
-      <a data-toggle="modal" href="#editTableModal" class="btn btn-warning">Edit table</a>
-      <button class="btn btn-danger" onclick="">Delete table</button>
+      <a data-toggle="modal" href="#newTableModal" class="btn btn-primary" onclick="initNewTable()">New table</a>
+      <a data-toggle="modal" href="#editTableModal" class="btn btn-warning" onclick="initEditTable()">Edit table</a>
+      <a data-toggle="modal" href="#deleteTableModal"  class="btn btn-danger" onclick="initDelTable()">Delete table</a>
       <br /><br />
-      <a data-toggle="modal" href="#newAttributeModal" class="btn btn-primary" onclick="genSelectHTML('tableName', tables, 1)">New attribute</a>
-      <a data-toggle="modal" href="#editAttributeModal" class="btn btn-warning">Edit attribute</a>
-      <button class="btn btn-danger" onclick="">Delete attribute</button>
+      <a data-toggle="modal" href="#newAttributeModal" class="btn btn-primary" onclick="initNewAttr()">New attribute</a>
+      <a data-toggle="modal" href="#editAttributeModal" class="btn btn-warning" onclick="initEditAttr()">Edit attribute</a>
+      <a data-toggle="modal" href="#deleteAttributeModal" class="btn btn-danger" onclick="initDelAttr()">Delete attribute</a>
       <br /><br />
-      <button class="btn btn-success" onclick="">Connect tables</button>
+      <a data-toggle="modal" href="#newRelationModal" class="btn btn-success" onclick="initNewRelation()">Connect tables</a>
+      <a data-toggle="modal" href="#deleteRelationModal" class="btn btn-warning" onclick="initDelRelation()">Disconnect tables</a>
     </div>
+
   </div>
 
 </div>
