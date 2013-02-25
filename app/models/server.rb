@@ -8,7 +8,8 @@ class Server < ActiveRecord::Base
   after_create do |s|
     #initialize db on the rds servers
     #change this from hardcoding the password, on the first time it should set it
-    $RDS.create_db_instance(:db_instance_identifier => "#{name}", :allocated_storage => 5,:db_instance_class => "db.t1.micro",:engine => "MySQL",:master_username=>"username#{user}",:master_user_password=>"cis400")
+    #should also hash username or something to prevent info leak
+    $RDS.create_db_instance(:db_instance_identifier => "#{name}", :allocated_storage => 5,:db_instance_class => "db.t1.micro",:engine => "MySQL",:master_username=>"username#{user.id}",:master_user_password=>"cis400")
     #check if connection is valid, if not, return error and cause transaction rollback
   end
   
@@ -24,12 +25,12 @@ class Server < ActiveRecord::Base
   def check_status
     response = $RDS.describe_db_instances(:db_instance_identifier => "#{name}")
     status = response[:db_instances].first[:db_instance_status]
-    if status = "available"
+    if status == "available"
       self.url = response[:db_instances].first[:endpoint][:address]
+      self.save
     end
     return status
   end
-  
   
   attr_accessor :sql
  
@@ -46,7 +47,7 @@ class Server < ActiveRecord::Base
   
   # Executes query on remote server
   def make_connection
-    self.sql ||= Mysql2::Client.new(:host => self.url, :username => "username#{self.user.email}")
+    self.sql ||= Mysql2::Client.new(:host => "#{self.url}", :username => "username#{self.user_id}", :password => "cis400", :port => 3306, :database => "helloworld")
   end
 
 end

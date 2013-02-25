@@ -43,8 +43,9 @@ class ServersController < ApplicationController
   end
   
   def query
-    @results = @user.connection.query(@user.connection.escape(params[:query]))
-    redirect_to @server
+    @results = @server.sql.query(@server.sql.escape(params[:query]))
+    logger.debug "Results: #{@results.size} from connection #{@server.sql}"
+    render :show
   end
   
   def get_user
