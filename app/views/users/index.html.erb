@@ -52,6 +52,9 @@ tables = new Array();
 // List of allowable data types
 datatypes = new Array("text", "number", "date");
 
+// List of allowable relation types
+reltypes = new Array("undefined", "one-to-one", "one-to-many", "many-to-many");
+
 // List of attributes
 attributes = new Array();
 
@@ -162,7 +165,7 @@ function createAttr(name, type, tableName) {
         alert('Table not found.');
         return;
     }
-    if(!uniqueAttribute(name, tableName)) {
+    if(!uniqueAttrName(name, tableName)) {
         alert('Attributes within a table must be unique.');
         return;
     }
@@ -442,7 +445,7 @@ function deleteTable(tableName) {
 /*
 * Checks  for unique attribute name within a table
 */
-function uniqueAttribute(attrName, tableName) {
+function uniqueAttrName(attrName, tableName) {
     var table = findTable(tableName);
     if(table.attr.indexOf(attrName) > -1) {
         return false;
@@ -586,6 +589,17 @@ function deleteRelation(relName) {
     layer.draw();
 }
 
+/*
+* Checks  for unique relation name
+*/
+function uniqueRelName(relName) {
+    for(var i = 0; i < relations.length; i++) {
+        if(relations[i][0].getName().toLowerCase() == relName.toLowerCase()) {
+            return false;
+	}
+    }
+    return true;
+}
 
 /*
 * Converts xml schema into current schema
@@ -602,14 +616,19 @@ function convert(schema) {
 */
 function genSelectInnerHTML(id, arr, type) {
   var ret = "";
-  if(type != 1) { // simple arrays
+  if(type == 0) { // simple arrays
     for(i=0; i<arr.length; i++) {
       ret += "\t<option value=\"" + arr[i] + "\">" + arr[i] + "</option>\n";
     }
   }
-  else { // tables array
+  else if(type == 1) { // tables array
     for(i=0; i<arr.length; i++) {
       ret += "\t<option value=\"" + arr[i].get('.text')[0].getText() + "\">" + arr[i].get('.text')[0].getText() + "</option>\n";
+    }
+  }
+  else { // relations array
+    for(i=0; i<arr.length; i++) {
+      ret += "\t<option value=\"" + arr[i][0].getName() + "\">" + arr[i][0].getName() + "</option>\n";
     }
   }
   document.getElementById(id).innerHTML = ret;
@@ -633,14 +652,12 @@ function initNewTable() {
 */
 function saveNewTable(e) {
   var tableName = document.getElementById("newTableName").value;
-  if(tableName.value != "") {
+  if(tableName != "" && uniqueTableName(tableName)) {
     $('#newTableModal').modal('hide'); // hide modal on save
-    if(uniqueTableName(tableName)) {
-      createTable(tableName);
-    }
-    else {
-      alert("Table names must be unique.");
-    }
+    createTable(tableName);
+  }
+  else {
+    alert("Table names must be unique and nonempty.");
   }
 }
 
@@ -659,9 +676,12 @@ function saveNewAttr(e) {
   var tableName = getSelectVal(document.getElementById("tableNameA"));
   var attrName = document.getElementById("newAttrName").value;
   var attrType = getSelectVal(document.getElementById("newAttrType"));
-  if(attrName != "") {
+  if(attrName != "" && uniqueAttrName(attrName, tableName)) {
     $('#newAttributeModal').modal('hide'); // hide modal on save
     createAttr(attrName, attrType, tableName);
+  }
+  else {
+    alert("Attribute names must be unique within a table and nonempty.");
   }
 }
 
@@ -678,9 +698,12 @@ function initEditTable() {
 function saveEditTable(e) {
   var oldTableName = getSelectVal(document.getElementById("oldTableName"));
   var newTableName = document.getElementById("editTableName").value;
-  if(newTableName != "") {
+  if(newTableName != "" && uniqueTableName(newTableName)) {
     $('#editTableModal').modal('hide'); // hide modal on save
     editTableName(oldTableName, newTableName);
+  }
+  else {
+    alert("Table names must be unique and nonempty.");
   }
 }
 
@@ -715,10 +738,13 @@ function saveEditAttr(e) {
   var oldAttrName = getSelectVal(document.getElementById("oldAttrName"));
   var newAttrName = document.getElementById("editAttrName").value;
   var newAttrType = getSelectVal(document.getElementById("editAttrType"));
-  if(newAttrName != "") {
+  if(newAttrName != "" && uniqueAttrName(newAttrName, tableName)) {
     $('#editAttributeModal').modal('hide'); // hide modal on save
     editAttrName(oldAttrName, newAttrName, tableName);
     editAttrType(newAttrName, tableName, newAttrType);
+  }
+  else {
+    alert("Attribute names must be unique within a table and nonempty.");
   }
 }
 
@@ -775,9 +801,38 @@ function saveNewRelation(e) {
   var relName = document.getElementById("relNameA").value;
   var tableName1 = getSelectVal(document.getElementById("tableNameR1"));
   var tableName2 = getSelectVal(document.getElementById("tableNameR2"));
-  if(relName != "") {
+  if(relName != "" && uniqueRelName(relName)) {
     $('#newRelationModal').modal('hide'); // hide modal on save
     createRelation(relName, tableName1, tableName2);
+  }
+  else {
+    alert("Relation names must be unique and nonempty.");
+  }
+}
+
+/*
+* Initializes modal to edit existing relation
+*/
+function initEditRelation() {
+  genSelectInnerHTML("relNameC", relations, 2);
+  genSelectInnerHTML("editRelType", reltypes, 0);
+}
+
+/*
+* Updates relations list based on selection within modal
+*/
+function editRelation(e) {
+  var oldRelName = getSelectVal(document.getElementById("relNameC"));
+  var newRelName = document.getElementById("editRelName").value;
+  var newRelType = getSelectVal(document.getElementById("editRelType"));
+
+  if(newRelName != "" && uniqueRelName(newRelName)) {
+    $('#editRelationModal').modal('hide'); // hide modal on save
+      editRelationName(oldRelName, newRelName);
+      editRelationType(newRelName, newRelType);
+  }
+  else {
+    alert("Relation names must be unique and nonempty.");
   }
 }
 
@@ -785,17 +840,17 @@ function saveNewRelation(e) {
 * Initializes modal to delete existing relation
 */
 function initDelRelation() {
-  genSelectInnerHTML("relNameB", relations, 1);
+  genSelectInnerHTML("relNameB", relations, 2);
 }
 
 /*
 * Deletes relation specified by modal
 */
-function deleteRelation(e) {
-  var relName = document.getElementById("relNameB").value;
+function delRelation(e) {
+  var relName = getSelectVal(document.getElementById("relNameB"));
   if(relName != "") {
     $('#deleteRelationModal').modal('hide'); // hide modal on save
-    alert('Delete relation: ' + relName);
+    deleteRelation(relName);
   }
 }
 </script>
@@ -944,7 +999,29 @@ function deleteRelation(e) {
     </div>
     </div>
 
-    <!-- deleteRelationModal -->
+  <!-- editRelationModal -->
+  <div id="editRelationModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="editRelationModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3 id="editRelationModalLabel">Edit relation</h3>
+    </div>
+    <div class="modal-body">
+      <label for="relNameC"><strong>Current relation name</strong></label>
+      <select id="relNameC">
+      </select>
+      <label for="editRelName"><strong>New relation name</strong></label>
+      <input type="text" id="editRelName" value="">
+      <label for="editRelType"><strong>Relation type</strong></label>
+      <select id="editRelType">
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Close</button>
+      <button id="editRelBtn" class="btn btn-primary" onclick="editRelation()">Edit relation</button>
+    </div>
+  </div>
+  
+  <!-- deleteRelationModal -->
     <div id="deleteRelationModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="deleteRelationModalLabel" aria-hidden="true">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -952,11 +1029,12 @@ function deleteRelation(e) {
       </div>
       <div class="modal-body">
         <label for="relNameB"><strong>Relation name</strong></label>
-        <input type="text" id="relNameB" value="">
+        <select id="relNameB">
+	</select>
       </div>
       <div class="modal-footer">
         <button class="btn" data-dismiss="modal">Close</button>
-        <button id="delRelBtn" class="btn btn-danger" onclick="deleteRelation()">Delete relation</button>
+        <button id="delRelBtn" class="btn btn-danger" onclick="delRelation()">Delete relation</button>
       </div>
     </div>
 
@@ -984,8 +1062,9 @@ function deleteRelation(e) {
       <a data-toggle="modal" href="#editAttributeModal" class="btn btn-warning" onclick="initEditAttr()">Edit attribute</a>
       <a data-toggle="modal" href="#deleteAttributeModal" class="btn btn-danger" onclick="initDelAttr()">Delete attribute</a>
       <br /><br />
-      <a data-toggle="modal" href="#newRelationModal" class="btn btn-success" onclick="initNewRelation()">Connect tables</a>
-      <a data-toggle="modal" href="#deleteRelationModal" class="btn btn-warning" onclick="initDelRelation()">Disconnect tables</a>
+      <a data-toggle="modal" href="#newRelationModal" class="btn btn-primary" onclick="initNewRelation()">Connect tables</a>
+      <a data-toggle="modal" href="#editRelationModal" class="btn btn-warning" onclick="initEditRelation()">Edit connection</a>
+      <a data-toggle="modal" href="#deleteRelationModal" class="btn btn-danger" onclick="initDelRelation()">Disconnect</a>
     </div>
 
   </div>
