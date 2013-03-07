@@ -94,7 +94,7 @@ function createTable(tableName) {
         fontSize: 16,
         fontFamily: 'Calibri',
         fill: 'white',
-        width: 100,
+        width: 160,
         padding: 20,
         align: 'center',
     });
@@ -106,7 +106,7 @@ function createTable(tableName) {
         stroke: 'black',
         strokeWidth: 4,
         fill: 'mediumblue',
-        width: 100,
+        width: 160,
         height: complexText.getHeight(),
         shadowColor: 'black',
         shadowBlur: 10,
@@ -180,7 +180,7 @@ function createAttr(name, type, tableName) {
        fontSize: 16,
        fontFamily: 'Calibri',
        fill: 'white',
-       width: 100,
+       width: 160,
        padding: 20,
        align: 'center'
     });
@@ -192,7 +192,7 @@ function createAttr(name, type, tableName) {
       stroke: 'black',
       strokeWidth: 4,
       fill: 'orangered',
-      width: 100,
+      width: 160,
       height: complexText.getHeight(),
       shadowColor: 'black',
       shadowBlur: 10,
@@ -390,6 +390,7 @@ function editTableName(oldName, newName) {
 function hasPrimaryKey(tableName) {
     var table = findTable(tableName);
     for(var i = 0; i < table.attr.length; i++) {
+	var attrName = table.attr[i];
         var attr = findAttr(attrName, tableName);
         if(attr[3]) {
             return true;
@@ -485,7 +486,7 @@ function editAttrName(oldAttrName, newAttrName, tableName) {
 * Modifies the existing attribute datatype to the provided attribute datatype
 */
 function editAttrType(attrName, tableName, newAttrType) {
-    var attr = findAttr(tableName, attrName);
+    var attr = findAttr(attrName, tableName);
     attr[2] = newAttrType;
 }
 
@@ -493,13 +494,13 @@ function editAttrType(attrName, tableName, newAttrType) {
 * Modifies the primary key status of provided attribute if possible
 */
 function editAttrPrimary(attrName, tableName) {
-    var attr = findAttr(tableName, oldAttrName);
+    var attr = findAttr(attrName, tableName);
     if(attr[3]) {
         attr[3] = false;
     }
     else {
         if(hasPrimaryKey(tableName)) {
-            alert('Already has primary key');
+            alert('This table already has a primary key');
         } else {
             attr[3] = true;
         }
@@ -676,9 +677,12 @@ function saveNewAttr(e) {
   var tableName = getSelectVal(document.getElementById("tableNameA"));
   var attrName = document.getElementById("newAttrName").value;
   var attrType = getSelectVal(document.getElementById("newAttrType"));
+  var attrPrimary = document.getElementById("setPrimary").checked;
   if(attrName != "" && uniqueAttrName(attrName, tableName)) {
     $('#newAttributeModal').modal('hide'); // hide modal on save
     createAttr(attrName, attrType, tableName);
+    if(attrPrimary) 
+	editAttrPrimary(attrName, tableName);
   }
   else {
     alert("Attribute names must be unique within a table and nonempty.");
@@ -738,10 +742,13 @@ function saveEditAttr(e) {
   var oldAttrName = getSelectVal(document.getElementById("oldAttrName"));
   var newAttrName = document.getElementById("editAttrName").value;
   var newAttrType = getSelectVal(document.getElementById("editAttrType"));
+  var attrPrimary = document.getElementById("editPrimary").checked;
   if(newAttrName != "" && uniqueAttrName(newAttrName, tableName)) {
     $('#editAttributeModal').modal('hide'); // hide modal on save
     editAttrName(oldAttrName, newAttrName, tableName);
     editAttrType(newAttrName, tableName, newAttrType);
+    if(attrPrimary)
+	editAttrPrimary(newAttrName, tableName);
   }
   else {
     alert("Attribute names must be unique within a table and nonempty.");
@@ -885,7 +892,9 @@ function delRelation(e) {
       <input type="text" id="newAttrName" value="">
       <label for="newAttrType"><strong>Attribute type</strong></label>
       <select id="newAttrType">
-      </select>
+      </select><br />
+      <input type="checkbox" id="setPrimary" value="1">&nbsp;
+      <label for="setPrimary"><span style="border-bottom:1px dashed #000;" title="Primary Key: uniquely identifies records in this table, e.g. SSN identifies Person">Primary?</span><label>
     </div>
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal">Close</button>
@@ -929,7 +938,9 @@ function delRelation(e) {
       <input type="text" id="editAttrName" value="">
       <label for="editAttrType"><strong>Attribute type</strong></label>
       <select id="editAttrType">
-      </select>
+      </select><br />
+      <input type="checkbox" id="editPrimary" value="1">&nbsp;
+      <label for="editPrimary"><span style="border-bottom:1px dashed #000;" title="Primary Key: uniquely identifies records in this table, e.g. SSN identifies Person">Primary?</span><label>
     </div>
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal">Close</button>
