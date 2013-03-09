@@ -298,8 +298,8 @@ function createRelation(rname, tableName1, tableName2){
     });
 
     // Adding group of line and tables to realtions array (Line obj, FirstTable, SecondTable, Directionality)
-   // Directionality[-1:'NotDefined', 0:'one-to-one', 1:'one-to-many', 2:'many-to-many']
-    var group = [line, table1, table2, -1];
+    // 'undefined', 'one-to-one', 'one-to-many', 'many-to-many'
+    var group = [line, table1, table2, 'undefined'];
     relations.push(group);
 
     //Add line to stage
@@ -408,6 +408,7 @@ function deleteTable(tableName) {
         if((attrLines[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
             attrLines[i][0].remove();
             attrLines.splice(i, 1);
+	    i--;
         }
     }
     
@@ -416,6 +417,7 @@ function deleteTable(tableName) {
         if(attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
             attributes[i][0].remove();
             attributes.splice(i, 1);
+	    i--;
         }
     }
     
@@ -425,6 +427,7 @@ function deleteTable(tableName) {
             (relations[i][2].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
              relations[i][0].remove();
              relations.splice(i,1);
+	     i--;
          }
          
      }
@@ -487,23 +490,38 @@ function editAttrName(oldAttrName, newAttrName, tableName) {
 */
 function editAttrType(attrName, tableName, newAttrType) {
     var attr = findAttr(attrName, tableName);
-    attr[2] = newAttrType;
+    if(attr[2] != newAttrType) {
+        attr[2] = newAttrType;
+	return true;
+    }
+    else
+        return false;
 }
 
 /*
 * Modifies the primary key status of provided attribute if possible
 */
-function editAttrPrimary(attrName, tableName) {
+function editAttrPrimary(attrName, tableName, primary) {
     var attr = findAttr(attrName, tableName);
-    if(attr[3]) {
-        attr[3] = false;
+    // case 1: update, [true->false]
+    if(attr[3] && !primary) {
+	attr[3] = false;
+	return true;
     }
-    else {
+    // case 2: update if possible, [false->true]
+    else if(!attr[3] && primary) {
         if(hasPrimaryKey(tableName)) {
+	    attr[3] = false;
             alert('This table already has a primary key');
+	    return false;
         } else {
             attr[3] = true;
+	    return true;
         }
+    }
+    // case 3: no change, [true->true] or [false->false]
+    else {
+      return false;
     }
 }
 
@@ -573,7 +591,12 @@ function editRelationName(oldRelName, newRelName) {
 */
 function editRelationType(relName, newRelType) {
     var rel = findRelation(relName);
-    rel[3] = newRelType;
+    if(rel[3] == newRelType)
+      return false;
+    else { 
+      rel[3] = newRelType;
+      return true;
+    }
 }
 
 /*
@@ -646,6 +669,7 @@ function getSelectVal(select) {
 * Initializes modal to create new table
 */
 function initNewTable() {
+  document.getElementById("newTableName").value = "";
 }
 
 /*
@@ -668,6 +692,8 @@ function saveNewTable(e) {
 function initNewAttr() {
   genSelectInnerHTML("tableNameA", tables, 1);
   genSelectInnerHTML("newAttrType", datatypes, 0);
+  document.getElementById("newAttrName").value = "";
+  document.getElementById("setPrimary").checked = false;
 }
 
 /*
@@ -682,7 +708,7 @@ function saveNewAttr(e) {
     $('#newAttributeModal').modal('hide'); // hide modal on save
     createAttr(attrName, attrType, tableName);
     if(attrPrimary) 
-	editAttrPrimary(attrName, tableName);
+	editAttrPrimary(attrName, tableName, attrPrimary);
   }
   else {
     alert("Attribute names must be unique within a table and nonempty.");
@@ -694,6 +720,7 @@ function saveNewAttr(e) {
 */
 function initEditTable() {
   genSelectInnerHTML("oldTableName", tables, 1);
+  document.getElementById("editTableName").value = "";
 }
 
 /*
@@ -718,6 +745,8 @@ function initEditAttr() {
   genSelectInnerHTML("tableNameB", tables, 1);
   // set invalid default index to ensure event is triggered later
   document.getElementById("tableNameB").selectedIndex = -1;
+  document.getElementById("oldAttrName").selectedIndex = -1;
+  document.getElementById("editAttrName").value = "";
   genSelectInnerHTML("editAttrType", datatypes, 0);
 }
 
@@ -735,6 +764,29 @@ function genAttrList(id1, id2) {
 }
 
 /*
+* Updates attribute properties based on currently selected attribute
+*/
+function genAttrProps() {
+  var tableName = getSelectVal(document.getElementById("tableNameB"));
+  var attrName = getSelectVal(document.getElementById("oldAttrName"));
+  var attr = findAttr(attrName, tableName);
+  var attrTypeIdx = datatypes.indexOf(attr[2]);
+  var attrPrimary = ( (attr[3]) ? true : false );
+  document.getElementById("editAttrType").selectedIndex = attrTypeIdx;
+  document.getElementById("editPrimary").checked = attrPrimary;
+}
+
+/*
+* Updates relation properties based on currently selected relation
+*/
+function genRelProps() {
+  var relName = getSelectVal(document.getElementById("relNameC"));
+  var rel = findRelation(relName);
+  var relTypeIdx = reltypes.indexOf(rel[3]);
+  document.getElementById("editRelType").selectedIndex = relTypeIdx; 
+}
+
+/*
 * Saves changes to attribute if valid info from modal
 */
 function saveEditAttr(e) {
@@ -743,12 +795,15 @@ function saveEditAttr(e) {
   var newAttrName = document.getElementById("editAttrName").value;
   var newAttrType = getSelectVal(document.getElementById("editAttrType"));
   var attrPrimary = document.getElementById("editPrimary").checked;
-  if(newAttrName != "" && uniqueAttrName(newAttrName, tableName)) {
+  if(oldAttrName == newAttrName && editAttrType(oldAttrName, tableName, newAttrType)) {
+    $('#editAttributeModal').modal('hide'); // hide modal on save
+    editAttrPrimary(newAttrName, tableName, attrPrimary);
+  }
+  else if(newAttrName != "" && uniqueAttrName(newAttrName, tableName)) {
     $('#editAttributeModal').modal('hide'); // hide modal on save
     editAttrName(oldAttrName, newAttrName, tableName);
     editAttrType(newAttrName, tableName, newAttrType);
-    if(attrPrimary)
-	editAttrPrimary(newAttrName, tableName);
+    editAttrPrimary(newAttrName, tableName, attrPrimary);
   }
   else {
     alert("Attribute names must be unique within a table and nonempty.");
@@ -779,6 +834,7 @@ function delTable(e) {
 function initDelAttr() {
   genSelectInnerHTML("tableNameC", tables, 1);
   document.getElementById("tableNameC").selectedIndex = -1;
+  document.getElementById("delAttrName").selectedIndex = -1;
 }
 
 /*
@@ -797,8 +853,10 @@ function delAttr(e) {
 * Initializes modal to create new relation
 */
 function initNewRelation() {
+  document.getElementById("relNameA").value = "";
   genSelectInnerHTML("tableNameR1", tables, 1);
   genSelectInnerHTML("tableNameR2", tables, 1);
+  document.getElementById("tableNameR2").selectedIndex = -1;
 }
 
 /*
@@ -808,7 +866,10 @@ function saveNewRelation(e) {
   var relName = document.getElementById("relNameA").value;
   var tableName1 = getSelectVal(document.getElementById("tableNameR1"));
   var tableName2 = getSelectVal(document.getElementById("tableNameR2"));
-  if(relName != "" && uniqueRelName(relName)) {
+  if(tableName1 == tableName2) {
+    alert("Cannot connect a table to itself.");
+  }
+  else if(relName != "" && uniqueRelName(relName)) {
     $('#newRelationModal').modal('hide'); // hide modal on save
     createRelation(relName, tableName1, tableName2);
   }
@@ -822,6 +883,9 @@ function saveNewRelation(e) {
 */
 function initEditRelation() {
   genSelectInnerHTML("relNameC", relations, 2);
+  // need to trigger js event
+  document.getElementById("relNameC").selectedIndex = -1;
+  document.getElementById("editRelName").value = "";
   genSelectInnerHTML("editRelType", reltypes, 0);
 }
 
@@ -833,7 +897,10 @@ function editRelation(e) {
   var newRelName = document.getElementById("editRelName").value;
   var newRelType = getSelectVal(document.getElementById("editRelType"));
 
-  if(newRelName != "" && uniqueRelName(newRelName)) {
+  if(oldRelName == newRelName && editRelationType(newRelName, newRelType)) {
+    $('#editRelationModal').modal('hide'); // hide modal on save
+  }
+  else if(newRelName != "" && uniqueRelName(newRelName)) {
     $('#editRelationModal').modal('hide'); // hide modal on save
       editRelationName(oldRelName, newRelName);
       editRelationType(newRelName, newRelType);
@@ -932,7 +999,7 @@ function delRelation(e) {
       <select id="tableNameB" onchange="genAttrList('tableNameB', 'oldAttrName')">
       </select>
       <label for="oldAttrName"><strong>Current attribute name</strong></label>
-      <select id="oldAttrName">
+      <select id="oldAttrName" onchange="genAttrProps()">
       </select>
       <label for="editAttrName"><strong>New attribute name</strong></label>
       <input type="text" id="editAttrName" value="">
@@ -1018,7 +1085,7 @@ function delRelation(e) {
     </div>
     <div class="modal-body">
       <label for="relNameC"><strong>Current relation name</strong></label>
-      <select id="relNameC">
+      <select id="relNameC" onchange="genRelProps()">
       </select>
       <label for="editRelName"><strong>New relation name</strong></label>
       <input type="text" id="editRelName" value="">
@@ -1036,7 +1103,7 @@ function delRelation(e) {
     <div id="deleteRelationModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="deleteRelationModalLabel" aria-hidden="true">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3 id="deleteRelationModalLabel">Delete attribute</h3>
+        <h3 id="deleteRelationModalLabel">Delete relation</h3>
       </div>
       <div class="modal-body">
         <label for="relNameB"><strong>Relation name</strong></label>
