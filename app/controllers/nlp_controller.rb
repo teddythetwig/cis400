@@ -1,5 +1,11 @@
 class NlpController < ApplicationController
   def post
+    @sqlQuery = Nlp::SqlQuery.new
+    @sqlQuery.addTable("employees")
+    @sqlQuery.addField("employees", "*")
+    @sqlQuery.addCondition("employees", "hire_date", "<", "August 2011")
+    @sqlQuery.addCondition("employees", "amount", ">", "1000")
+    
     query = params[:query]
     db_blob = JSON.parse(params[:db_json])
 
@@ -22,11 +28,28 @@ class NlpController < ApplicationController
 #    @results << "json parse test: " + JSON.parse("{\"tables\":[{\"name\":\"employees\",\"fields\":[{\"name\":\"first_name\",\"type\":\"string\"},{\"name\":\"id\",\"type\":\"int\"}]}]}").inspect
     @results << "blob" + db_blob.inspect
     
-    table_or_field_names = []
+    #####
+    #
+    # Find Table
+    #
+    #####
+    @results << "Table names:"
+    table_names = []
     for i in 0 ... words.size
-      #if 
+      db_blob["tables"].each do |table|
+        if table["name"].stem == words[i].stem
+          @results << "Table name: " + table["name"].stem + " at index " + i.to_s + " word stem: " + words[i].stem
+        end
+      end
     end
 
+
+
+    #####
+    #
+    # Find Dates
+    #
+    #####
     dates = []
     for i in 0 ... words.size
       for j in i ... words.size
