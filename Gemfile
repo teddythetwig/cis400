@@ -38,6 +38,7 @@ gem 'twitter-bootstrap-rails'
 
 gem 'engtagger'
 gem 'fast-stemmer'
+gem 'treat'
 gem 'chronic'
 
 # Dependencies for Kinetic JS
