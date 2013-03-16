@@ -78,9 +78,7 @@ var currGroup = new Kinetic.Group();
 * Creates table
 * Note: Check table name is unique before calling.
 */
-function createTable(tableName) {
-    var rectX = stage.getWidth() / 2 - 50;
-    var rectY = stage.getHeight() / 2 - 25;
+function createTable(tableName, rectX, rectY) {
 
     var group = new Kinetic.Group({
         draggable: true
@@ -135,14 +133,25 @@ function createTable(tableName) {
             currGroup.get('.shape')[0].setStroke('black');
         }
         currGroup = group;
+        document.getElementById('nameTitle').innerHTML = 'Table Name: ';
         document.getElementById('name').innerHTML = group.get('.text')[0].getText();
         group.get('.shape')[0].setStroke('lightsteelblue');
 
-        //TODO: Add multiple attributes functionality
-        if(group.attr.length > 0){
-            //document.getElementById('attribute').innerHTML = group.attr[0];
-            document.getElementById('attribute').innerHTML = group.attr.length;
+        var attrs = '';
+        if(group.attr.length == 0) {
+            attrs = 'None';
+        } else {
+            for (var i = 0; i < group.attr.length; i++) {
+                attrs = attrs + group.attr[i];
+                if((i + 1) < group.attr.length) {
+                    attrs = attrs + ', ';
+                } else {
+                    attrs = attrs + ' ';
+                }
+            }
         }
+        document.getElementById('attributeTitle').innerHTML = 'Attributes: ';
+        document.getElementById('attribute').innerHTML = attrs;
     }); 
     
     //Add group to table array  
@@ -156,9 +165,7 @@ function createTable(tableName) {
 /* 
 * Creates attribute
 */
-function createAttr(name, type, tableName) {
-    var rectX = stage.getWidth() / 2 - 75;
-    var rectY = stage.getHeight() / 2 - 50;
+function createAttr(name, type, tableName, rectX, rectY) {
 
     var table = findTable(tableName);
     if(table == null) {
@@ -223,9 +230,13 @@ function createAttr(name, type, tableName) {
             currGroup.get('.shape')[0].setStroke('black');
         }
         currGroup = group;
+
+        document.getElementById('nameTitle').innerHTML = 'Attribute Name: ';
+        document.getElementById('name').innerHTML = group.get('.Atext')[0].getText();
         group.get('.shape')[0].setStroke('lightsteelblue');
 
-        //alert('Datatype: ' + group.type + ', Parent:' + group.parent.get('.text')[0].getText());
+        document.getElementById('attributeTitle').innerHTML = 'Attribute Type: ';
+        document.getElementById('attribute').innerHTML = attGroup[2];
     });
     
     group.on('dragstart dragmove', function(){
@@ -679,7 +690,7 @@ function saveNewTable(e) {
   var tableName = document.getElementById("newTableName").value;
   if(tableName != "" && uniqueTableName(tableName)) {
     $('#newTableModal').modal('hide'); // hide modal on save
-    createTable(tableName);
+    createTable(tableName, 525, 225);
   }
   else {
     alert("Table names must be unique and nonempty.");
@@ -706,7 +717,7 @@ function saveNewAttr(e) {
   var attrPrimary = document.getElementById("setPrimary").checked;
   if(attrName != "" && uniqueAttrName(attrName, tableName)) {
     $('#newAttributeModal').modal('hide'); // hide modal on save
-    createAttr(attrName, attrType, tableName);
+    createAttr(attrName, attrType, tableName, 525, 225);
     if(attrPrimary) 
 	editAttrPrimary(attrName, tableName, attrPrimary);
   }
@@ -1120,11 +1131,11 @@ function delRelation(e) {
     <div class="span8">
       <table class= "table table-bordered">
         <tr>
-          <td>Table Name: </td>
+          <td><div id="nameTitle">Table Name: </div></td>
           <td><div id="name">None</div></td>
         </tr>
         <tr>
-          <td>Attributes: </td>
+          <td><div id="attributeTitle">Attributes: </div></td>
           <td><div id="attribute">None</div></td>
         </tr>
       </table>
