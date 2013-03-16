@@ -1127,7 +1127,21 @@ function delRelation(e) {
       </div>
     </div>
 
-    <!-- table info display -->
+  <!-- finalizeModal -->
+    <div id="finalizeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="finalizeModalLabel" aria-hidden="true">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 id="finalizeModalLabel">Final Steps</h3>
+      </div>
+      <div class="modal-body">
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Close</button>
+        <button id="finalizeBtn" class="btn btn-primary" onclick="delRelation()">Add Constraint</button>
+      </div>
+    </div>
+   
+ <!-- table info display -->
     <div class="span8">
       <table class= "table table-bordered">
         <tr>
@@ -1154,6 +1168,8 @@ function delRelation(e) {
       <a data-toggle="modal" href="#newRelationModal" class="btn btn-primary" onclick="initNewRelation()">Connect tables</a>
       <a data-toggle="modal" href="#editRelationModal" class="btn btn-warning" onclick="initEditRelation()">Edit connection</a>
       <a data-toggle="modal" href="#deleteRelationModal" class="btn btn-danger" onclick="initDelRelation()">Disconnect</a>
+      <br /><br />
+      <a data-toggle="modal" href="#finalizeModal" class="btn btn-success" onclick="initFinalize()">Finalize</a>
     </div>
 
   </div>
