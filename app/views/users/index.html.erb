@@ -53,7 +53,7 @@ tables = new Array();
 datatypes = new Array("text", "number", "date");
 
 // List of allowable relation types
-reltypes = new Array("undefined", "one-to-one", "one-to-many", "many-to-many");
+reltypes = new Array("undefined", "one-to-one", "one-to-many", "many-to-one", "many-to-many");
 
 // List of attributes
 attributes = new Array();
@@ -73,7 +73,8 @@ var layer = new Kinetic.Layer();
 var currGroup = new Kinetic.Group();
 
 // Finalization variable
-var finalizeStep = 0;
+var finalizeIdx = 0;
+var finalizeArr = 1;
 
 /********* Creation Methods *********/
 
@@ -757,7 +758,7 @@ function convertToSQL() {
 * Generates HTML to dynamically populate selectors 
 * from dynamic data structures
 */
-function genSelectInnerHTML(id, arr, type) {
+function genSelectInnerHTML(id, arr, type, write=1) {
   var ret = "";
   if(type == 0) { // simple arrays
     for(i=0; i<arr.length; i++) {
@@ -774,7 +775,10 @@ function genSelectInnerHTML(id, arr, type) {
       ret += "\t<option value=\"" + arr[i][0].getName() + "\">" + arr[i][0].getName() + "</option>\n";
     }
   }
-  document.getElementById(id).innerHTML = ret;
+  if(write)
+    document.getElementById(id).innerHTML = ret;
+  else
+    return ret;
 }
 
 /*
@@ -878,6 +882,7 @@ function genAttrList(id1, id2) {
     attrs.push(table.attr[i]);
   }
   genSelectInnerHTML(id2, attrs, 0);
+  document.getElementById(id2).selectedIndex = -1; // need to trigger js event
 }
 
 /*
@@ -912,9 +917,10 @@ function saveEditAttr(e) {
   var newAttrName = document.getElementById("editAttrName").value;
   var newAttrType = getSelectVal(document.getElementById("editAttrType"));
   var attrPrimary = document.getElementById("editPrimary").checked;
-  if(oldAttrName == newAttrName && editAttrType(oldAttrName, tableName, newAttrType)) {
-    $('#editAttributeModal').modal('hide'); // hide modal on save
-    editAttrPrimary(newAttrName, tableName, attrPrimary);
+  if(oldAttrName == newAttrName) {
+    if(editAttrType(oldAttrName, tableName, newAttrType) || editAttrPrimary(newAttrName, tableName, attrPrimary)) {
+      $('#editAttributeModal').modal('hide'); // hide modal on save
+    } 
   }
   else if(newAttrName != "" && uniqueAttrName(newAttrName, tableName)) {
     $('#editAttributeModal').modal('hide'); // hide modal on save
@@ -1003,7 +1009,6 @@ function initEditRelation() {
   // need to trigger js event
   document.getElementById("relNameC").selectedIndex = -1;
   document.getElementById("editRelName").value = "";
-  genSelectInnerHTML("editRelType", reltypes, 0);
 }
 
 /*
@@ -1012,15 +1017,13 @@ function initEditRelation() {
 function editRelation(e) {
   var oldRelName = getSelectVal(document.getElementById("relNameC"));
   var newRelName = document.getElementById("editRelName").value;
-  var newRelType = getSelectVal(document.getElementById("editRelType"));
 
-  if(oldRelName == newRelName && editRelationType(newRelName, newRelType)) {
+  if(oldRelName == newRelName) {
     $('#editRelationModal').modal('hide'); // hide modal on save
   }
   else if(newRelName != "" && uniqueRelName(newRelName)) {
     $('#editRelationModal').modal('hide'); // hide modal on save
       editRelationName(oldRelName, newRelName);
-      editRelationType(newRelName, newRelType);
   }
   else {
     alert("Relation names must be unique and nonempty.");
@@ -1045,12 +1048,11 @@ function delRelation(e) {
   }
 }
 
-
 /*
 * Initializes modal to finalize database schema
 */
 function initFinalize() {
-  finalizeNext("finalizeModalDiv", 0);
+  finalizeNext("finalizeModalDiv");
 }
 
 /*
@@ -1060,17 +1062,60 @@ function initFinalize() {
 *   closes the modal if all steps are complete
 */
 function finalizeNext(id) {
-  if(finalizeStep < tables.length) {
+  // determine if schema is fully constrained
+  if(!isFinalized()) { 
+
     var div = document.getElementById(id);
-    var html = tables[finalizeStep].get('.text')[0].getText().toLowerCase();
-    div.innerHTML = "<p>Finalize first table: " + html + "</p>";
-    finalizeStep++;
+    var html = "";
+
+    /*
+    * Case 1: Check tables array for constraints
+    */
+    if(finalizeArr == 1) {
+
+      // display next table constraint (primary key)
+      var tname = tables[finalizeIdx].get('.text')[0].getText();
+      html += "<h4>Table: " + tname.toLowerCase() + "</h4>";
+      html += "<p>Which of the following attributes is the identifier for your table?</p>";
+
+      // generate table attrributes selector html
+      attrs = new Array();
+      table = findTable(tname);
+      var i;
+      for(i=0; i<table.attr.length; i++) {
+        attrs.push(table.attr[i]);
+      }
+      html += "<select id='finalizeSelector'>" + genSelectInnerHTML("finalizeSelector", attrs, 0, 0) + "</select>";
+      
+      div.innerHTML = html;
+      finalizeIdx++;
+      if(finalizeIdx == tables.length) { finalizeArr++; finalizeIdx = 0; }
+    }
+    /*
+    * Case 2: Check relations array for constraints
+    */
+    else if(finalizeArr == 2) {
+
+      // display next relation constraint (relation types for connected tables)
+      html += "<h4>Relation: " + relations[finalizeIdx].get('.text')[0].getText().toLowerCase() + "</h4>";
+      html += "<p>Does [tableName1] have many [tableName2]?</p>";
+      html += "<p>Does [tableName2] have many [tableName1]?</p>";
+      
+      div.innerHTML = html;
+      finalizeIdx++;
+      if(finalizeIdx == relations.length) { finalizeArr++; finalizeIdx = 0; }
+    }
+
   }
-  else { // we are done
-    finalizeStep = 0;
+  else { // schema is fully constrained at this point
+    finalizeArr = 0; 
     $('#finalizeModal').modal('hide'); // hide modal on completion of schema finalization
     // after this point we can convert our JS objects into SQL to send to RDS
   }
+}
+
+function isFinalized() {
+  return finalizeArr > 2;
 }
 </script>
 
@@ -1234,9 +1279,6 @@ function finalizeNext(id) {
       </select>
       <label for="editRelName"><strong>New relation name</strong></label>
       <input type="text" id="editRelName" value="">
-      <label for="editRelType"><strong>Relation type</strong></label>
-      <select id="editRelType">
-      </select>
     </div>
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal">Close</button>
