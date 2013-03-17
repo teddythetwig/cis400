@@ -64,13 +64,16 @@ attrLines = new Array();
 // List of Relations
 relations = new Array();
 
-//Graphics variables
+// Graphics variables
 var stage = new Kinetic.Stage({
     container: 'container',
     width: 1150,
     height: 500 });
 var layer = new Kinetic.Layer();
 var currGroup = new Kinetic.Group();
+
+// Finalization variable
+var finalizeStep = 0;
 
 /********* Creation Methods *********/
 
@@ -996,8 +999,7 @@ function delRelation(e) {
 * Initializes modal to finalize database schema
 */
 function initFinalize() {
-  var div = document.getElementById("finalizeModalDiv");
-  finalizeNext(div);
+  finalizeNext("finalizeModalDiv", 0);
 }
 
 /*
@@ -1006,13 +1008,18 @@ function initFinalize() {
 * Either continues to next finalization step, or
 *   closes the modal if all steps are complete
 */
-function finalizeNext(div) {
-  // TODO: Complete.
-  var html, i;
-  for(i=0; i<tables.length; i++) {
-    html = tables[i].get('.text')[0].getText().toLowerCase();
+function finalizeNext(id) {
+  if(finalizeStep < tables.length) {
+    var div = document.getElementById(id);
+    var html = tables[finalizeStep].get('.text')[0].getText().toLowerCase();
+    div.innerHTML = "<p>Finalize first table: " + html + "</p>";
+    finalizeStep++;
   }
-  div.innerHTML = "<p>Finalize first table: " + html + "</p>";
+  else { // we are done
+    finalizeStep = 0;
+    $('#finalizeModal').modal('hide'); // hide modal on completion of schema finalization
+    // after this point we can convert our JS objects into SQL to send to RDS
+  }
 }
 </script>
 
@@ -1213,7 +1220,7 @@ function finalizeNext(div) {
       </div>
       <div class="modal-footer">
         <button class="btn" data-dismiss="modal">Close</button>
-        <button id="finalizeBtn" class="btn btn-primary" onclick="finalizeSchema()">Add Constraint</button>
+        <button id="finalizeBtn" class="btn btn-primary" onclick="finalizeNext('finalizeModalDiv')">Add Constraint</button>
       </div>
     </div>
    
