@@ -625,8 +625,8 @@ function deleteRelation(relName) {
 }
 
 /*
-* Checks  for unique relation name
-*/
+ * Checks  for unique relation name
+ */
 function uniqueRelName(relName) {
     for(var i = 0; i < relations.length; i++) {
         if(relations[i][0].getName().toLowerCase() == relName.toLowerCase()) {
@@ -637,14 +637,66 @@ function uniqueRelName(relName) {
 }
 
 /*
-* Converts xml schema into current schema
-*/
+ * Converts xml schema into current schema
+ */
 function convert(schema) {
    return false;   
 }
 
-/********* HTML Helper Functions *********/
+/*
+ * Converts current graph to SQL
+ */
+function convertToSQL() {
+    var code = '';
+    var currName = '';
+    for (var i = 0; i < tables.length; i++) {
 
+        currName = tables[i].get('.text')[0].getText();
+        code = code + 'CREATE TABLE ' + currName + '\n(\n';
+        for (var j = 0; j < tables[i].attr.length; j++) {
+
+            var currAttr = new Array();
+            for(var k = 0; k < attributes.length; k++) {
+                if((attributes[k][0].get('.Atext')[0].getText().toLowerCase() == tables[i].attr[j].toLowerCase()) &&
+                    (attributes[k][1].get('.text')[0].getText().toLowerCase() == currName.toLowerCase())) {
+                    currAttr = attributes[k];
+                }
+            }
+
+            //TODO add code for primary key
+            if(currAttr[3]) {
+                code = code + '\t' + currAttr[0].get('.Atext')[0].getText() + ' ';
+            } else {
+                code = code + '\t' + currAttr[0].get('.Atext')[0].getText() + ' ';
+            }
+
+            switch(currAttr[2])
+            {
+            case 'text':
+                code = code + 'VARCHAR(256)';
+                break;
+            case 'number':
+                code = code + 'INTEGER';
+                break;
+            case 'date':
+                code = code + 'DATETIME';
+            }
+
+            if((j + 1) < tables[i].attr.length) {
+                code = code + ',\n';
+            }
+            else {
+                code = code + '\n';
+            }
+        }
+        code = code + ')\n';
+    }
+    alert(code);
+}
+
+
+
+/********* HTML Helper Functions *********/
 /*
 * Generates HTML to dynamically populate selectors 
 * from dynamic data structures
