@@ -168,7 +168,7 @@ function createTable(tableName, rectX, rectY) {
 /* 
 * Creates attribute
 */
-function createAttr(name, type, tableName, rectX, rectY) {
+function createAttr(name, type, tableName, primary, rectX, rectY) {
 
     var table = findTable(tableName);
     if(table == null) {
@@ -177,6 +177,11 @@ function createAttr(name, type, tableName, rectX, rectY) {
     }
     if(!uniqueAttrName(name, tableName)) {
         alert('Attributes within a table must be unique.');
+        return;
+    }
+
+    if (hasPrimaryKey(tableName)) {
+        alert('Table already contains Primary Key');
         return;
     }
 
@@ -216,7 +221,7 @@ function createAttr(name, type, tableName, rectX, rectY) {
     group.add(complexText);
 
     //Adding attributes to attribute (AttrGroup, ParentTable, Datatype, PrimaryKey)
-    var attGroup = [group, table, type, false];
+    var attGroup = [group, table, type, primary];
 
     //Adding attribute to table
     table.attr.push(name);
@@ -795,9 +800,7 @@ function saveNewAttr(e) {
   var attrPrimary = document.getElementById("setPrimary").checked;
   if(attrName != "" && uniqueAttrName(attrName, tableName)) {
     $('#newAttributeModal').modal('hide'); // hide modal on save
-    createAttr(attrName, attrType, tableName, 525, 225);
-    if(attrPrimary) 
-	editAttrPrimary(attrName, tableName, attrPrimary);
+    createAttr(attrName, attrType, tableName, attrPrimary, 525, 225);
   }
   else {
     alert("Attribute names must be unique within a table and nonempty.");
