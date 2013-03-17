@@ -280,8 +280,8 @@ function createAttr(name, type, tableName, rectX, rectY) {
 }
 
 /*
-* Creates Relations
-*/
+ * Creates Relations
+ */
 function createRelation(rname, tableName1, tableName2){
     // Finds the table
     table1 = findTable(tableName1);
@@ -647,13 +647,25 @@ function convert(schema) {
 }
 
 /*
+ * Test
+ */
+function test() {
+    alert('test');
+}
+
+/*
  * Converts current graph to SQL
  */
 function convertToSQL() {
     var code = '';
     var currName = '';
+    var tableA, tableB;
+
+
+    //Table Creation
     for (var i = 0; i < tables.length; i++) {
 
+        var primary = '';
         currName = tables[i].get('.text')[0].getText();
         code = code + 'CREATE TABLE ' + currName + '\n(\n';
         for (var j = 0; j < tables[i].attr.length; j++) {
@@ -666,12 +678,7 @@ function convertToSQL() {
                 }
             }
 
-            //TODO add code for primary key
-            if(currAttr[3]) {
-                code = code + '\t' + currAttr[0].get('.Atext')[0].getText() + ' ';
-            } else {
-                code = code + '\t' + currAttr[0].get('.Atext')[0].getText() + ' ';
-            }
+            code = code + '\t' + currAttr[0].get('.Atext')[0].getText() + ' ';
 
             switch(currAttr[2])
             {
@@ -685,14 +692,30 @@ function convertToSQL() {
                 code = code + 'DATETIME';
             }
 
-            if((j + 1) < tables[i].attr.length) {
-                code = code + ',\n';
+            if(currAttr[3]) {
+                code = code + ' NOT NULL';
+                primary = currAttr[0].get('.Atext')[0].getText();
             }
-            else {
-                code = code + '\n';
-            }
+
+            code = code + ',\n';
         }
-        code = code + ')\n';
+        code = code + '\tPRIMARY KEY (' + primary + ')\n'; //Assumes each table has a PRIMARY KEY
+        code = code + ')\n\n';
+    }
+
+    //Relation Table Creation
+    for(var i = 0; i < relations.length; i++) {
+        /*
+        // Adding group of line and tables to realtions array (Line obj, FirstTable, SecondTable, Directionality)
+        // 'undefined', 'one-to-one', 'one-to-many', 'many-to-many'
+        var group = [line, table1, table2, 'undefined'];*/
+        tableA = relations[i][1];
+        tableB = relations[i][2];
+        code = code + 'CREATE TABLE ' + relations[i][0].getName() + '\n(\n';
+
+        //Figure out one-to-one, one-to-many, many-to-many
+
+        code = code + ')\n\n';
     }
     alert(code);
 }
@@ -1253,6 +1276,7 @@ function finalizeNext(id) {
       <a data-toggle="modal" href="#deleteRelationModal" class="btn btn-danger" onclick="initDelRelation()">Disconnect</a>
       <br /><br />
       <a data-toggle="modal" href="#finalizeModal" class="btn btn-success" onclick="initFinalize()">Finalize</a>
+      <a class="btn" onclick="convertToSQL()">Convert</a>
     </div>
 
   </div>
