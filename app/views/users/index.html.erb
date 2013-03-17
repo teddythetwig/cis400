@@ -180,7 +180,7 @@ function createAttr(name, type, tableName, primary, rectX, rectY) {
         return;
     }
 
-    if (hasPrimaryKey(tableName)) {
+    if (hasPrimaryKey(tableName) && primary) {
         alert('Table already contains Primary Key');
         return;
     }
@@ -240,7 +240,11 @@ function createAttr(name, type, tableName, primary, rectX, rectY) {
         currGroup = group;
 
         document.getElementById('nameTitle').innerHTML = 'Attribute Name: ';
-        document.getElementById('name').innerHTML = group.get('.Atext')[0].getText();
+        var name = group.get('.Atext')[0].getText();
+        if(attGroup[3]) {
+            name = name + ' (Primary Key)'
+        }
+        document.getElementById('name').innerHTML = name;
         group.get('.shape')[0].setStroke('lightsteelblue');
 
         document.getElementById('attributeTitle').innerHTML = 'Attribute Type: ';
@@ -307,6 +311,27 @@ function createRelation(rname, tableName1, tableName2){
         lineCap: 'round',
         lineJoin: 'round'
       });
+
+    // Event handling
+    line.on('mouseover', function() {
+        document.body.style.cursor = 'pointer';
+    });
+    line.on('mouseout', function() {
+        document.body.style.cursor = 'default';
+    });  
+    line.on('mousedown', function() {
+        if(currGroup.getChildren().length > 0) {
+            currGroup.get('.shape')[0].setStroke('black');
+        }
+        //currGroup = line;
+
+        document.getElementById('nameTitle').innerHTML = 'Relation Name: ';
+        document.getElementById('name').innerHTML = line.getName();
+        //group.get('.shape')[0].setStroke('lightsteelblue');
+
+        document.getElementById('attributeTitle').innerHTML = 'Tables: ';
+        document.getElementById('attribute').innerHTML = table1.get('.text')[0].getText() + ', ' + table2.get('.text')[0].getText();
+    });
 
     table1.on('dragstart dragmove', function(){
         update();
