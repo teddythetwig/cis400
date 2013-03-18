@@ -758,7 +758,8 @@ function convertToSQL() {
 * Generates HTML to dynamically populate selectors 
 * from dynamic data structures
 */
-function genSelectInnerHTML(id, arr, type, write=1) {
+function genSelectInnerHTML(id, arr, type, write) {
+  if(typeof(write) === 'undefined') write = 1; // default value
   var ret = "";
   if(type == 0) { // simple arrays
     for(i=0; i<arr.length; i++) {
