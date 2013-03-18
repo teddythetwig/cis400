@@ -1,5 +1,5 @@
 class ServersController < ApplicationController
-  before_filter :authenticate_user!, :get_user
+  before_filter :authenticate_user!, :match_user_server
   before_filter :make_connection, :only=>:query
   
 
@@ -46,21 +46,27 @@ class ServersController < ApplicationController
   end
   
   def query
-    
-    @results = @server.sql.query(params[:query])
+    query = params[:query].gsub(/(\n|\t|\r)/, ' ').gsub(/>\s*</, '><').squeeze(' ').split("\;")
+    query.reject!(&:blank?)
+    logger.info("Parsed query: #{query.each{|t| puts t}}")
+    @results = []
+    query.each{|q| @results << @server.sql.query(q)}
+    #@results = @server.sql.query(params[:query])
     #logger.debug "Results: #{@results.size} from connection #{@server.sql}"
     logger.info @results.to_json
     respond_to do |format|
       format.json{render :json => @results.to_json}
+      format.html
     end
   end
   
-  def get_user
+  def match_user_server
     @user = User.find(params[:user_id])
+    @server = Server.find(params[:id]) if params[:id]
     #Users can only access their own resources
-    #if !(current_user.id == @user.id)
-      #redirect_to :root
-    #end
+    if !(current_user.id == @user.id and (@server.nil? or current_user.servers.include? @server))
+      redirect_to :root
+    end
   end
   
   def make_connection

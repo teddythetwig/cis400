@@ -8,4 +8,8 @@ class User < ActiveRecord::Base
   
   # Setup accessible (or protected) attributes for your model
   attr_accessible :email, :password, :password_confirmation, :remember_me
+  
+  after_create do |s|
+    s.servers << Server.new(:name => "user#{self.id}")
+  end
 end
