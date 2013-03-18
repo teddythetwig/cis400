@@ -695,7 +695,7 @@ function convert(schema) {
  * Converts current graph to SQL
  */
 function convertToSQL() {
-    var code = '';
+    var code = 'CREATE DATABASE MYTEST;\nUSE MYTEST;\n';
     var currName = '';
     var tableA, tableB;
 
@@ -743,13 +743,9 @@ function convertToSQL() {
 
     //Relation Table Creation
     for(var i = 0; i < relations.length; i++) {
-        /*
-        // Adding group of line and tables to realtions array (Line obj, FirstTable, SecondTable, Directionality)
-        // 'undefined', 'one-to-one', 'one-to-many', 'many-to-many'
-        var group = [line, table1, table2, 'undefined'];*/
         tableA = relations[i][1];
         tableB = relations[i][2];
-        switch(relations[i][3])
+        /*switch(relations[i][3])
         {
         case 'one-to-one':
             code = code; //TODO: IMPLEMENT
@@ -757,9 +753,8 @@ function convertToSQL() {
         case 'one-to-many':
             code = code; //TODO: IMPLEMENT
             break;
-        case 'many-to-amy':
+        case 'many-to-amy':*/
             var primaryA = getPrimaryKey(tableA.get('.text')[0].getText());
-            //[0].get('.Atext')[0].getText() // get attribute name
             var primaryB = getPrimaryKey(tableB.get('.text')[0].getText());
             code = code + 'CREATE TABLE ' + relations[i][0].getName() + '\n(\n\t' + primaryA[0].get('.Atext')[0].getText();
             switch(primaryA[2])
@@ -774,7 +769,7 @@ function convertToSQL() {
                 code = code + 'DATETIME';
             }
 
-            code = code + 'NOT NULL REFERENCES ' + tableA.get('.text')[0].getText() + ' (' + primaryA[0].get('.Atext')[0].getText() + '),\n\t'
+            code = code + ' NOT NULL REFERENCES ' + tableA.get('.text')[0].getText() + ' (' + primaryA[0].get('.Atext')[0].getText() + '),\n\t'
                 + primaryB[0].get('.Atext')[0].getText();
 
             switch(primaryB[2])
@@ -789,11 +784,12 @@ function convertToSQL() {
                 code = code + 'DATETIME';
             }
 
-            code = code + 'NOT NULL REFERENCES ' + tableB.get('.text')[0].getText() + ' (' + primaryB[0].get('.Atext')[0].getText() + '),\n\tPRIMARY KEY (' +
+            code = code + ' NOT NULL REFERENCES ' + tableB.get('.text')[0].getText() + ' (' + primaryB[0].get('.Atext')[0].getText() + '),\n\tPRIMARY KEY (' +
                 primaryA[0].get('.Atext')[0].getText() + ', ' + primaryB[0].get('.Atext')[0].getText() + ')\n)\n;\n\n';
-        }
+        //}
     }
     alert(code);
+    submitQuery('/users/1/servers/1/query', code, (function(response){alert(response[0])}));
 }
 
 
