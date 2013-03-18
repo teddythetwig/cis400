@@ -47,7 +47,7 @@ class Server < ActiveRecord::Base
   
   # Executes query on remote server
   def make_connection
-    self.sql ||= Mysql2::Client.new(:host => "#{self.url}", :username => "username#{self.user_id}", :password => "cis400", :port => 3306, :database => "helloworld")
+    self.sql ||= Mysql2::Client.new(:host => "#{self.url}", :username => "username#{self.user_id}", :password => "cis400", :port => 3306)
   end
 
 end

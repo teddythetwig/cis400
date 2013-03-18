@@ -1,8 +1,11 @@
 class ServersController < ApplicationController
   before_filter :authenticate_user!, :get_user
   before_filter :make_connection, :only=>:query
+  
+
+  
   def index
-    @servers = Server.all
+    @servers = Server.where(:user_id => @user)
   end
 
   def destroy
@@ -37,24 +40,34 @@ class ServersController < ApplicationController
     @server = Server.find(params[:id])
     @status = @server.check_status
     if @status != "available"
-      flash[:notice] = "Server Statust is: #{@status} Server is not available yet, please try again later"
+      flash[:notice] = "Server Status is: #{@status} Server is not available yet, please try again later"
       redirect_to user_servers_path(@user)
     end
   end
   
   def query
-    @results = @server.sql.query(@server.sql.escape(params[:query]))
-    logger.debug "Results: #{@results.size} from connection #{@server.sql}"
-    render :show
+    
+    @results = @server.sql.query(params[:query])
+    #logger.debug "Results: #{@results.size} from connection #{@server.sql}"
+    logger.info @results.to_json
+    respond_to do |format|
+      format.json{render :json => @results.to_json}
+    end
   end
   
   def get_user
     @user = User.find(params[:user_id])
+    #Users can only access their own resources
+    #if !(current_user.id == @user.id)
+      #redirect_to :root
+    #end
   end
   
   def make_connection
     @server = Server.find(params[:server_id])
     #Virtural attribute of user that is created on sign-in and destroyed on sign-out
     @server.make_connection
+    #@server.sql ||= Mysql2::Client.new(:host => "#{@server.url}", :username => "username#{@server.user_id}", :password => "cis400", :port => 3306)
   end
+  
 end
