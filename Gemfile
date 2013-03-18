@@ -41,6 +41,7 @@ gem 'fast-stemmer'
 gem 'treat'
 gem 'chronic'
 
+
 # Dependencies for Kinetic JS
 gem 'thor'
 gem 'json_pure'

@@ -1049,6 +1049,39 @@ function delRelation(e) {
   }
 }
 
+
+/*
+* Sends post request to query endpoint
+*/
+function submitQuery(path, query, callback){
+  $.ajax({url: path,
+    type: 'POST',
+    beforeSend: function(xhr){xhr.setRequestHeader('X-CSRF-TOKEN',$('meta[name="csrf-token"]').attr('content'))},
+    data: 'query=' + query,
+    success: function(response){callback(response)}
+  });
+  //$.post(path,q,callback);
+ /*
+ 
+  method = "post";
+  
+  var form = document.createElement("form");
+  form.setAttribute("method", method);
+  form.setAttribute("path", path);
+  
+  for(var key in params) { 
+    var hiddenField = document.createElement("input");
+    hiddenField.setAttribute("type", "hidden");
+    hiddenField.setAttribute("name", key);
+    hiddenField.setAttribute("value", params[key]);
+    form.appendChild(hiddenField);
+  }
+  document.body.appendChild(form);
+  form.submit();
+  */
+  
+}
+
 /*
 * Initializes modal to finalize database schema
 */
@@ -1118,6 +1151,7 @@ function finalizeNext(id) {
 function isFinalized() {
   return finalizeArr > 2;
 }
+
 </script>
 
   <!-- newTableModal -->
