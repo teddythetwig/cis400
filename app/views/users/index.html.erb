@@ -73,7 +73,7 @@ var currGroup = new Kinetic.Group();
 
 // Finalization variable
 var finalizeIdx = 0;
-var finalizeArr = 1;
+var finalizeArr = 0;
 
 /********* Creation Methods *********/
 
@@ -441,6 +441,22 @@ function hasPrimaryKey(tableName) {
         }
     }
     return false;
+}
+
+/*
+* Check if table has obvious primary key
+*/
+function obviousPrimaryKey(tableName) {
+  if(hasPrimaryKey(tableName)) { return true; }
+  var attrs = getAttrs(tableName);
+  var i;
+  for(i=0; i<attrs.length; i++) {
+    if(attrs[i].toLowerCase() == 'id') {
+      editAttrPrimary(attrs[i], tableName, true);
+      return true;
+    }
+  }
+  return false;
 }
 
 /*
@@ -926,6 +942,16 @@ function genAttrList(id1, id2) {
   document.getElementById(id2).selectedIndex = -1; // need to trigger js event
 }
 
+function getAttrs(tableName) {
+  var attrs = new Array();
+  table = findTable(tableName);
+  var i;
+  for(i=0; i<table.attr.length; i++) {
+    attrs.push(table.attr[i]);
+  }
+  return attrs;
+}
+
 /*
 * Updates attribute properties based on currently selected attribute
 */
@@ -1136,7 +1162,26 @@ function initFinalize() {
 *   closes the modal if all steps are complete
 */
 function finalizeNext(id) {
-  // determine if schema is fully constrained
+  // handle last finalization step
+  if(finalizeArr == 0) finalizeArr++;
+  else if(finalizeArr == 1) { // table constraint
+    var pkey = getSelectVal(document.getElementById("finalizeSelector"));
+    alert("pkey: " + pkey);
+    var tname = tables[finalizeIdx-1].get('.text')[0].getText();
+    if(pkey == "Don't Know") {
+      pkey = "sysid";
+      createAttr(pkey, 'number', tname, true, 525, 225);
+    }
+    else {
+      editAttrPrimary(pkey, tname, true);
+    }
+    if(finalizeIdx == tables.length) { finalizeArr++; finalizeIdx = 0; }
+  }
+  else if(finalizeArr == 2) { // reltaion constraint
+    if(finalizeIdx == relations.length) { finalizeArr++; finalizeIdx = 0; }
+  }
+  
+  // determine if schema is now fully constrained
   if(!isFinalized()) { 
 
     var div = document.getElementById(id);
@@ -1148,22 +1193,29 @@ function finalizeNext(id) {
     if(finalizeArr == 1) {
 
       // display next table constraint (primary key)
-      var tname = tables[finalizeIdx].get('.text')[0].getText();
-      html += "<h4>Table: " + tname.toLowerCase() + "</h4>";
+      var tableName = tables[finalizeIdx].get('.text')[0].getText();
+      html += "<h4>Table: " + tableName.toLowerCase() + "</h4>";
       html += "<p>Which of the following attributes is the identifier for your table?</p>";
 
       // generate table attrributes selector html
-      attrs = new Array();
-      table = findTable(tname);
-      var i;
-      for(i=0; i<table.attr.length; i++) {
-        attrs.push(table.attr[i]);
+      if(obviousPrimaryKey(tableName)) {
+	finalizeIdx++;
+        finalizeNext(id);
       }
-      html += "<select id='finalizeSelector'>" + genSelectInnerHTML("finalizeSelector", attrs, 0, 0) + "</select>";
-      
-      div.innerHTML = html;
-      finalizeIdx++;
-      if(finalizeIdx == tables.length) { finalizeArr++; finalizeIdx = 0; }
+      else {
+        var attrs = getAttrs(tableName);
+        html += "<select id='finalizeSelector'>" + genSelectInnerHTML("finalizeSelector", attrs, 0, 0) + "</select>";
+    
+        div.innerHTML = html;
+    
+        // Don't know option - generate automatic sysid
+        var opt = document.createElement("option");
+        opt.text = "Don't Know";
+        var sel = document.getElementById("finalizeSelector");
+        sel.add(opt, sel.options[null]);
+        
+        finalizeIdx++;
+      }
     }
     /*
     * Case 2: Check relations array for constraints
@@ -1177,7 +1229,6 @@ function finalizeNext(id) {
       
       div.innerHTML = html;
       finalizeIdx++;
-      if(finalizeIdx == relations.length) { finalizeArr++; finalizeIdx = 0; }
     }
 
   }
