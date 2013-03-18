@@ -1,4 +1,16 @@
 %h1 Result
+= @sqlQuery
+%br
+%table
+  %tr
+    - (0..@query.size-1).each do |i|
+      %td
+        = i
+  %tr
+    - @query.each do |word|
+      %td
+        = word
+%br
 - @results.each do |result|
   = result
   %br

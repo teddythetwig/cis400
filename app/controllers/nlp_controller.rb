@@ -1,6 +1,30 @@
 class NlpController < ApplicationController
+  #require 'treat'
+  
   def post
+    
     query = params[:query]
+    db_blob = JSON.parse(params[:db_json])
+
+    @query = query.split(" ")
+    
+    @sqlQuery = Nlp::SqlQuery.new(query)
+    #@sqlQuery.addTable("employees", 0)
+    #@sqlQuery.addField("employees", "*", 0)
+    #@sqlQuery.addCondition("employees", "hire_date", "<", "August 2011")
+    #@sqlQuery.addCondition("employees", "amount", ">", "1000")
+
+
+    ## TREAT isn't working right now
+    # @section = Paragraph 'Get all employees who were hired before August 2011 and have been paid more than $1,000 since September 2012'
+
+    # Chunk: split the titles and paragraphs.
+    # Segment: perform sentence segmentation.
+    # Parse: parse the syntax of each sentence.
+    # @section.do :segment, :parse
+
+
+
 
     tgr = EngTagger.new
     @results = []
@@ -17,8 +41,33 @@ class NlpController < ApplicationController
 #    @results << 'hired'.stem
 
     words = tagged.inject([]){|l,x| l + [/(.*)\/[A-Z]+$/.match(x)[1]]}
-    #@results << "words: " + words.inspect
+    @results << "words: " + words.inspect
+#    @results << "json parse test: " + JSON.parse("{\"tables\":[{\"name\":\"employees\",\"fields\":[{\"name\":\"first_name\",\"type\":\"string\"},{\"name\":\"id\",\"type\":\"int\"}]}]}").inspect
+    @results << "blob" + db_blob.inspect
     
+    #####
+    #
+    # Find Table
+    #
+    #####
+    @results << "Table names:"
+    table_names = []
+    for i in 0 ... words.size
+      db_blob["tables"].each do |table|
+        if table["name"].stem == words[i].stem
+          @results << "Table name: " + table["name"].stem + " at index " + i.to_s + " word stem: " + words[i].stem
+          @sqlQuery.addTable(table["name"], i)
+        end
+      end
+    end
+
+
+
+    #####
+    #
+    # Find Dates
+    #
+    #####
     dates = []
     for i in 0 ... words.size
       for j in i ... words.size

@@ -53,7 +53,7 @@ tables = new Array();
 datatypes = new Array("text", "number", "date");
 
 // List of allowable relation types
-reltypes = new Array("undefined", "one-to-one", "one-to-many", "many-to-many");
+reltypes = new Array("undefined", "one-to-one", "one-to-many", "many-to-one", "many-to-many");
 
 // List of attributes
 attributes = new Array();
@@ -64,7 +64,7 @@ attrLines = new Array();
 // List of Relations
 relations = new Array();
 
-//Graphics variables
+// Graphics variables
 var stage = new Kinetic.Stage({
     container: 'container',
     width: 1150,
@@ -72,15 +72,17 @@ var stage = new Kinetic.Stage({
 var layer = new Kinetic.Layer();
 var currGroup = new Kinetic.Group();
 
+// Finalization variable
+var finalizeIdx = 0;
+var finalizeArr = 1;
+
 /********* Creation Methods *********/
 
 /* 
 * Creates table
 * Note: Check table name is unique before calling.
 */
-function createTable(tableName) {
-    var rectX = stage.getWidth() / 2 - 50;
-    var rectY = stage.getHeight() / 2 - 25;
+function createTable(tableName, rectX, rectY) {
 
     var group = new Kinetic.Group({
         draggable: true
@@ -94,7 +96,7 @@ function createTable(tableName) {
         fontSize: 16,
         fontFamily: 'Calibri',
         fill: 'white',
-        width: 100,
+        width: 160,
         padding: 20,
         align: 'center',
     });
@@ -106,7 +108,7 @@ function createTable(tableName) {
         stroke: 'black',
         strokeWidth: 4,
         fill: 'mediumblue',
-        width: 100,
+        width: 160,
         height: complexText.getHeight(),
         shadowColor: 'black',
         shadowBlur: 10,
@@ -135,14 +137,25 @@ function createTable(tableName) {
             currGroup.get('.shape')[0].setStroke('black');
         }
         currGroup = group;
+        document.getElementById('nameTitle').innerHTML = 'Table Name: ';
         document.getElementById('name').innerHTML = group.get('.text')[0].getText();
         group.get('.shape')[0].setStroke('lightsteelblue');
 
-        //TODO: Add multiple attributes functionality
-        if(group.attr.length > 0){
-            //document.getElementById('attribute').innerHTML = group.attr[0];
-            document.getElementById('attribute').innerHTML = group.attr.length;
+        var attrs = '';
+        if(group.attr.length == 0) {
+            attrs = 'None';
+        } else {
+            for (var i = 0; i < group.attr.length; i++) {
+                attrs = attrs + group.attr[i];
+                if((i + 1) < group.attr.length) {
+                    attrs = attrs + ', ';
+                } else {
+                    attrs = attrs + ' ';
+                }
+            }
         }
+        document.getElementById('attributeTitle').innerHTML = 'Attributes: ';
+        document.getElementById('attribute').innerHTML = attrs;
     }); 
     
     //Add group to table array  
@@ -156,9 +169,7 @@ function createTable(tableName) {
 /* 
 * Creates attribute
 */
-function createAttr(name, type, tableName) {
-    var rectX = stage.getWidth() / 2 - 75;
-    var rectY = stage.getHeight() / 2 - 50;
+function createAttr(name, type, tableName, primary, rectX, rectY) {
 
     var table = findTable(tableName);
     if(table == null) {
@@ -167,6 +178,11 @@ function createAttr(name, type, tableName) {
     }
     if(!uniqueAttrName(name, tableName)) {
         alert('Attributes within a table must be unique.');
+        return;
+    }
+
+    if (hasPrimaryKey(tableName) && primary) {
+        alert('Table already contains Primary Key');
         return;
     }
 
@@ -180,7 +196,7 @@ function createAttr(name, type, tableName) {
        fontSize: 16,
        fontFamily: 'Calibri',
        fill: 'white',
-       width: 100,
+       width: 160,
        padding: 20,
        align: 'center'
     });
@@ -192,7 +208,7 @@ function createAttr(name, type, tableName) {
       stroke: 'black',
       strokeWidth: 4,
       fill: 'orangered',
-      width: 100,
+      width: 160,
       height: complexText.getHeight(),
       shadowColor: 'black',
       shadowBlur: 10,
@@ -206,7 +222,7 @@ function createAttr(name, type, tableName) {
     group.add(complexText);
 
     //Adding attributes to attribute (AttrGroup, ParentTable, Datatype, PrimaryKey)
-    var attGroup = [group, table, type, false];
+    var attGroup = [group, table, type, primary];
 
     //Adding attribute to table
     table.attr.push(name);
@@ -223,9 +239,17 @@ function createAttr(name, type, tableName) {
             currGroup.get('.shape')[0].setStroke('black');
         }
         currGroup = group;
+
+        document.getElementById('nameTitle').innerHTML = 'Attribute Name: ';
+        var name = group.get('.Atext')[0].getText();
+        if(attGroup[3]) {
+            name = name + ' (Primary Key)'
+        }
+        document.getElementById('name').innerHTML = name;
         group.get('.shape')[0].setStroke('lightsteelblue');
 
-        //alert('Datatype: ' + group.type + ', Parent:' + group.parent.get('.text')[0].getText());
+        document.getElementById('attributeTitle').innerHTML = 'Attribute Type: ';
+        document.getElementById('attribute').innerHTML = attGroup[2];
     });
     
     group.on('dragstart dragmove', function(){
@@ -266,8 +290,8 @@ function createAttr(name, type, tableName) {
 }
 
 /*
-* Creates Relations
-*/
+ * Creates Relations
+ */
 function createRelation(rname, tableName1, tableName2){
     // Finds the table
     table1 = findTable(tableName1);
@@ -289,6 +313,27 @@ function createRelation(rname, tableName1, tableName2){
         lineJoin: 'round'
       });
 
+    // Event handling
+    line.on('mouseover', function() {
+        document.body.style.cursor = 'pointer';
+    });
+    line.on('mouseout', function() {
+        document.body.style.cursor = 'default';
+    });  
+    line.on('mousedown', function() {
+        if(currGroup.getChildren().length > 0) {
+            currGroup.get('.shape')[0].setStroke('black');
+        }
+        //currGroup = line;
+
+        document.getElementById('nameTitle').innerHTML = 'Relation Name: ';
+        document.getElementById('name').innerHTML = line.getName();
+        //group.get('.shape')[0].setStroke('lightsteelblue');
+
+        document.getElementById('attributeTitle').innerHTML = 'Tables: ';
+        document.getElementById('attribute').innerHTML = table1.get('.text')[0].getText() + ', ' + table2.get('.text')[0].getText();
+    });
+
     table1.on('dragstart dragmove', function(){
         update();
     });
@@ -298,8 +343,8 @@ function createRelation(rname, tableName1, tableName2){
     });
 
     // Adding group of line and tables to realtions array (Line obj, FirstTable, SecondTable, Directionality)
-   // Directionality[-1:'NotDefined', 0:'one-to-one', 1:'one-to-many', 2:'many-to-many']
-    var group = [line, table1, table2, -1];
+    // 'undefined', 'one-to-one', 'one-to-many', 'many-to-many'
+    var group = [line, table1, table2, 'undefined'];
     relations.push(group);
 
     //Add line to stage
@@ -390,6 +435,7 @@ function editTableName(oldName, newName) {
 function hasPrimaryKey(tableName) {
     var table = findTable(tableName);
     for(var i = 0; i < table.attr.length; i++) {
+	var attrName = table.attr[i];
         var attr = findAttr(attrName, tableName);
         if(attr[3]) {
             return true;
@@ -407,6 +453,7 @@ function deleteTable(tableName) {
         if((attrLines[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
             attrLines[i][0].remove();
             attrLines.splice(i, 1);
+	    i--;
         }
     }
     
@@ -415,6 +462,7 @@ function deleteTable(tableName) {
         if(attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
             attributes[i][0].remove();
             attributes.splice(i, 1);
+	    i--;
         }
     }
     
@@ -424,6 +472,7 @@ function deleteTable(tableName) {
             (relations[i][2].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
              relations[i][0].remove();
              relations.splice(i,1);
+	     i--;
          }
          
      }
@@ -485,24 +534,39 @@ function editAttrName(oldAttrName, newAttrName, tableName) {
 * Modifies the existing attribute datatype to the provided attribute datatype
 */
 function editAttrType(attrName, tableName, newAttrType) {
-    var attr = findAttr(tableName, attrName);
-    attr[2] = newAttrType;
+    var attr = findAttr(attrName, tableName);
+    if(attr[2] != newAttrType) {
+        attr[2] = newAttrType;
+	return true;
+    }
+    else
+        return false;
 }
 
 /*
 * Modifies the primary key status of provided attribute if possible
 */
-function editAttrPrimary(attrName, tableName) {
-    var attr = findAttr(tableName, oldAttrName);
-    if(attr[3]) {
-        attr[3] = false;
+function editAttrPrimary(attrName, tableName, primary) {
+    var attr = findAttr(attrName, tableName);
+    // case 1: update, [true->false]
+    if(attr[3] && !primary) {
+	attr[3] = false;
+	return true;
     }
-    else {
+    // case 2: update if possible, [false->true]
+    else if(!attr[3] && primary) {
         if(hasPrimaryKey(tableName)) {
-            alert('Already has primary key');
+	    attr[3] = false;
+            alert('This table already has a primary key');
+	    return false;
         } else {
             attr[3] = true;
+	    return true;
         }
+    }
+    // case 3: no change, [true->true] or [false->false]
+    else {
+      return false;
     }
 }
 
@@ -572,7 +636,12 @@ function editRelationName(oldRelName, newRelName) {
 */
 function editRelationType(relName, newRelType) {
     var rel = findRelation(relName);
-    rel[3] = newRelType;
+    if(rel[3] == newRelType)
+      return false;
+    else { 
+      rel[3] = newRelType;
+      return true;
+    }
 }
 
 /*
@@ -590,8 +659,8 @@ function deleteRelation(relName) {
 }
 
 /*
-* Checks  for unique relation name
-*/
+ * Checks  for unique relation name
+ */
 function uniqueRelName(relName) {
     for(var i = 0; i < relations.length; i++) {
         if(relations[i][0].getName().toLowerCase() == relName.toLowerCase()) {
@@ -602,19 +671,94 @@ function uniqueRelName(relName) {
 }
 
 /*
-* Converts xml schema into current schema
-*/
+ * Converts xml schema into current schema
+ */
 function convert(schema) {
    return false;   
 }
 
-/********* HTML Helper Functions *********/
+/*
+ * Test
+ */
+function test() {
+    alert('test');
+}
 
+/*
+ * Converts current graph to SQL
+ */
+function convertToSQL() {
+    var code = '';
+    var currName = '';
+    var tableA, tableB;
+
+
+    //Table Creation
+    for (var i = 0; i < tables.length; i++) {
+
+        var primary = '';
+        currName = tables[i].get('.text')[0].getText();
+        code = code + 'CREATE TABLE ' + currName + '\n(\n';
+        for (var j = 0; j < tables[i].attr.length; j++) {
+
+            var currAttr = new Array();
+            for(var k = 0; k < attributes.length; k++) {
+                if((attributes[k][0].get('.Atext')[0].getText().toLowerCase() == tables[i].attr[j].toLowerCase()) &&
+                    (attributes[k][1].get('.text')[0].getText().toLowerCase() == currName.toLowerCase())) {
+                    currAttr = attributes[k];
+                }
+            }
+
+            code = code + '\t' + currAttr[0].get('.Atext')[0].getText() + ' ';
+
+            switch(currAttr[2])
+            {
+            case 'text':
+                code = code + 'VARCHAR(256)';
+                break;
+            case 'number':
+                code = code + 'INTEGER';
+                break;
+            case 'date':
+                code = code + 'DATETIME';
+            }
+
+            if(currAttr[3]) {
+                code = code + ' NOT NULL';
+                primary = currAttr[0].get('.Atext')[0].getText();
+            }
+
+            code = code + ',\n';
+        }
+        code = code + '\tPRIMARY KEY (' + primary + ')\n'; //Assumes each table has a PRIMARY KEY
+        code = code + ')\n\n';
+    }
+
+    //Relation Table Creation
+    for(var i = 0; i < relations.length; i++) {
+        /*
+        // Adding group of line and tables to realtions array (Line obj, FirstTable, SecondTable, Directionality)
+        // 'undefined', 'one-to-one', 'one-to-many', 'many-to-many'
+        var group = [line, table1, table2, 'undefined'];*/
+        tableA = relations[i][1];
+        tableB = relations[i][2];
+        code = code + 'CREATE TABLE ' + relations[i][0].getName() + '\n(\n';
+
+        //Figure out one-to-one, one-to-many, many-to-many
+
+        code = code + ')\n\n';
+    }
+    alert(code);
+}
+
+
+
+/********* HTML Helper Functions *********/
 /*
 * Generates HTML to dynamically populate selectors 
 * from dynamic data structures
 */
-function genSelectInnerHTML(id, arr, type) {
+function genSelectInnerHTML(id, arr, type, write=1) {
   var ret = "";
   if(type == 0) { // simple arrays
     for(i=0; i<arr.length; i++) {
@@ -631,7 +775,10 @@ function genSelectInnerHTML(id, arr, type) {
       ret += "\t<option value=\"" + arr[i][0].getName() + "\">" + arr[i][0].getName() + "</option>\n";
     }
   }
-  document.getElementById(id).innerHTML = ret;
+  if(write)
+    document.getElementById(id).innerHTML = ret;
+  else
+    return ret;
 }
 
 /*
@@ -645,6 +792,7 @@ function getSelectVal(select) {
 * Initializes modal to create new table
 */
 function initNewTable() {
+  document.getElementById("newTableName").value = "";
 }
 
 /*
@@ -654,7 +802,7 @@ function saveNewTable(e) {
   var tableName = document.getElementById("newTableName").value;
   if(tableName != "" && uniqueTableName(tableName)) {
     $('#newTableModal').modal('hide'); // hide modal on save
-    createTable(tableName);
+    createTable(tableName, 525, 225);
   }
   else {
     alert("Table names must be unique and nonempty.");
@@ -667,6 +815,8 @@ function saveNewTable(e) {
 function initNewAttr() {
   genSelectInnerHTML("tableNameA", tables, 1);
   genSelectInnerHTML("newAttrType", datatypes, 0);
+  document.getElementById("newAttrName").value = "";
+  document.getElementById("setPrimary").checked = false;
 }
 
 /*
@@ -676,9 +826,10 @@ function saveNewAttr(e) {
   var tableName = getSelectVal(document.getElementById("tableNameA"));
   var attrName = document.getElementById("newAttrName").value;
   var attrType = getSelectVal(document.getElementById("newAttrType"));
+  var attrPrimary = document.getElementById("setPrimary").checked;
   if(attrName != "" && uniqueAttrName(attrName, tableName)) {
     $('#newAttributeModal').modal('hide'); // hide modal on save
-    createAttr(attrName, attrType, tableName);
+    createAttr(attrName, attrType, tableName, attrPrimary, 525, 225);
   }
   else {
     alert("Attribute names must be unique within a table and nonempty.");
@@ -690,6 +841,7 @@ function saveNewAttr(e) {
 */
 function initEditTable() {
   genSelectInnerHTML("oldTableName", tables, 1);
+  document.getElementById("editTableName").value = "";
 }
 
 /*
@@ -714,6 +866,8 @@ function initEditAttr() {
   genSelectInnerHTML("tableNameB", tables, 1);
   // set invalid default index to ensure event is triggered later
   document.getElementById("tableNameB").selectedIndex = -1;
+  document.getElementById("oldAttrName").selectedIndex = -1;
+  document.getElementById("editAttrName").value = "";
   genSelectInnerHTML("editAttrType", datatypes, 0);
 }
 
@@ -728,6 +882,30 @@ function genAttrList(id1, id2) {
     attrs.push(table.attr[i]);
   }
   genSelectInnerHTML(id2, attrs, 0);
+  document.getElementById(id2).selectedIndex = -1; // need to trigger js event
+}
+
+/*
+* Updates attribute properties based on currently selected attribute
+*/
+function genAttrProps() {
+  var tableName = getSelectVal(document.getElementById("tableNameB"));
+  var attrName = getSelectVal(document.getElementById("oldAttrName"));
+  var attr = findAttr(attrName, tableName);
+  var attrTypeIdx = datatypes.indexOf(attr[2]);
+  var attrPrimary = ( (attr[3]) ? true : false );
+  document.getElementById("editAttrType").selectedIndex = attrTypeIdx;
+  document.getElementById("editPrimary").checked = attrPrimary;
+}
+
+/*
+* Updates relation properties based on currently selected relation
+*/
+function genRelProps() {
+  var relName = getSelectVal(document.getElementById("relNameC"));
+  var rel = findRelation(relName);
+  var relTypeIdx = reltypes.indexOf(rel[3]);
+  document.getElementById("editRelType").selectedIndex = relTypeIdx; 
 }
 
 /*
@@ -738,10 +916,17 @@ function saveEditAttr(e) {
   var oldAttrName = getSelectVal(document.getElementById("oldAttrName"));
   var newAttrName = document.getElementById("editAttrName").value;
   var newAttrType = getSelectVal(document.getElementById("editAttrType"));
-  if(newAttrName != "" && uniqueAttrName(newAttrName, tableName)) {
+  var attrPrimary = document.getElementById("editPrimary").checked;
+  if(oldAttrName == newAttrName) {
+    if(editAttrType(oldAttrName, tableName, newAttrType) || editAttrPrimary(newAttrName, tableName, attrPrimary)) {
+      $('#editAttributeModal').modal('hide'); // hide modal on save
+    } 
+  }
+  else if(newAttrName != "" && uniqueAttrName(newAttrName, tableName)) {
     $('#editAttributeModal').modal('hide'); // hide modal on save
     editAttrName(oldAttrName, newAttrName, tableName);
     editAttrType(newAttrName, tableName, newAttrType);
+    editAttrPrimary(newAttrName, tableName, attrPrimary);
   }
   else {
     alert("Attribute names must be unique within a table and nonempty.");
@@ -772,6 +957,7 @@ function delTable(e) {
 function initDelAttr() {
   genSelectInnerHTML("tableNameC", tables, 1);
   document.getElementById("tableNameC").selectedIndex = -1;
+  document.getElementById("delAttrName").selectedIndex = -1;
 }
 
 /*
@@ -790,8 +976,10 @@ function delAttr(e) {
 * Initializes modal to create new relation
 */
 function initNewRelation() {
+  document.getElementById("relNameA").value = "";
   genSelectInnerHTML("tableNameR1", tables, 1);
   genSelectInnerHTML("tableNameR2", tables, 1);
+  document.getElementById("tableNameR2").selectedIndex = -1;
 }
 
 /*
@@ -801,7 +989,10 @@ function saveNewRelation(e) {
   var relName = document.getElementById("relNameA").value;
   var tableName1 = getSelectVal(document.getElementById("tableNameR1"));
   var tableName2 = getSelectVal(document.getElementById("tableNameR2"));
-  if(relName != "" && uniqueRelName(relName)) {
+  if(tableName1 == tableName2) {
+    alert("Cannot connect a table to itself.");
+  }
+  else if(relName != "" && uniqueRelName(relName)) {
     $('#newRelationModal').modal('hide'); // hide modal on save
     createRelation(relName, tableName1, tableName2);
   }
@@ -815,7 +1006,9 @@ function saveNewRelation(e) {
 */
 function initEditRelation() {
   genSelectInnerHTML("relNameC", relations, 2);
-  genSelectInnerHTML("editRelType", reltypes, 0);
+  // need to trigger js event
+  document.getElementById("relNameC").selectedIndex = -1;
+  document.getElementById("editRelName").value = "";
 }
 
 /*
@@ -824,12 +1017,13 @@ function initEditRelation() {
 function editRelation(e) {
   var oldRelName = getSelectVal(document.getElementById("relNameC"));
   var newRelName = document.getElementById("editRelName").value;
-  var newRelType = getSelectVal(document.getElementById("editRelType"));
 
-  if(newRelName != "" && uniqueRelName(newRelName)) {
+  if(oldRelName == newRelName) {
+    $('#editRelationModal').modal('hide'); // hide modal on save
+  }
+  else if(newRelName != "" && uniqueRelName(newRelName)) {
     $('#editRelationModal').modal('hide'); // hide modal on save
       editRelationName(oldRelName, newRelName);
-      editRelationType(newRelName, newRelType);
   }
   else {
     alert("Relation names must be unique and nonempty.");
@@ -853,6 +1047,7 @@ function delRelation(e) {
     deleteRelation(relName);
   }
 }
+
 
 /*
 * Sends post request to query endpoint
@@ -885,6 +1080,77 @@ function submitQuery(path, query, callback){
   */
   
 }
+
+/*
+* Initializes modal to finalize database schema
+*/
+function initFinalize() {
+  finalizeNext("finalizeModalDiv");
+}
+
+/*
+* Advances finalization process to next step.
+* Called each time a modal must change its body
+* Either continues to next finalization step, or
+*   closes the modal if all steps are complete
+*/
+function finalizeNext(id) {
+  // determine if schema is fully constrained
+  if(!isFinalized()) { 
+
+    var div = document.getElementById(id);
+    var html = "";
+
+    /*
+    * Case 1: Check tables array for constraints
+    */
+    if(finalizeArr == 1) {
+
+      // display next table constraint (primary key)
+      var tname = tables[finalizeIdx].get('.text')[0].getText();
+      html += "<h4>Table: " + tname.toLowerCase() + "</h4>";
+      html += "<p>Which of the following attributes is the identifier for your table?</p>";
+
+      // generate table attrributes selector html
+      attrs = new Array();
+      table = findTable(tname);
+      var i;
+      for(i=0; i<table.attr.length; i++) {
+        attrs.push(table.attr[i]);
+      }
+      html += "<select id='finalizeSelector'>" + genSelectInnerHTML("finalizeSelector", attrs, 0, 0) + "</select>";
+      
+      div.innerHTML = html;
+      finalizeIdx++;
+      if(finalizeIdx == tables.length) { finalizeArr++; finalizeIdx = 0; }
+    }
+    /*
+    * Case 2: Check relations array for constraints
+    */
+    else if(finalizeArr == 2) {
+
+      // display next relation constraint (relation types for connected tables)
+      html += "<h4>Relation: " + relations[finalizeIdx].get('.text')[0].getText().toLowerCase() + "</h4>";
+      html += "<p>Does [tableName1] have many [tableName2]?</p>";
+      html += "<p>Does [tableName2] have many [tableName1]?</p>";
+      
+      div.innerHTML = html;
+      finalizeIdx++;
+      if(finalizeIdx == relations.length) { finalizeArr++; finalizeIdx = 0; }
+    }
+
+  }
+  else { // schema is fully constrained at this point
+    finalizeArr = 0; 
+    $('#finalizeModal').modal('hide'); // hide modal on completion of schema finalization
+    // after this point we can convert our JS objects into SQL to send to RDS
+  }
+}
+
+function isFinalized() {
+  return finalizeArr > 2;
+}
+
 </script>
 
   <!-- newTableModal -->
@@ -917,7 +1183,9 @@ function submitQuery(path, query, callback){
       <input type="text" id="newAttrName" value="">
       <label for="newAttrType"><strong>Attribute type</strong></label>
       <select id="newAttrType">
-      </select>
+      </select><br />
+      <input type="checkbox" id="setPrimary" value="1">&nbsp;
+      <label for="setPrimary"><span style="border-bottom:1px dashed #000;" title="Primary Key: uniquely identifies records in this table, e.g. SSN identifies Person">Primary?</span><label>
     </div>
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal">Close</button>
@@ -955,13 +1223,15 @@ function submitQuery(path, query, callback){
       <select id="tableNameB" onchange="genAttrList('tableNameB', 'oldAttrName')">
       </select>
       <label for="oldAttrName"><strong>Current attribute name</strong></label>
-      <select id="oldAttrName">
+      <select id="oldAttrName" onchange="genAttrProps()">
       </select>
       <label for="editAttrName"><strong>New attribute name</strong></label>
       <input type="text" id="editAttrName" value="">
       <label for="editAttrType"><strong>Attribute type</strong></label>
       <select id="editAttrType">
-      </select>
+      </select><br />
+      <input type="checkbox" id="editPrimary" value="1">&nbsp;
+      <label for="editPrimary"><span style="border-bottom:1px dashed #000;" title="Primary Key: uniquely identifies records in this table, e.g. SSN identifies Person">Primary?</span><label>
     </div>
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal">Close</button>
@@ -1039,13 +1309,10 @@ function submitQuery(path, query, callback){
     </div>
     <div class="modal-body">
       <label for="relNameC"><strong>Current relation name</strong></label>
-      <select id="relNameC">
+      <select id="relNameC" onchange="genRelProps()">
       </select>
       <label for="editRelName"><strong>New relation name</strong></label>
       <input type="text" id="editRelName" value="">
-      <label for="editRelType"><strong>Relation type</strong></label>
-      <select id="editRelType">
-      </select>
     </div>
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal">Close</button>
@@ -1057,7 +1324,7 @@ function submitQuery(path, query, callback){
     <div id="deleteRelationModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="deleteRelationModalLabel" aria-hidden="true">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3 id="deleteRelationModalLabel">Delete attribute</h3>
+        <h3 id="deleteRelationModalLabel">Delete relation</h3>
       </div>
       <div class="modal-body">
         <label for="relNameB"><strong>Relation name</strong></label>
@@ -1070,15 +1337,29 @@ function submitQuery(path, query, callback){
       </div>
     </div>
 
-    <!-- table info display -->
+  <!-- finalizeModal -->
+    <div id="finalizeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="finalizeModalLabel" aria-hidden="true">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 id="finalizeModalLabel">Final Steps</h3>
+      </div>
+      <div id="finalizeModalDiv" class="modal-body">
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Close</button>
+        <button id="finalizeBtn" class="btn btn-primary" onclick="finalizeNext('finalizeModalDiv')">Add Constraint</button>
+      </div>
+    </div>
+   
+ <!-- table info display -->
     <div class="span8">
       <table class= "table table-bordered">
         <tr>
-          <td>Table Name: </td>
+          <td><div id="nameTitle">Table Name: </div></td>
           <td><div id="name">None</div></td>
         </tr>
         <tr>
-          <td>Attributes: </td>
+          <td><div id="attributeTitle">Attributes: </div></td>
           <td><div id="attribute">None</div></td>
         </tr>
       </table>
@@ -1097,6 +1378,9 @@ function submitQuery(path, query, callback){
       <a data-toggle="modal" href="#newRelationModal" class="btn btn-primary" onclick="initNewRelation()">Connect tables</a>
       <a data-toggle="modal" href="#editRelationModal" class="btn btn-warning" onclick="initEditRelation()">Edit connection</a>
       <a data-toggle="modal" href="#deleteRelationModal" class="btn btn-danger" onclick="initDelRelation()">Disconnect</a>
+      <br /><br />
+      <a data-toggle="modal" href="#finalizeModal" class="btn btn-success" onclick="initFinalize()">Finalize</a>
+      <a class="btn" onclick="convertToSQL()">Convert</a>
     </div>
 
   </div>
