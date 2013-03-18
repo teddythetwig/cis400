@@ -38,7 +38,6 @@
 <div class="container">
   <div id="container"></div>
   <script src="http://www.html5canvastutorials.com/libraries/kinetic-v4.3.0-beta2.js"></script>
-  <!-- <script src="../../../public/javascripts/graphics.js"></script> -->
   <script type="text/javascript">
 
 /********* Global Variables *********/
@@ -412,8 +411,8 @@ function uniqueTableName(name){
 }
 
 /*
-* Modifies the existing table name to the provided table name
-*/
+ * Modifies the existing table name to the provided table name
+ */
 function editTableName(oldName, newName) {
     var table = findTable(oldName);
     if(table == null) {
@@ -430,8 +429,8 @@ function editTableName(oldName, newName) {
 }
 
 /*
-* Check if table has a primary key
-*/
+ * Check if table has a primary key
+ */
 function hasPrimaryKey(tableName) {
     var table = findTable(tableName);
     for(var i = 0; i < table.attr.length; i++) {
@@ -445,8 +444,23 @@ function hasPrimaryKey(tableName) {
 }
 
 /*
-* Deletes table from tables array, any connected attributes, and any relations connected to table
-*/
+ * Returns name of Primary Key
+ */
+function getPrimaryKey(tableName) {
+    var table = findTable(tableName);
+    for(var i = 0; i < table.attr.length; i++) {
+        var attrName = table.attr[i];
+        var attr = findAttr(attrName, tableName);
+        if(attr[3]) {
+            return attr;
+        }
+    }
+    return null;
+}
+
+/*
+ * Deletes table from tables array, any connected attributes, and any relations connected to table
+ */
 function deleteTable(tableName) {
     // Deletes attribute lines from attrLines array
     for(var i = 0; i < attrLines.length; i++) {
@@ -678,13 +692,6 @@ function convert(schema) {
 }
 
 /*
- * Test
- */
-function test() {
-    alert('test');
-}
-
-/*
  * Converts current graph to SQL
  */
 function convertToSQL() {
@@ -731,7 +738,7 @@ function convertToSQL() {
             code = code + ',\n';
         }
         code = code + '\tPRIMARY KEY (' + primary + ')\n'; //Assumes each table has a PRIMARY KEY
-        code = code + ')\n\n';
+        code = code + ')\n;\n\n';
     }
 
     //Relation Table Creation
@@ -742,15 +749,52 @@ function convertToSQL() {
         var group = [line, table1, table2, 'undefined'];*/
         tableA = relations[i][1];
         tableB = relations[i][2];
-        code = code + 'CREATE TABLE ' + relations[i][0].getName() + '\n(\n';
+        switch(relations[i][3])
+        {
+        case 'one-to-one':
+            code = code; //TODO: IMPLEMENT
+            break;
+        case 'one-to-many':
+            code = code; //TODO: IMPLEMENT
+            break;
+        case 'many-to-amy':
+            var primaryA = getPrimaryKey(tableA.get('.text')[0].getText());
+            //[0].get('.Atext')[0].getText() // get attribute name
+            var primaryB = getPrimaryKey(tableB.get('.text')[0].getText());
+            code = code + 'CREATE TABLE ' + relations[i][0].getName() + '\n(\n\t' + primaryA[0].get('.Atext')[0].getText();
+            switch(primaryA[2])
+            {
+            case 'text':
+                code = code + 'VARCHAR(256)';
+                break;
+            case 'number':
+                code = code + 'INTEGER';
+                break;
+            case 'date':
+                code = code + 'DATETIME';
+            }
 
-        //Figure out one-to-one, one-to-many, many-to-many
+            code = code + 'NOT NULL REFERENCES ' + tableA.get('.text')[0].getText() + ' (' + primaryA[0].get('.Atext')[0].getText() + '),\n\t'
+                + primaryB[0].get('.Atext')[0].getText();
 
-        code = code + ')\n\n';
+            switch(primaryB[2])
+            {
+            case 'text':
+                code = code + 'VARCHAR(256)';
+                break;
+            case 'number':
+                code = code + 'INTEGER';
+                break;
+            case 'date':
+                code = code + 'DATETIME';
+            }
+
+            code = code + 'NOT NULL REFERENCES ' + tableB.get('.text')[0].getText() + ' (' + primaryB[0].get('.Atext')[0].getText() + '),\n\tPRIMARY KEY (' +
+                primaryA[0].get('.Atext')[0].getText() + ', ' + primaryB[0].get('.Atext')[0].getText() + ')\n)\n;\n\n';
+        }
     }
     alert(code);
 }
-
 
 
 /********* HTML Helper Functions *********/
