@@ -1,6 +1,10 @@
 %h1 Result
 = @sqlQuery
 %br
+- @segments.each do |seg|
+  = seg
+  %br
+  %br
 %table
   %tr
     - (0..@query.size-1).each do |i|

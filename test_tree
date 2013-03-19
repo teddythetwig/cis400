@@ -1,0 +1,76 @@
+(ROOT
+  (S
+    (VP
+      (VP
+        (VB Get)
+        (NP
+          (NP
+            (DT the)
+            (NN name)
+            (CC and)
+            (NN height)
+          )
+        (PP
+          (IN of)
+            (NP
+              (NP
+                (DT all)
+                (NNS employees)
+              )
+              (SBAR
+                (WHNP
+                  (WP who)
+                )
+                (S
+                  (VP
+                    (VBD were)
+                    (VP
+                      (VBN hired)
+                      (PP
+                        (IN before)
+                        (NP
+                          (NNP August)
+                          (CD 2011)
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+      (CC and)
+      (VP
+        (VB have)
+        (VP
+          (VBN worked)
+          (PP
+            (IN for)
+            (NP
+              (NP
+                (QP
+                  (XS
+                    (JJR more)
+                    (IN than)
+                  )
+                  (CD 10)
+                )
+                (NNS hours)
+              )
+              (PP
+                (IN since)
+                (NP
+                  (NNP September)
+                  (CD 2012)
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+    (. .)
+  )
+)

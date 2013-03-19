@@ -2,18 +2,61 @@ class NlpController < ApplicationController
   #require 'treat'
   
   def post
-    
-    query = params[:query]
+    @text = params[:query]
     db_blob = JSON.parse(params[:db_json])
 
-    @query = query.split(" ")
+    @results = []
+
+    @segments = []
+
+    pipeline =  StanfordCoreNLP.load(:tokenize, :ssplit, :pos, :lemma, :parse, :ner, :dcoref)
+    processed = StanfordCoreNLP::Annotation.new(@text)
+    pipeline.annotate(processed)
     
-    @sqlQuery = Nlp::SqlQuery.new(query)
+    processed.get(:sentences).each do |sentence|
+      # Syntatical dependencies
+      @results << sentence.get(:tree).to_s
+      intermediate = ''
+      sentence.get(:tokens).each do |token|
+        # Default annotations for all tokens
+        @results << '1: ' + token.get(:value).to_s
+        @results << '2: ' + token.get(:original_text).to_s
+        @results << '3: ' + token.get(:character_offset_begin).to_s
+        @results << '4: ' + token.get(:character_offset_end).to_s
+        # POS returned by the tagger
+        @results << '5: ' + token.get(:part_of_speech).to_s
+        if (token.get(:part_of_speech).to_s == "IN" || token.get(:part_of_speech).to_s.start_with?('JJ'))
+          intermediate << ">"
+        end
+        intermediate += token.get(:value).to_s + ' '
+        if token.get(:named_entity_tag).to_s == 'O' && (token.get(:part_of_speech).to_s == "CC" || token.get(:part_of_speech).to_s.start_with?('NN'))
+          @segments << intermediate
+          intermediate = ''
+        end
+        # Lemma (base form of the token)
+        @results << '6: ' + token.get(:lemma).to_s
+        # Named entity tag
+        @results << '7: ' + token.get(:named_entity_tag).to_s
+        # Coreference
+        @results << '8: ' + token.get(:coref_cluster_id).to_s
+        @results << '9: ' + token.get(:coref_graph).to_s
+        # Also of interest: coref, coref_chain, 
+        # coref_cluster, coref_dest, coref_graph.
+      end
+      @segments << intermediate
+      @results << ''
+      @results << ''
+    end
+    
+    @query = @text.split(" ")
+    
+    #@sqlQuery = Nlp::SqlQuery.new(query)
     #@sqlQuery.addTable("employees", 0)
     #@sqlQuery.addField("employees", "*", 0)
     #@sqlQuery.addCondition("employees", "hire_date", "<", "August 2011")
     #@sqlQuery.addCondition("employees", "amount", ">", "1000")
-
+    
+=begin
 
     ## TREAT isn't working right now
     # @section = Paragraph 'Get all employees who were hired before August 2011 and have been paid more than $1,000 since September 2012'
@@ -108,5 +151,6 @@ class NlpController < ApplicationController
       @results << words[i,j-i+1].join(' ')
       @results << Chronic.parse(words[i,j-i+1].join(' '))
     end
+=end
   end
 end
