@@ -746,7 +746,7 @@ function convert(schema) {
 }
 
 /*
- * Converts current graph to SQL
+ * Converts current graph to proper RDS SQL
  */
 function convertToSQL() {
     var code = 'CREATE DATABASE MYTEST%3B\n';
@@ -845,6 +845,117 @@ function convertToSQL() {
     alert(code);
     submitQuery('<%= "/users/#{@user.id}/servers/#{@server.id}/query" %>', code, (function(response){alert(response[0])}));
 }
+
+/*
+ * Converts current graph to MySQL
+ */
+function convertToCode() {
+    var code = '<p>CREATE DATABASE MYTEST;</p><p>USE MYTEST;</p><p>';
+    var currName = '';
+    var tableA, tableB;
+
+
+    //Table Creation
+    for (var i = 0; i < tables.length; i++) {
+
+        var primary = '';
+        var primaryKey = false;
+        currName = tables[i].get('.text')[0].getText();
+        code = code + 'CREATE TABLE ' + currName + ' (</p><p>    ';
+        for (var j = 0; j < tables[i].attr.length; j++) {
+
+            var currAttr = new Array();
+            for(var k = 0; k < attributes.length; k++) {
+                if((attributes[k][0].get('.Atext')[0].getText().toLowerCase() == tables[i].attr[j].toLowerCase()) &&
+                    (attributes[k][1].get('.text')[0].getText().toLowerCase() == currName.toLowerCase())) {
+                    currAttr = attributes[k];
+                }
+            }
+
+            code = code + '    ' + currAttr[0].get('.Atext')[0].getText() + ' ';
+
+            switch(currAttr[2])
+            {
+            case 'text':
+                code = code + 'VARCHAR(256)';
+                break;
+            case 'number':
+                code = code + 'INTEGER';
+                break;
+            case 'date':
+                code = code + 'DATETIME';
+            }
+
+            if(currAttr[3]) {
+                code = code + ' NOT NULL';
+                primary = currAttr[0].get('.Atext')[0].getText();
+                primaryKey = true;
+            }
+            if(primaryKey && ((j + 1) == tables[i].attr.length) || (j+1) < tables[i].attr.length) {
+                code = code + ',</p><p>    ';
+            } else {
+                code = code + '</p><p>';
+            }
+
+        }
+        if(primaryKey) {
+            code = code + '    PRIMARY KEY (' + primary + ')</p><p>';
+        }
+        code = code + ');</p><p>';
+    }
+
+    //Relation Table Creation
+    for(var i = 0; i < relations.length; i++) {
+        tableA = relations[i][1];
+        tableB = relations[i][2];
+        /*switch(relations[i][3])
+        {
+        case 'one-to-one':
+            code = code; //TODO: IMPLEMENT
+            break;
+        case 'one-to-many':
+            code = code; //TODO: IMPLEMENT
+            break;
+        case 'many-to-amy':*/
+            var primaryA = getPrimaryKey(tableA.get('.text')[0].getText());
+            var primaryB = getPrimaryKey(tableB.get('.text')[0].getText());
+            code = code + 'CREATE TABLE ' + relations[i][0].getName() + '(</p><p>    ' + primaryA[0].get('.Atext')[0].getText();
+            switch(primaryA[2])
+            {
+            case 'text':
+                code = code + 'VARCHAR(256)';
+                break;
+            case 'number':
+                code = code + 'INTEGER';
+                break;
+            case 'date':
+                code = code + 'DATETIME';
+            }
+
+            code = code + ' NOT NULL REFERENCES ' + tableA.get('.text')[0].getText() + ' (' + primaryA[0].get('.Atext')[0].getText() + '),</p><p>    '
+                + primaryB[0].get('.Atext')[0].getText();
+
+            switch(primaryB[2])
+            {
+            case 'text':
+                code = code + 'VARCHAR(256)';
+                break;
+            case 'number':
+                code = code + 'INTEGER';
+                break;
+            case 'date':
+                code = code + 'DATETIME';
+            }
+
+            code = code + ' NOT NULL REFERENCES ' + tableB.get('.text')[0].getText() + ' (' + primaryB[0].get('.Atext')[0].getText() + '),\n\tPRIMARY KEY (' +
+                primaryA[0].get('.Atext')[0].getText() + ', ' + primaryB[0].get('.Atext')[0].getText() + ')</p><p>);</p><p>';
+        //}
+    }
+    code = code + '</p>'
+    //alert(code);
+    document.getElementById("DBCodeMySQL").innerHTML = code;
+}
+
 
 
 /********* HTML Helper Functions *********/
@@ -1480,6 +1591,21 @@ function isFinalized() {
         <button id="finalizeBtn" class="btn btn-primary" onclick="finalizeNext('finalizeModalDiv')">Add Constraint</button>
       </div>
     </div>
+
+  <!-- finalizeModal -->
+    <div id="DBCode" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="DBCode" aria-hidden="true">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Code of Schema</h3>
+      </div>
+      <div class="modal-body">
+        <h3>MySQL</h3>
+        <p id="DBCodeMySQL"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Close</button>
+      </div>
+    </div>
    
  <!-- table info display -->
     <div class="span8">
@@ -1510,7 +1636,8 @@ function isFinalized() {
       <a data-toggle="modal" href="#deleteRelationModal" class="btn btn-danger" onclick="initDelRelation()">Disconnect</a>
       <br /><br />
       <a data-toggle="modal" href="#finalizeModal" class="btn btn-success" onclick="initFinalize()">Finalize</a>
-      <a class="btn" onclick="convertToSQL()">Convert</a>
+      <a class="btn" onclick="convertToSQL()">Convert</a> <!-- Should be called in Finalize when modal is complete -->
+      <a data-toggle="modal" href="#DBCode" class="btn" onClick="convertToCode()">Code</a>
     </div>
 
   </div>
