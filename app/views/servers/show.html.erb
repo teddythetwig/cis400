@@ -35,6 +35,17 @@
 <div class="page-header">
   <h1>Database Creation</h1>
 </div>
+<div class="offset10" >
+    <div class="row-fluid">
+        <div class="span5">
+            <h5>Show/Hide Attributes</h5>
+        </div>
+        <div class="span1">
+            <input id="showAttr" onClick="onAttrShow()" type="checkbox" style="float-right" checked>
+        </div>
+    </div>
+</div>
+<br/>
 <div class="container">
   <div id="container"></div>
   <script src="http://www.html5canvastutorials.com/libraries/kinetic-v4.3.0-beta2.js"></script>
@@ -74,6 +85,9 @@ var currGroup = new Kinetic.Group();
 // Finalization variable
 var finalizeIdx = 0;
 var finalizeArr = 0;
+
+//Show variable
+var attrShow = true;
 
 /********* Creation Methods *********/
 
@@ -181,7 +195,7 @@ function createAttr(name, type, tableName, primary, rectX, rectY) {
     }
 
     if (hasPrimaryKey(tableName) && primary) {
-        alert('Table already contains Primary Key');
+        alert('Table already contains Primary Attribute');
         return;
     }
 
@@ -192,10 +206,10 @@ function createAttr(name, type, tableName, primary, rectX, rectY) {
        x: rectX,
        y: rectY,
        text: name,
-       fontSize: 16,
+       fontSize: 14,
        fontFamily: 'Calibri',
        fill: 'white',
-       width: 160,
+       width: 80,
        padding: 20,
        align: 'center'
     });
@@ -207,7 +221,7 @@ function createAttr(name, type, tableName, primary, rectX, rectY) {
       stroke: 'black',
       strokeWidth: 4,
       fill: 'orangered',
-      width: 160,
+      width: 80,
       height: complexText.getHeight(),
       shadowColor: 'black',
       shadowBlur: 10,
@@ -220,8 +234,8 @@ function createAttr(name, type, tableName, primary, rectX, rectY) {
     group.add(rect);
     group.add(complexText);
 
-    //Adding attributes to attribute (AttrGroup, ParentTable, Datatype, PrimaryKey)
-    var attGroup = [group, table, type, primary];
+    //Adding attributes to attribute (AttrGroup, ParentTable, Datatype, PrimaryKey, name)
+    var attGroup = [group, table, type, primary, name];
 
     //Adding attribute to table
     table.attr.push(name);
@@ -285,7 +299,13 @@ function createAttr(name, type, tableName, primary, rectX, rectY) {
     stage.add(layer);
     
     line.moveToBottom();
-    layer.draw();  
+    layer.draw();
+
+    if(!attrShow){
+        line.setVisible(false);
+        group.setVisible(false);
+        layer.draw();
+    }
 }
 
 /*
@@ -481,7 +501,9 @@ function deleteTable(tableName) {
     // Deletes attribute lines from attrLines array
     for(var i = 0; i < attrLines.length; i++) {
         if((attrLines[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
-            attrLines[i][0].remove();
+            if(attrShow) {
+                attrLines[i][0].remove();
+            }
             attrLines.splice(i, 1);
 	    i--;
         }
@@ -490,7 +512,9 @@ function deleteTable(tableName) {
     // Deletes connected attributes from attributes table
     for(var i = 0; i < attributes.length; i++) {
         if(attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
-            attributes[i][0].remove();
+            if(attrShow) {
+                attributes[i][0].remove();
+            }
             attributes.splice(i, 1);
 	    i--;
         }
@@ -636,6 +660,20 @@ function deleteAttribute(attrName, tableName) {
         }
     }
     
+    layer.draw();
+}
+
+function onAttrShow() {
+    attrShow = document.getElementById("showAttr").checked;
+    //Adds/Removes attribute lines from canvas
+    for(var i = 0; i < attrLines.length; i++) {
+        attrLines[i][0].setVisible(attrShow);
+    }
+
+    //Adds/Removes attributes from canvas
+    for(var i = 0; i < attributes.length; i++) {
+        attributes[i][0].setVisible(attrShow);
+    }
     layer.draw();
 }
 
