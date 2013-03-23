@@ -182,7 +182,7 @@ function createTable(tableName, rectX, rectY) {
 /* 
 * Creates attribute
 */
-function createAttr(name, type, tableName, primary, rectX, rectY) {
+function createAttr(name, type, tableName, primary, notNull, unique, rectX, rectY) {
 
     var table = findTable(tableName);
     if(table == null) {
@@ -234,8 +234,8 @@ function createAttr(name, type, tableName, primary, rectX, rectY) {
     group.add(rect);
     group.add(complexText);
 
-    //Adding attributes to attribute (AttrGroup, ParentTable, Datatype, PrimaryKey, name)
-    var attGroup = [group, table, type, primary, name];
+    //Adding attributes to attribute (AttrGroup, ParentTable, Datatype, PrimaryKey, NotNull, Unique)
+    var attGroup = [group, table, type, primary, notNull, unique];
 
     //Adding attribute to table
     table.attr.push(name);
@@ -789,6 +789,16 @@ function convertToSQL() {
                 primary = currAttr[0].get('.Atext')[0].getText();
             }
 
+            //Not Null
+            if(currAttr[4]) {
+                code = code + ' NOT NULL';
+            }
+
+            //Unique
+            if(currAttr[5]) {
+                code = code + ' UNIQUE';
+            }
+
             code = code + ',\n';
         }
         code = code + '\tPRIMARY KEY (' + primary + ')\n'; //Assumes each table has a PRIMARY KEY
@@ -886,11 +896,15 @@ function convertToCode() {
                 code = code + 'DATETIME';
             }
 
+            //Primary Key
             if(currAttr[3]) {
                 code = code + ' NOT NULL';
                 primary = currAttr[0].get('.Atext')[0].getText();
                 primaryKey = true;
             }
+
+
+
             if(primaryKey && ((j + 1) == tables[i].attr.length) || (j+1) < tables[i].attr.length) {
                 code = code + ',</p><p>    ';
             } else {
@@ -1033,9 +1047,11 @@ function saveNewAttr(e) {
   var attrName = document.getElementById("newAttrName").value;
   var attrType = getSelectVal(document.getElementById("newAttrType"));
   var attrPrimary = document.getElementById("setPrimary").checked;
+  var attrNotNull = false;
+  var attrUnique = false;
   if(attrName != "" && uniqueAttrName(attrName, tableName)) {
     $('#newAttributeModal').modal('hide'); // hide modal on save
-    createAttr(attrName, attrType, tableName, attrPrimary, 525, 225);
+    createAttr(attrName, attrType, tableName, attrPrimary, attrNotNull, attrUnique, 525, 225);
   }
   else {
     alert("Attribute names must be unique within a table and nonempty.");
@@ -1600,7 +1616,7 @@ function isFinalized() {
       </div>
       <div class="modal-body">
         <h3>MySQL</h3>
-        <p id="DBCodeMySQL"></p>
+        <div id="DBCodeMySQL"></div>
       </div>
       <div class="modal-footer">
         <button class="btn" data-dismiss="modal">Close</button>
