@@ -158,7 +158,11 @@ function createTable(tableName, rectX, rectY) {
         }
         document.getElementById('attributeTitle').innerHTML = 'Attributes: ';
         document.getElementById('attribute').innerHTML = attrs;
-    }); 
+    });
+
+    group.on('dragstart dragmove', function(){
+        update();
+    });
     
     //Add group to table array  
     tables.push(group);
@@ -262,10 +266,6 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
         update();
     });
 
-    table.on('dragstart dragmove', function(){
-        update();
-    });
-
     //Add group to attributes array  
     attributes.push(attGroup);
     
@@ -304,66 +304,112 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
 /*
  * Creates Relations
  */
-function createRelation(rname, tableName1, tableName2){
-    // Finds the table
-    table1 = findTable(tableName1);
-    table2 = findTable(tableName2);
+function createRelation(rname, tableArr, relX, relY){
 
-    if(table1 == null || table2 == null) {
-        alert('Table not found');
+    // Finds the table
+    var rType = new Array();
+    var rLines = new Array();
+    var rTables = new Array();
+    for(var i = 0; i < tableArr.length; i++) {
+        var currTable = findTable(tableArr[i])
+        if(currTable == null) {
+            alert('Table not found');
+        }
+        rTables.push(currTable);
+        rType.push('undefined');
     }
 
-    var line = new Kinetic.Line({
-        name: rname,
-        points: [table1.getX()+table1.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50, 
-                 table1.getY()+table1.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25, 
-                 table2.getX()+table2.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50,
-                 table2.getY()+table2.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25],
-        stroke: 'red',
-        strokeWidth: 5,
-        lineCap: 'round',
-        lineJoin: 'round'
-      });
+    var group = new Kinetic.Group({draggable: true});
+
+    var complexText = new Kinetic.Text({
+       name: 'Rtext',
+       x: relX,
+       y: relY,
+       text: rname,
+       fontSize: 14,
+       fontFamily: 'Calibri',
+       fill: 'white',
+       width: 80,
+       padding: 20,
+       align: 'center'
+    });
+
+    var ell = new Kinetic.Rect({
+      name: 'shape',
+      x: relX,
+      y: relY,
+      stroke: 'black',
+      strokeWidth: 4,
+      fill: 'green',
+      width: 80,
+      height: complexText.getHeight(),
+      shadowColor: 'black',
+      shadowBlur: 10,
+      shadowOffset: [10, 10],
+      shadowOpacity: 0.2,
+      cornerRadius: 10
+    });
+
+    //Add Elements to group  
+    group.add(ell);
+    group.add(complexText);
 
     // Event handling
-    line.on('mouseover', function() {
+    group.on('mouseover', function() {
         document.body.style.cursor = 'pointer';
     });
-    line.on('mouseout', function() {
+    group.on('mouseout', function() {
         document.body.style.cursor = 'default';
     });  
-    line.on('mousedown', function() {
+    group.on('mousedown', function() {
         if(currGroup.getChildren().length > 0) {
             currGroup.get('.shape')[0].setStroke('black');
         }
-        //currGroup = line;
+        currGroup = group;
 
         document.getElementById('nameTitle').innerHTML = 'Relation Name: ';
         document.getElementById('name').innerHTML = line.getName();
-        //group.get('.shape')[0].setStroke('lightsteelblue');
+        group.get('.shape')[0].setStroke('lightsteelblue');
 
         document.getElementById('attributeTitle').innerHTML = 'Tables: ';
-        document.getElementById('attribute').innerHTML = table1.get('.text')[0].getText() + ', ' + table2.get('.text')[0].getText();
+        var tablesText = '';
+        for(var i = 0; i < rTables.length; i++) {
+            tablesText = tablesText + rTables[i].get('.text')[0].getText();
+            if ((i + 1) < rTables.length) {
+                tablesText = tablesText + ', ';
+            }
+             document.getElementById('attribute').innerHTML = tablesText;
+        }
     });
-
-    table1.on('dragstart dragmove', function(){
+    
+    group.on('dragstart dragmove', function(){
         update();
     });
 
-    table2.on('dragstart dragmove', function(){
-        update();
-    });
+    layer.add(group);
+
+    for(var i = 0; i < rTables.length; i++) {
+        var currTable = rTables[i];
+        var line = new Kinetic.Line({
+            name: rname,
+            points: [group.getX()+currTable.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50, 
+                 group.getY()+currTable.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25, 
+                 currTable.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50,
+                 currTable.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25],
+            stroke: 'red',
+            strokeWidth: 5,
+            lineCap: 'round',
+            lineJoin: 'round'
+        });
+        rLines.push(line);
+        layer.add(line);
+        line.moveToBottom();
+    }
 
     // Adding group of line and tables to realtions array (Line obj, FirstTable, SecondTable, Directionality)
     // 'undefined', 'one-to-one', 'one-to-many', 'many-to-many'
-    var group = [line, table1, table2, 'undefined'];
-    relations.push(group);
-
-    //Add line to stage
-    layer.add(line);
-    stage.add(layer); 
-
-    line.moveToBottom();
+    var currRelation = [group, rLines, rTables, rType];
+    relations.push(currRelation);
     layer.draw();
 }
 
@@ -373,14 +419,17 @@ function createRelation(rname, tableName1, tableName2){
 function update() {
     // Updates relation lines
     for(var i = 0; i < relations.length; i++) {
-        var line = relations[i][0];
-        var table1 = relations[i][1];
-        var table2 = relations[i][2];
-        line.setPoints([table1.getX()+table1.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50, 
-                 table1.getY()+table1.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25, 
-                 table2.getX()+table2.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50,
-                 table2.getY()+table2.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25]);
-        layer.draw();
+        var rel = relations[i][0];
+        var lines = relations[i][1];
+        for(var j = 0; j < lines.length; j++) {
+            var table = relations[i][2][j];
+            var line = lines[j];
+            line.setPoints([table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50, 
+                 table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25, 
+                 rel.getX()+rel.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50,
+                 rel.getY()+rel.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25]);
+            layer.draw();
+        }
     }
     
     // Updates attribute lines
@@ -447,7 +496,7 @@ function editTableName(oldName, newName) {
 function hasPrimaryKey(tableName) {
     var table = findTable(tableName);
     for(var i = 0; i < table.attr.length; i++) {
-	var attrName = table.attr[i];
+	    var attrName = table.attr[i];
         var attr = findAttr(attrName, tableName);
         if(attr[3]) {
             return true;
@@ -1214,12 +1263,15 @@ function saveNewRelation(e) {
   var relName = document.getElementById("relNameA").value;
   var tableName1 = getSelectVal(document.getElementById("tableNameR1"));
   var tableName2 = getSelectVal(document.getElementById("tableNameR2"));
+  var tables = new Array();
+  tables.push(tableName1);
+  tables.push(tableName2);
   if(tableName1 == tableName2) {
     alert("Cannot connect a table to itself.");
   }
   else if(relName != "" && uniqueRelName(relName)) {
     $('#newRelationModal').modal('hide'); // hide modal on save
-    createRelation(relName, tableName1, tableName2);
+    createRelation(relName, tables, 525, 225);
   }
   else {
     alert("Relation names must be unique and nonempty.");
