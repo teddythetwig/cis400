@@ -1089,7 +1089,7 @@ function saveNewAttr(e) {
   var attrName = document.getElementById("newAttrName").value;
   var attrType = getSelectVal(document.getElementById("newAttrType"));
   var attrPrimary = document.getElementById("setPrimary").checked;
-  var attrNotNull = false;
+  var attrNotNull = document.getElementById("setNotNull").checked;
   var attrUnique = false;
   if(attrName != "" && uniqueAttrName(attrName, tableName)) {
     $('#newAttributeModal').modal('hide'); // hide modal on save
@@ -1487,7 +1487,11 @@ function isFinalized() {
       <select id="newAttrType">
       </select><br />
       <input type="checkbox" id="setPrimary" value="1">&nbsp;
-      <label for="setPrimary"><span style="border-bottom:1px dashed #000;" title="Primary Key: uniquely identifies records in this table, e.g. SSN identifies Person">Primary?</span><label>
+      <label for="setPrimary"><span style="border-bottom:1px dashed #000;" title="Primary Key: uniquely identifies records in this table, e.g. SSN identifies Person">Primary?</span><label><br />
+      <input type="checkbox" id="setNotNull" value="1">&nbsp;
+      <label for="setNotNull"><span style="border-bottom:1px dashed #000;" title="Not Null: attribute cannot be missing when added to table, e.g. Name is necessary to differentiate a person, but is not a unique identifier">Not Null?</span><label><br />
+      <input type="checkbox" id="setUnique" value="1">&nbsp;
+      <label for="setUnique"><span style="border-bottom:1px dashed #000;" title="Unique: attribute is unique in this table, e.g. Drivers License is unique but might not be a unique identifier for a Person">Unique?</span><label><br />
     </div>
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal">Close</button>
