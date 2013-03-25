@@ -1,5 +1,18 @@
 ==SIQL (Simple Interactive Query Language)
 
+== Setup
+
+With the introduction of the StanfordCoreNLP gem, it is required that we use RJB as well. To allow this gem to compile, you must set JAVA_HOME in your environment variables. In Ubuntu, the JDK library for version 1.7 is located at /usr/lib/jvm/java-7-oracle/. This can be set by running 
+
+    export "JAVA_HOME=/usr/lib/jvm/java-7-oracle/"
+    
+After that, check to see if you are using the correct java executable. The command 
+
+    readlink -f $(which java)
+
+This will evaluate the symlink in your /usr/bin folder, and should resolve to the same folder that we set as our JAVA_HOME. If its not correct, or is not found, run
+
+    export "PATH=$PATH:/usr/lib/jvm/java-7-oracle/bin/"
 
 == To Run
 
