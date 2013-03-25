@@ -705,6 +705,9 @@ function deleteAttribute(attrName, tableName) {
     layer.draw();
 }
 
+/*
+ * Shows and hides attributes in graph
+ */
 function onAttrShow() {
     attrShow = document.getElementById("showAttr").checked;
     //Adds/Removes attribute lines from canvas
@@ -775,9 +778,26 @@ function uniqueRelName(relName) {
     for(var i = 0; i < relations.length; i++) {
         if(relations[i][0].getName().toLowerCase() == relName.toLowerCase()) {
             return false;
-	}
+	   }
     }
     return true;
+}
+
+/*
+ * Shows and Hides Relations
+ */
+function onRelShow() {
+    relShow = document.getElementById("showRel").checked;
+
+    // Updates relation lines and relation table
+    for(var i = 0; i < relations.length; i++) {
+        var rel = relations[i][0].setVisible(relShow);
+        var lines = relations[i][1];
+        for(var j = 0; j < lines.length; j++) {
+            lines[j].setVisible(relShow);
+        }
+    }
+    layer.draw();
 }
 
 /*
@@ -1678,10 +1698,16 @@ function isFinalized() {
             <div class="span3">
                 <h5>Show/Hide Attributes</h5>
             </div>
-        <div class="span1">
-            <input id="showAttr" onClick="onAttrShow()" type="checkbox" style="float-right" checked>
-        </div>
-    </div>
+            <div class="span1">
+                <input id="showAttr" onClick="onAttrShow()" type="checkbox" style="float-right" checked>
+            </div>
+            <div class="span3">
+                <h5>Show/Hide Relations</h5>
+            </div>
+            <div class="span1">
+                <input id="showRel" onClick="onRelShow()" type="checkbox" style="float-right" checked>
+            </div>
+        </div> <br />
         <table class= "table table-bordered">
             <tr>
                 <td><div id="nameTitle">Table Name: </div></td>
