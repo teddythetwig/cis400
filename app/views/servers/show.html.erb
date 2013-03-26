@@ -722,6 +722,9 @@ function deleteAttribute(attrName, tableName) {
     viewport.draw();
 }
 
+/*
+ * Shows and hides attributes in graph
+ */
 function onAttrShow() {
     attrShow = document.getElementById("showAttr").checked;
     //Adds/Removes attribute lines from canvas
@@ -794,9 +797,26 @@ function uniqueRelName(relName) {
     for(var i = 0; i < relations.length; i++) {
         if(relations[i][0].getName().toLowerCase() == relName.toLowerCase()) {
             return false;
-	}
+	   }
     }
     return true;
+}
+
+/*
+ * Shows and Hides Relations
+ */
+function onRelShow() {
+    relShow = document.getElementById("showRel").checked;
+
+    // Updates relation lines and relation table
+    for(var i = 0; i < relations.length; i++) {
+        var rel = relations[i][0].setVisible(relShow);
+        var lines = relations[i][1];
+        for(var j = 0; j < lines.length; j++) {
+            lines[j].setVisible(relShow);
+        }
+    }
+    layer.draw();
 }
 
 /*
@@ -1108,7 +1128,7 @@ function saveNewAttr(e) {
   var attrName = document.getElementById("newAttrName").value;
   var attrType = getSelectVal(document.getElementById("newAttrType"));
   var attrPrimary = document.getElementById("setPrimary").checked;
-  var attrNotNull = false;
+  var attrNotNull = document.getElementById("setNotNull").checked;
   var attrUnique = false;
   if(attrName != "" && uniqueAttrName(attrName, tableName)) {
     $('#newAttributeModal').modal('hide'); // hide modal on save
@@ -1506,7 +1526,11 @@ function isFinalized() {
       <select id="newAttrType">
       </select><br />
       <input type="checkbox" id="setPrimary" value="1">&nbsp;
-      <label for="setPrimary"><span style="border-bottom:1px dashed #000;" title="Primary Key: uniquely identifies records in this table, e.g. SSN identifies Person">Primary?</span><label>
+      <label for="setPrimary"><span style="border-bottom:1px dashed #000;" title="Primary Key: uniquely identifies records in this table, e.g. SSN identifies Person">Primary?</span><label><br />
+      <input type="checkbox" id="setNotNull" value="1">&nbsp;
+      <label for="setNotNull"><span style="border-bottom:1px dashed #000;" title="Not Null: attribute cannot be missing when added to table, e.g. Name is necessary to differentiate a person, but is not a unique identifier">Not Null?</span><label><br />
+      <input type="checkbox" id="setUnique" value="1">&nbsp;
+      <label for="setUnique"><span style="border-bottom:1px dashed #000;" title="Unique: attribute is unique in this table, e.g. Drivers License is unique but might not be a unique identifier for a Person">Unique?</span><label><br />
     </div>
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal">Close</button>
@@ -1693,10 +1717,16 @@ function isFinalized() {
             <div class="span3">
                 <h5>Show/Hide Attributes</h5>
             </div>
-        <div class="span1">
-            <input id="showAttr" onClick="onAttrShow()" type="checkbox" style="float-right" checked>
-        </div>
-    </div>
+            <div class="span1">
+                <input id="showAttr" onClick="onAttrShow()" type="checkbox" style="float-right" checked>
+            </div>
+            <div class="span3">
+                <h5>Show/Hide Relations</h5>
+            </div>
+            <div class="span1">
+                <input id="showRel" onClick="onRelShow()" type="checkbox" style="float-right" checked>
+            </div>
+        </div> <br />
         <table class= "table table-bordered">
             <tr>
                 <td><div id="nameTitle">Table Name: </div></td>

@@ -3,12 +3,25 @@ class NlpController < ApplicationController
   
   def post
     @text = params[:query]
-    db_blob = JSON.parse(params[:db_json])
-
+    @query = @text.split(" ")
+    db_json = JSON.parse(params[:db_json])
+    
+   
+    @sqlQuery = Nlp::SqlQuery.new(@query)
+    
     @results = []
-
-    @segments = []
-
+    
+    @results << db_json
+    
+    @sqlQuery.addTable('employees', 0)
+    @sqlQuery.addField("employees", "*", 0)
+    # TODO: parse db_json
+    parsePhrase(@sqlQuery, @text, '', 'employees', lemmatizeList(%w{name height hired hours}))
+    
+    # Types: numeric, string, date
+    # CD : cardinal number
+    # NP == Date
+    # else = ignore column & JJ/IN => string
     pipeline =  StanfordCoreNLP.load(:tokenize, :ssplit, :pos, :lemma, :parse, :ner, :dcoref)
     processed = StanfordCoreNLP::Annotation.new(@text)
     pipeline.annotate(processed)
@@ -16,7 +29,6 @@ class NlpController < ApplicationController
     processed.get(:sentences).each do |sentence|
       # Syntatical dependencies
       @results << sentence.get(:tree).to_s
-      intermediate = ''
       sentence.get(:tokens).each do |token|
         # Default annotations for all tokens
         @results << '1: ' + token.get(:value).to_s
@@ -25,14 +37,6 @@ class NlpController < ApplicationController
         @results << '4: ' + token.get(:character_offset_end).to_s
         # POS returned by the tagger
         @results << '5: ' + token.get(:part_of_speech).to_s
-        if (token.get(:part_of_speech).to_s == "IN" || token.get(:part_of_speech).to_s.start_with?('JJ'))
-          intermediate << ">"
-        end
-        intermediate += token.get(:value).to_s + ' '
-        if token.get(:named_entity_tag).to_s == 'O' && (token.get(:part_of_speech).to_s == "CC" || token.get(:part_of_speech).to_s.start_with?('NN'))
-          @segments << intermediate
-          intermediate = ''
-        end
         # Lemma (base form of the token)
         @results << '6: ' + token.get(:lemma).to_s
         # Named entity tag
@@ -43,12 +47,9 @@ class NlpController < ApplicationController
         # Also of interest: coref, coref_chain, 
         # coref_cluster, coref_dest, coref_graph.
       end
-      @segments << intermediate
       @results << ''
       @results << ''
     end
-    
-    @query = @text.split(" ")
     
     #@sqlQuery = Nlp::SqlQuery.new(query)
     #@sqlQuery.addTable("employees", 0)
@@ -86,7 +87,7 @@ class NlpController < ApplicationController
     words = tagged.inject([]){|l,x| l + [/(.*)\/[A-Z]+$/.match(x)[1]]}
     @results << "words: " + words.inspect
 #    @results << "json parse test: " + JSON.parse("{\"tables\":[{\"name\":\"employees\",\"fields\":[{\"name\":\"first_name\",\"type\":\"string\"},{\"name\":\"id\",\"type\":\"int\"}]}]}").inspect
-    @results << "blob" + db_blob.inspect
+    @results << "blob" + db_json.inspect
     
     #####
     #
@@ -96,7 +97,7 @@ class NlpController < ApplicationController
     @results << "Table names:"
     table_names = []
     for i in 0 ... words.size
-      db_blob["tables"].each do |table|
+      db_json["tables"].each do |table|
         if table["name"].stem == words[i].stem
           @results << "Table name: " + table["name"].stem + " at index " + i.to_s + " word stem: " + words[i].stem
           @sqlQuery.addTable(table["name"], i)
@@ -152,5 +153,50 @@ class NlpController < ApplicationController
       @results << Chronic.parse(words[i,j-i+1].join(' '))
     end
 =end
+  end
+  def parsePhrase(sqlQueryObj, phrase, sugg_column, sugg_table, lemmatized_db)
+    pipeline =  StanfordCoreNLP.load(:tokenize, :ssplit, :pos, :lemma, :parse, :ner, :dcoref)
+    processed = StanfordCoreNLP::Annotation.new(phrase)
+    pipeline.annotate(processed)
+    
+    table = sugg_table
+    column = sugg_column
+    value = []
+    operator = []
+    processed.get(:sentences).each do |sentence|
+      # Syntatical dependencies
+      sentence.get(:tokens).each do |token|
+        val = token.get(:original_text).to_s
+        pos = token.get(:part_of_speech).to_s
+        lemma = token.get(:lemma).to_s
+        named_entity = token.get(:named_entity_tag).to_s
+        # Check for column name
+        if pos.start_with? 'NN' or pos.start_with? 'VB'
+          lemmatized_db.get(:tokens).each do |db_col|
+            if lemma == db_col.get(:lemma).to_s
+              column = db_col.get(:original_text).to_s
+            end
+          end
+        # Check for operator
+        elsif pos.start_with? 'JJ' or pos.start_with? 'IN'
+          # if no column yet, check this for column
+          operator << val 
+        # Else is value
+        else
+          value << val
+        end
+      end
+    end
+    
+    sqlQueryObj.addCondition(table, column, operator.join(' '), value.join(' '))
+    
+  end
+  def lemmatizeList(list)
+    pipeline =  StanfordCoreNLP.load(:tokenize, :ssplit, :pos, :lemma)
+    processed = StanfordCoreNLP::Annotation.new(list.join(' '))
+    pipeline.annotate(processed)
+    processed.get(:sentences).each do |sentence|
+      return sentence
+    end
   end
 end
