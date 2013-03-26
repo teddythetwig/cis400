@@ -42,8 +42,8 @@ function Viewport(stage) {
 }
 
 Viewport.prototype.updateViewBounds = function() {
-	this.viewRight = 1100;//this.viewLeft + this.canvasWidth * (1 / this.scale);
-	this.viewBottom = 450;//this.viewTop + this.canvasHeight * (1 / this.scale);
+	this.viewRight = this.viewLeft + this.canvasWidth * (1 / this.scale);
+	this.viewBottom = this.viewTop + this.canvasHeight * (1 / this.scale);
 }
 
 /// <summary>
@@ -130,9 +130,11 @@ Viewport.prototype.add = function(node, /* only required if node doesn't have it
 	this.nodes[node.ID] = node;
 	
 	// apply view-space position adjustment
-	node.x -= this.viewLeft;
-	node.y -= this.viewTop;
-	
+	//node.x -= this.viewLeft;
+	//node.y -= this.viewTop;
+	node.setX(node.getX() - this.viewLeft);
+	node.setY(node.getY() - this.viewTop);	
+
 	// record that the node is not visible, not added to layer
 	//node.isVisible = false;
 	node.setVisible(false);
@@ -170,7 +172,7 @@ Viewport.prototype.updateVisibleNodes = function() {
 	log( "view rect: left=" + viewLeft + ", right=" + viewRight + ", top=" + viewTop + ", bottom=" + viewBottom );
 		
 	// start ClipRect - for testing only
-        /*
+        
 	if( typeof( this.clipRect ) == "undefined" ) {
 
 		// add test polygon for the clipping rect
@@ -196,7 +198,7 @@ Viewport.prototype.updateVisibleNodes = function() {
 		this.clipRect.width = viewRight - viewLeft;
 		
 		this.clipRect.moveToBottom();
-	}*/
+	}
 	// end ClipRect
 	
 	
@@ -205,8 +207,8 @@ Viewport.prototype.updateVisibleNodes = function() {
 		var node = this.getNode(nodeID);
 		
 		// TODO: set node radius to actual value
-		var nodeRadius = 80;//node.radius;
-		var nodeDiameter = 160;//nodeRadius * 2;
+		var nodeRadius = node.radius;
+		var nodeDiameter = nodeRadius * 2;
 		
 		// calculate node positions
 		var nodeLeft = this.getNodeX( nodeID ) - nodeRadius;
@@ -282,7 +284,10 @@ Viewport.prototype.panX = function(amount) {
 	
 	for( var nodeID in this.nodes ) {
 		// move node position by given amount
-		this.nodes[nodeID].x += -panChange;
+		//this.nodes[nodeID].x += -panChange;
+		var node = this.nodes[nodeID];
+		var x = node.getX();
+		node.setX(x-panChange);
 	}
 	
 	// record new view left
@@ -294,7 +299,10 @@ Viewport.prototype.panY = function(amount) {
 	
 	for( var nodeID in this.nodes ) {
 		// move node position by given amount
-		this.nodes[nodeID].y += -panChange;
+		//this.nodes[nodeID].y += -panChange;
+		var node = this.nodes[nodeID];
+		var y = node.getY();
+		node.setY(y-panChange);
 	}
 	
 	// record new view top

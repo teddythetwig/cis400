@@ -396,7 +396,7 @@ function createRelation(rname, tableArr, relX, relY){
     });
 
     //layer.add(group);
-    viewport.add(group,100);
+    viewport.add(group,50);
 
     for(var i = 0; i < rTables.length; i++) {
         var currTable = rTables[i];
@@ -497,7 +497,8 @@ function editTableName(oldName, newName) {
     }
     if(uniqueTableName(newName)) {
         table.get('.text')[0].setText(newName);
-        layer.draw();
+        //layer.draw();
+        viewport.draw();
     }
     else {
         alert("Table names must be unique.");
@@ -816,7 +817,8 @@ function onRelShow() {
             lines[j].setVisible(relShow);
         }
     }
-    layer.draw();
+    //layer.draw();
+    viewport.draw();
 }
 
 /*
