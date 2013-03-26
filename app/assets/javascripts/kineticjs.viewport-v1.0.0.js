@@ -13,8 +13,8 @@ function Viewport(stage) {
     this.maximumScale = 1.5;
     this.scaleRate = 0.03;
 
-	this.canvasWidth = stage.width;
-	this.canvasHeight = stage.height;
+	this.canvasWidth = stage.getWidth();
+	this.canvasHeight = stage.getHeight();
         //alert("width: " + canvasWidth + ", height: " + canvasHeight);
 	
 	// we zero out the view -- position it at 0,0
@@ -42,8 +42,8 @@ function Viewport(stage) {
 }
 
 Viewport.prototype.updateViewBounds = function() {
-	this.viewRight = this.viewLeft + this.canvasWidth * (1 / this.scale);
-	this.viewBottom = this.viewTop + this.canvasHeight * (1 / this.scale);
+	this.viewRight = 1100;//this.viewLeft + this.canvasWidth * (1 / this.scale);
+	this.viewBottom = 450;//this.viewTop + this.canvasHeight * (1 / this.scale);
 }
 
 /// <summary>
@@ -66,38 +66,38 @@ Viewport.prototype.getNewNodeID = function() {
 Viewport.prototype.setNodeX = function( nodeID, x ) {
 	var node = this.getNode( nodeID );
 	
-	node.x = this.viewLeft + x;
+	node.setX(this.viewLeft + x);
 }
 
 Viewport.prototype.setNodeY = function( nodeID, y ) {
 	var node = this.getNode( nodeID );
 	
-	node.y = this.viewTop + y;
+	node.setY(this.viewTop + y);
 }
 
 // returns the game-space position, not the view-space position
 Viewport.prototype.getNodeX = function( nodeID ) {
 	var node = this.getNode( nodeID );
 	
-	return node.x + this.viewLeft;
+	return node.getX() + this.viewLeft;
 }
 
 Viewport.prototype.getNodeY = function( nodeID ) {
 	var node = this.getNode( nodeID );
 	
-	return node.y + this.viewTop;
+	return node.getY() + this.viewTop;
 }
 
 Viewport.prototype.addNodeX = function( nodeID, x ) {
 	var node = this.getNode( nodeID );
 	
-	node.x += x;
+	node.setX(node.getX() + x);
 }
 
 Viewport.prototype.addNodeY = function( nodeID, y ) {
 	var node = this.getNode( nodeID );
 	
-	node.y += y;
+	node.setY(node.getY() + y);
 }
 
 Viewport.prototype.getNode = function( nodeID ) {
@@ -134,8 +134,9 @@ Viewport.prototype.add = function(node, /* only required if node doesn't have it
 	node.y -= this.viewTop;
 	
 	// record that the node is not visible, not added to layer
-	node.isVisible = false;
-	
+	//node.isVisible = false;
+	node.setVisible(false);
+
 	// log event
 	log( "added a new node with ID = " + node.ID );
 	
@@ -169,6 +170,7 @@ Viewport.prototype.updateVisibleNodes = function() {
 	log( "view rect: left=" + viewLeft + ", right=" + viewRight + ", top=" + viewTop + ", bottom=" + viewBottom );
 		
 	// start ClipRect - for testing only
+        /*
 	if( typeof( this.clipRect ) == "undefined" ) {
 
 		// add test polygon for the clipping rect
@@ -194,7 +196,7 @@ Viewport.prototype.updateVisibleNodes = function() {
 		this.clipRect.width = viewRight - viewLeft;
 		
 		this.clipRect.moveToBottom();
-	}
+	}*/
 	// end ClipRect
 	
 	
@@ -203,8 +205,8 @@ Viewport.prototype.updateVisibleNodes = function() {
 		var node = this.getNode(nodeID);
 		
 		// TODO: set node radius to actual value
-		var nodeRadius = node.radius;
-		var nodeDiameter = nodeRadius * 2;
+		var nodeRadius = 80;//node.radius;
+		var nodeDiameter = 160;//nodeRadius * 2;
 		
 		// calculate node positions
 		var nodeLeft = this.getNodeX( nodeID ) - nodeRadius;
@@ -225,14 +227,14 @@ Viewport.prototype.updateVisibleNodes = function() {
 
 		switch( isInView ) {
 			case true:
-				if( !node.isVisible ) {
+				if( !node.isVisible() ) {
 					// node isn't visible, and it needs to be
 					
 					// add node to layer
 					this.layer.add(node);
 					
 					// flag node as visible
-					node.isVisible = true;
+					node.setVisible(true);
 				}
 				
 				/*if( nodeID == 34 ) {
@@ -241,14 +243,14 @@ Viewport.prototype.updateVisibleNodes = function() {
 				break;
 				
 			case false:
-				if( node.isVisible ) {
+				if( node.isVisible() ) {
 					// node is visible, and it shouldn't be
 					
 					// remove node from layer
 					this.layer.remove(node);
 					
 					// flag node as not visible
-					node.isVisible = false;
+					node.setVisible(false);
 					
 					/*if( nodeID == 34 || nodeID == 1 ) {
 						log("hiding node " + nodeID + ": left=" + nodeLeft + ", right=" + nodeRight + ", top=" + nodeTop + ", bottom=" + nodeBottom );
