@@ -172,7 +172,7 @@ Viewport.prototype.updateVisibleNodes = function() {
 	log( "view rect: left=" + viewLeft + ", right=" + viewRight + ", top=" + viewTop + ", bottom=" + viewBottom );
 		
 	// start ClipRect - for testing only
-        
+        /* 
 	if( typeof( this.clipRect ) == "undefined" ) {
 
 		// add test polygon for the clipping rect
@@ -198,7 +198,7 @@ Viewport.prototype.updateVisibleNodes = function() {
 		this.clipRect.width = viewRight - viewLeft;
 		
 		this.clipRect.moveToBottom();
-	}
+	}*/
 	// end ClipRect
 	
 	
@@ -249,7 +249,7 @@ Viewport.prototype.updateVisibleNodes = function() {
 					// node is visible, and it shouldn't be
 					
 					// remove node from layer
-					this.layer.remove(node);
+					//this.layer.remove(node);
 					
 					// flag node as not visible
 					node.setVisible(false);
