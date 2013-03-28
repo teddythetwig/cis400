@@ -26,9 +26,28 @@ class NlpController < ApplicationController
     processed = StanfordCoreNLP::Annotation.new(@text)
     pipeline.annotate(processed)
     
+    
+    #asking for processed.get(:tree) will return nothing. We can only make trees from individual sentances
     processed.get(:sentences).each do |sentence|
       # Syntatical dependencies
       @results << sentence.get(:tree).to_s
+      #if we want to traverse this tree we can use rubies each method to call the java iterator for the treenode class.
+      #this will traverse the tree in a depth first search fashion
+      sentence.get(:tree).each do |treeNode|
+        #These methods come standard with every ruby object, they will allow us to have access in other ways than the .each iterator method
+        puts treeNode.to_a
+        puts treeNode.to_s
+        
+        #return the score of the node(not sure wtf this actually means, I imagine it has to do with probable correctness)
+        puts treeNode.score
+        
+        #To access the other interesting methods(non_symbol methods indicate that they are part of the library), we can run
+        #treeNode.methods.select{|e| e != e.to_sym}
+        #["score", "children", "label", "treeFactory", "nodeString", "setChildren", "setLabel", "setScore", "equals", "toString", "labelFactory", "prune", "isUnaryRewrite", "firstChild", "taggedYield", "pennPrint", "indentedListPrint", "deepCopy", "indexLeaves", "mapDependencies", "taggedLabeledYield", "getLeaves", "isLeaf", "labels", "setValue", "getSpan", "removeChild", "getChild", "iterator", "size", "yield", "depth", "value", "pennString", "headTerminal", "headPreTerminal", "percolateHeads", "yieldWords", "yieldHasWord", "labeledYield", "preTerminalYield", "setLabels", "flatten", "subTrees", "treeSkeletonCopy", "spliceOut", "skipRoot", "ancestor", "postOrderNodeList", "preOrderNodeList", "addChild", "setChild", "dominates", "dominationPath", "pathNodeToNode", "joinNode", "cCommands", "siblings", "insertDtr", "leftCharEdge", "rightCharEdge", "nodeNumber", "getNodeNumber", "percolateHeadIndices", "indexSpans", "isPrePreTerminal", "objectIndexOf", "getChildrenAsList", "lastChild", "upperMostUnary", "setSpans", "constituents", "localTrees", "toStructureDebugString", "toStringBuilder", "printLocalTree", "indentedXMLPrint", "numChildren", "localTree", "isPreTerminal", "isPhrasal", "subTreeList", "hashCode", "setFromString", "dependencies", "parent", "transform", "toArray", "retainAll", "addAll", "isEmpty", "clear", "contains", "remove", "add", "containsAll", "removeAll", "wait", "notify", "notifyAll", "getClass"]
+      end
+      
+      
+      
       sentence.get(:tokens).each do |token|
         # Default annotations for all tokens
         @results << '1: ' + token.get(:value).to_s

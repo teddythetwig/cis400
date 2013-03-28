@@ -4,8 +4,16 @@ gem 'rails', '>=3.2.11'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
+group :test do
+  gem 'cucumber-rails', :require => false
+  gem 'factory_girl_rails'
+  gem 'database_cleaner'
+end
 group :development, :test do
   gem 'sqlite3'
+  gem 'rspec-rails'
+  gem 'rspec'
+  gem 'capybara'
 end
 
 group :production do
@@ -39,6 +47,7 @@ gem 'twitter-bootstrap-rails'
 gem 'engtagger'
 gem 'fast-stemmer'
 gem 'chronic'
+gem 'rjb'
 gem 'stanford-core-nlp'
 
 
