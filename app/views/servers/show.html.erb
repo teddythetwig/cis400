@@ -1304,15 +1304,15 @@ function saveNewRelation(e) {
   var relName = document.getElementById("relNameA").value;
   var tableName1 = getSelectVal(document.getElementById("tableNameR1"));
   var tableName2 = getSelectVal(document.getElementById("tableNameR2"));
-  var tables = new Array();
-  tables.push(tableName1);
-  tables.push(tableName2);
+  var myTables = new Array();
+  myTables.push(tableName1);
+  myTables.push(tableName2);
   if(tableName1 == tableName2) {
     alert("Cannot connect a table to itself.");
   }
   else if(relName != "" && uniqueRelName(relName)) {
     $('#newRelationModal').modal('hide'); // hide modal on save
-    createRelation(relName, tables, 525, 225);
+    createRelation(relName, myTables, 525, 225);
   }
   else {
     alert("Relation names must be unique and nonempty.");
