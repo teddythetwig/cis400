@@ -1,4 +1,3 @@
-
 function log(message) {
 	if( console && console.log ) {
 		console.log(message);
@@ -130,8 +129,6 @@ Viewport.prototype.add = function(node, /* only required if node doesn't have it
 	this.nodes[node.ID] = node;
 	
 	// apply view-space position adjustment
-	//node.x -= this.viewLeft;
-	//node.y -= this.viewTop;
 	node.setX(node.getX() - this.viewLeft);
 	node.setY(node.getY() - this.viewTop);	
 
@@ -163,50 +160,17 @@ Viewport.prototype.updateVisibleNodes = function() {
 	// for each node, determine if node is in bounds. if it is, and isn't visible, add it. if it isn't and is visible, remove it.
 	
 	// store values in local variables for convenience and performance
-	var viewPadding = 50; // for testing only
-	var viewLeft = this.viewLeft + viewPadding;
-	var viewTop = this.viewTop + viewPadding;
-	var viewRight = this.viewRight - viewPadding;
-	var viewBottom = this.viewBottom - viewPadding;
+	var viewLeft = this.viewLeft;
+	var viewTop = this.viewTop;
+	var viewRight = this.viewRight;
+	var viewBottom = this.viewBottom;
 	
 	log( "view rect: left=" + viewLeft + ", right=" + viewRight + ", top=" + viewTop + ", bottom=" + viewBottom );
-		
-	// start ClipRect - for testing only
-        /* 
-	if( typeof( this.clipRect ) == "undefined" ) {
-
-		// add test polygon for the clipping rect
-		this.clipRect = new Kinetic.Rect( {
-				x: viewPadding,
-		    	y: viewPadding,
-		    	stroke: "grey",
-		    	strokeWidth: 1,
-		    	height: viewBottom - viewTop,
-		    	width: viewRight - viewLeft
-        	} );
-        	
-		// add rect to layer
-		this.layer.add(this.clipRect);
-		
-		this.clipRect.moveToBottom();
-	}
-	else
-	{
-		this.clipRect.x = viewPadding;
-		this.clipRect.y = viewPadding;
-		this.clipRect.height = viewBottom - viewTop;
-		this.clipRect.width = viewRight - viewLeft;
-		
-		this.clipRect.moveToBottom();
-	}*/
-	// end ClipRect
-	
 	
 	for( var nodeID in this.nodes ) {
 		// get current node
 		var node = this.getNode(nodeID);
 		
-		// TODO: set node radius to actual value
 		var nodeRadius = node.radius;
 		var nodeDiameter = nodeRadius * 2;
 		
@@ -239,9 +203,6 @@ Viewport.prototype.updateVisibleNodes = function() {
 					node.setVisible(true);
 				}
 				
-				/*if( nodeID == 34 ) {
-					log("showing node " + nodeID + ": left=" + nodeLeft + ", right=" + nodeRight + ", top=" + nodeTop + ", bottom=" + nodeBottom );
-				}*/
 				break;
 				
 			case false:
@@ -254,9 +215,6 @@ Viewport.prototype.updateVisibleNodes = function() {
 					// flag node as not visible
 					node.setVisible(false);
 					
-					/*if( nodeID == 34 || nodeID == 1 ) {
-						log("hiding node " + nodeID + ": left=" + nodeLeft + ", right=" + nodeRight + ", top=" + nodeTop + ", bottom=" + nodeBottom );
-					}*/
 				}
 				break;
 		}
