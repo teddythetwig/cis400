@@ -1,3 +1,6 @@
+var updateX = 0;
+var updateY = 0;
+
 function log(message) {
 	if( console && console.log ) {
 		console.log(message);
@@ -200,6 +203,7 @@ Viewport.prototype.updateVisibleNodes = function() {
 					this.layer.add(node);
 					
 					// flag node as visible
+
 					node.setVisible(true);
 				}
 				

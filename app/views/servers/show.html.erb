@@ -436,10 +436,12 @@ function update() {
         for(var j = 0; j < lines.length; j++) {
             var table = relations[i][2][j];
             var line = lines[j];
-            line.setPoints([table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50, 
-                 table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25, 
-                 rel.getX()+rel.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50,
-                 rel.getY()+rel.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25]);
+	    
+            line.setPoints([table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
+                 table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
+                 rel.getX()+rel.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
+                 rel.getY()+rel.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY]);
+	    
             //layer.draw();
             viewport.draw();
         }
@@ -450,10 +452,10 @@ function update() {
         var line = attrLines[i][0];
         var table = attrLines[i][1];
         var attr = attrLines[i][2];
-        line.setPoints([attr.getX()+attr.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50, 
-                 attr.getY()+attr.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25, 
-                 table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50,
-                 table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25]);
+        line.setPoints([attr.getX()+attr.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
+                 attr.getY()+attr.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
+                 table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
+                 table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY]);
         //layer.draw();
         viewport.draw();
     }
@@ -1802,24 +1804,28 @@ $(document).ready( function() {
 			case ArrowLeft:
 				//stageMoveX--;
 				viewport.panLeft(10);
+				updateX += 10;
 				viewport.draw();
 				event.preventDefault();
 				break;
 				
 			case ArrowRight:
 				viewport.panRight(10);
+				updateX -= 10;
 				viewport.draw();
 				event.preventDefault();
 				break;
 				
 			case ArrowUp:
 				viewport.panUp(10);
+				updateY += 10;
 				viewport.draw();
 				event.preventDefault();
 				break;
 				
 			case ArrowDown:
 				viewport.panDown(10);
+				updateY -= 10;
 				viewport.draw();
 				event.preventDefault();
 				break;
