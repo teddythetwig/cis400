@@ -893,9 +893,46 @@ function convertToSQL() {
 
     //Relation Table Creation
     for(var i = 0; i < relations.length; i++) {
-        tableA = relations[i][1];
+
+        code = code + 'CREATE TABLE MYTEST.' + relations[i][0].get('.Rtext')[0].getText() + '\n(\n\t';
+        for(var j = 0; j < relations[i][2].length; j++) {
+            var currTable = relations[i][2][j];
+            var primary = getPrimaryKey(currTable.get('.text')[0].getText());
+            code = code + primary[0].get('.Atext')[0].getText();
+
+            switch(primary[2])
+            {
+            case 'text':
+                code = code + 'VARCHAR(256)';
+                break;
+            case 'number':
+                code = code + 'INTEGER';
+                break;
+            case 'date':
+                code = code + 'DATETIME';
+            }
+
+            code = code + ' NOT NULL REFERENCES ' + currTable.get('.text')[0].getText() + ' (' + primary[0].get('.Atext')[0].getText();
+
+            if((j + 1) < relations[i][2].length) {
+              code = code + '),\n\t';
+            } else {
+              code = code + ')\n\tPRIMARY KEY (';
+            }
+        }
+        for (var j = 0; j < relations[i][2].length; j++) {
+            var currTable = relations[i][2][j];
+            var primary = getPrimaryKey(currTable.get('.text')[0].getText());
+            code = code + primary[0].get('.Atext')[0].getText();
+            if((j + 1) < relations[i][2].length) {
+              code = code + ', ';
+            } else {
+              code = code + ')\n)\n;\n\n';
+            }
+        };
+        /*tableA = relations[i][1];
         tableB = relations[i][2];
-        /*switch(relations[i][3])
+        switch(relations[i][3])
         {
         case 'one-to-one':
             code = code; //TODO: IMPLEMENT
@@ -903,7 +940,7 @@ function convertToSQL() {
         case 'one-to-many':
             code = code; //TODO: IMPLEMENT
             break;
-        case 'many-to-amy':*/
+        case 'many-to-amy':
             var primaryA = getPrimaryKey(tableA.get('.text')[0].getText());
             var primaryB = getPrimaryKey(tableB.get('.text')[0].getText());
             code = code + 'CREATE TABLE MYTEST.' + relations[i][0].getName() + '\n(\n\t' + primaryA[0].get('.Atext')[0].getText();
@@ -936,7 +973,7 @@ function convertToSQL() {
 
             code = code + ' NOT NULL REFERENCES ' + tableB.get('.text')[0].getText() + ' (' + primaryB[0].get('.Atext')[0].getText() + '),\n\tPRIMARY KEY (' +
                 primaryA[0].get('.Atext')[0].getText() + ', ' + primaryB[0].get('.Atext')[0].getText() + ')\n)\n;\n\n';
-        //}
+        }*/
     }
     alert(code);
     submitQuery('<%= "/users/#{@user.id}/servers/#{@server.id}/query" %>', code, (function(response){alert(response[0])}));
@@ -1006,9 +1043,48 @@ function convertToCode() {
 
     //Relation Table Creation
     for(var i = 0; i < relations.length; i++) {
-        tableA = relations[i][1];
+
+        code = code + 'CREATE TABLE MYTEST.' + relations[i][0].get('.Rtext')[0].getText() + '(</p><p>';
+        for(var j = 0; j < relations[i][2].length; j++) {
+            var currTable = relations[i][2][j];
+            if (!hasPrimaryKey(currTable.get('.text')[0].getText())) {
+              alert('Connected tables must contain Primary Attribute');
+              return;
+            }
+            var primary = getPrimaryKey(currTable.get('.text')[0].getText());
+            code = code + primary[0].get('.Atext')[0].getText();
+
+            switch(primary[2])
+            {
+            case 'text':
+                code = code + ' VARCHAR(256)';
+                break;
+            case 'number':
+                code = code + ' INTEGER';
+                break;
+            case 'date':
+                code = code + ' DATETIME';
+            }
+
+            code = code + ' NOT NULL REFERENCES ' + currTable.get('.text')[0].getText() + ' (' + primary[0].get('.Atext')[0].getText() + '),</p><p>';
+
+            if((j + 1) == relations[i][2].length) {
+              code = code + 'PRIMARY KEY (';
+            }
+        }
+        for (var j = 0; j < relations[i][2].length; j++) {
+            var currTable = relations[i][2][j];
+            var primary = getPrimaryKey(currTable.get('.text')[0].getText());
+            code = code + primary[0].get('.Atext')[0].getText();
+            if((j + 1) < relations[i][2].length) {
+              code = code + ', ';
+            } else {
+              code = code + ')</p><p>); ';
+            }
+        };
+        /*tableA = relations[i][1];
         tableB = relations[i][2];
-        /*switch(relations[i][3])
+        switch(relations[i][3])
         {
         case 'one-to-one':
             code = code; //TODO: IMPLEMENT
@@ -1016,7 +1092,7 @@ function convertToCode() {
         case 'one-to-many':
             code = code; //TODO: IMPLEMENT
             break;
-        case 'many-to-amy':*/
+        case 'many-to-amy':
             var primaryA = getPrimaryKey(tableA.get('.text')[0].getText());
             var primaryB = getPrimaryKey(tableB.get('.text')[0].getText());
             code = code + 'CREATE TABLE ' + relations[i][0].getName() + '(</p><p>    ' + primaryA[0].get('.Atext')[0].getText();
@@ -1049,10 +1125,9 @@ function convertToCode() {
 
             code = code + ' NOT NULL REFERENCES ' + tableB.get('.text')[0].getText() + ' (' + primaryB[0].get('.Atext')[0].getText() + '),\n\tPRIMARY KEY (' +
                 primaryA[0].get('.Atext')[0].getText() + ', ' + primaryB[0].get('.Atext')[0].getText() + ')</p><p>);</p><p>';
-        //}
+        }*/
     }
     code = code + '</p>'
-    //alert(code);
     document.getElementById("DBCodeMySQL").innerHTML = code;
 }
 
