@@ -322,10 +322,11 @@ function createRelation(rname, tableArr, relX, relY){
     for(var i = 0; i < tableArr.length; i++) {
         var currTable = findTable(tableArr[i])
         if(currTable == null) {
-            alert('Table not found');
+          alert('Table not found');
+        } else {
+          rTables.push(currTable);
+          rType.push('undefined');
         }
-        rTables.push(currTable);
-        rType.push('undefined');
     }
 
     var group = new Kinetic.Group({draggable: true});
@@ -377,7 +378,7 @@ function createRelation(rname, tableArr, relX, relY){
         currGroup = group;
 
         document.getElementById('nameTitle').innerHTML = 'Relation Name: ';
-        document.getElementById('name').innerHTML = line.getName();
+        document.getElementById('name').innerHTML = rname;
         group.get('.shape')[0].setStroke('lightsteelblue');
 
         document.getElementById('attributeTitle').innerHTML = 'Tables: ';
@@ -1287,30 +1288,56 @@ function delAttr(e) {
   }
 }
 
+var count;
+
 /*
 * Initializes modal to create new relation
 */
 function initNewRelation() {
   document.getElementById("relNameA").value = "";
-  genSelectInnerHTML("tableNameR1", tables, 1);
-  genSelectInnerHTML("tableNameR2", tables, 1);
-  document.getElementById("tableNameR2").selectedIndex = -1;
+  document.getElementById("tableInputList").innerHTML = "";
+  count = 1;
+  for (var i = 0; i < 2; i++) {
+    createRTableInputs();
+  }
 }
+
+/*
+ * Creates new table inputes
+ */
+function createRTableInputs() {
+
+  var labelName = 'Table name #' + count;
+  var myLabel = document.createElement('label');
+  myLabel.setAttribute("for", labelName);
+  myLabel.innerHTML = '<strong>' + labelName + '</strong>';
+  var mySelect = document.createElement('select');
+  mySelect.setAttribute("id", labelName);
+
+  document.getElementById("tableInputList").appendChild(myLabel);
+  document.getElementById("tableInputList").appendChild(mySelect);
+  genSelectInnerHTML(labelName, tables, 1);
+  document.getElementById(labelName).selectedIndex = -1;
+  count++;
+}
+
 
 /*
 * Saves new relation if valid info from modal
 */
 function saveNewRelation(e) {
   var relName = document.getElementById("relNameA").value;
-  var tableName1 = getSelectVal(document.getElementById("tableNameR1"));
-  var tableName2 = getSelectVal(document.getElementById("tableNameR2"));
   var myTables = new Array();
-  myTables.push(tableName1);
-  myTables.push(tableName2);
-  if(tableName1 == tableName2) {
-    alert("Cannot connect a table to itself.");
+  for (var i = 1; i < count; i++) {
+    var labelName = 'Table name #' + i;
+    var tableName = getSelectVal(document.getElementById(labelName));
+    if(myTables.indexOf(tableName) != -1) {
+      alert("Cannot connect a table to itself.");
+    } else {
+      myTables.push(tableName);
+    }
   }
-  else if(relName != "" && uniqueRelName(relName)) {
+  if(relName != "" && uniqueRelName(relName)) {
     $('#newRelationModal').modal('hide'); // hide modal on save
     createRelation(relName, myTables, 525, 225);
   }
@@ -1635,12 +1662,10 @@ function isFinalized() {
     <div class="modal-body">
       <label for="relNameA"><strong>Relation name</strong></label>
       <input type="text" id="relNameA" value="">
-      <label for="tableNameR1"><strong>Table name #1</strong></label>
-      <select id="tableNameR1">
-      </select>
-      <label for="tableNameR2"><strong>Table name #2</strong></label>
-      <select id="tableNameR2">
-      </select>
+      <div id="tableInputList">
+
+      </div>
+      <button class='btn btn-primary' id="addTableInputs" onClick="createRTableInputs()">Add New Table</button>
     </div>
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal">Close</button>
