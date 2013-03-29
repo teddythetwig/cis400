@@ -109,6 +109,9 @@ var attrShow = true;
 // Viewport
 var viewport = new Viewport(stage);
 
+// JSON obj
+var JSONObj;
+
 /********* Creation Methods *********/
 
 /* 
@@ -855,8 +858,47 @@ function onRelShow() {
 /*
  * Converts xml schema into current schema
  */
-function convert(schema) {
-   return false;   
+function convertToJSON () {
+  var txt = '{ "tables" : [';
+
+  // Tables
+  for (var i = 0; i < tables.length; i++) {
+    var table = tables[i];
+    txt = txt + '{ "name" : "' + tables[i].get('.text')[0].getText() + '" , "xval" : "' + tables[i].getX() + '" , "yval" : "' + tables[i].getY() + '" , "attributes" : [';
+    // Table Attributes
+    for (var j = 0; j < table.attr.length; j++) {
+      var attr = findAttr(table.attr[j], tables[i].get('.text')[0].getText());
+      var type = '';
+      switch(attr[2])
+      {
+      case 'text':
+          type = 'VARCHAR(256)';
+          break;
+      case 'number':
+          type = 'INTEGER';
+          break;
+      case 'date':
+          type = 'DATETIME';
+      }
+      txt = txt + '{ "name" : "' + table.attr[j] + '" , "dataType" : "' + type + '" , "primary" : "' + attr[3] + '" , "notnull" : "' + attr[4] + '" , "unique" : "' + attr[5] + '" , "xval" : "' + attr[0].getX() + '" , "yval" : "' + attr[0].getY() + '" }';
+      if ((j + 1) < table.attr.length) {
+        txt = txt + ', ';
+      }
+    }
+    txt = txt + ']}';
+    if ((i + 1) < tables.length) {
+      txt = txt + ', ';
+    }
+  }
+
+  // Relations
+  txt = txt + '], "relations" : [';
+  for (var i = 0; i < relations.length; i++) {
+    txt = txt + '{ "name" : "' + relations[i][0].get('.Rtext')[0].getText() + '" , "xval" : "' + relations[i][0].getX() + '" , "yval" : "' + relations[i][0].getY() + '" , "tables" : [';
+  }
+  txt = txt + ']}';
+  alert(txt);
+  JSONObj = eval ("(" + txt + ")");   
 }
 
 /*
@@ -1828,7 +1870,7 @@ function isFinalized() {
       </div>
     </div>
 
-  <!-- finalizeModal -->
+  <!-- CodeModal -->
     <div id="DBCode" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="DBCode" aria-hidden="true">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -1888,6 +1930,7 @@ function isFinalized() {
       <a data-toggle="modal" href="#finalizeModal" class="btn btn-success" onclick="initFinalize()">Finalize</a>
       <a class="btn" onclick="convertToSQL()">Convert</a> <!-- Should be called in Finalize when modal is complete -->
       <a data-toggle="modal" href="#DBCode" class="btn" onClick="convertToCode()">Code</a>
+      <a href="#" class="btn" onClick="convertToJSON()">JSON</a>
     </div>
 
   </div>
