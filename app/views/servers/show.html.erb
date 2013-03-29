@@ -920,17 +920,18 @@ function convertToSQL() {
                 code = code + 'DATETIME';
             }
 
+            // Primary Key
             if(currAttr[3]) {
                 code = code + ' NOT NULL';
                 primary = currAttr[0].get('.Atext')[0].getText();
             }
 
-            //Not Null
+            // Not Null
             if(currAttr[4]) {
                 code = code + ' NOT NULL';
             }
 
-            //Unique
+            // Unique
             if(currAttr[5]) {
                 code = code + ' UNIQUE';
             }
@@ -1076,7 +1077,15 @@ function convertToCode() {
                 primaryKey = true;
             }
 
+            //Not Null
+            if(currAttr[4]) {
+                code = code + ' NOT NULL';
+            }
 
+            //Unique
+            if(currAttr[5]) {
+                code = code + ' UNIQUE';
+            }
 
             if(primaryKey && ((j + 1) == tables[i].attr.length) || (j+1) < tables[i].attr.length) {
                 code = code + ',</p><p>    ';
