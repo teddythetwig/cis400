@@ -3,8 +3,6 @@ var updateY = 0;
 
 var relShow = true;
 var attrShow = true;
-var prevRelShow = true;
-var prevAttrShow = true;
 
 function log(message) {
 	if( console && console.log ) {
@@ -237,7 +235,7 @@ Viewport.prototype.updateVisibleNodes = function() {
 		
 	}
 
-	if(attrShow != prevAttrShow) {
+	if(!attrShow) {
 	  //Adds/Removes attribute lines from canvas
           for(var i = 0; i < attrLines.length; i++) {
             attrLines[i][0].setVisible(attrShow);
@@ -247,9 +245,8 @@ Viewport.prototype.updateVisibleNodes = function() {
           for(var i = 0; i < attributes.length; i++) {
             attributes[i][0].setVisible(attrShow);
           }
-          prevAttrShow = attrShow;
         }
-        if(relShow != prevRelShow) {
+        if(!relShow) {
           // Updates relation lines and relation table
           for(var i = 0; i < relations.length; i++) {
             var rel = relations[i][0].setVisible(relShow);
@@ -258,27 +255,7 @@ Viewport.prototype.updateVisibleNodes = function() {
               lines[j].setVisible(relShow);
             }
           }
-          prevRelShow = relShow;
         }
-}
-
-/*
- * Shows and Hides Relations
- */
-function onRelShow() {
-    viewport.draw();
-
-    relShow = document.getElementById("showRel").checked;
-
-    // Updates relation lines and relation table
-    for(var i = 0; i < relations.length; i++) {
-        var rel = relations[i][0].setVisible(relShow);
-        var lines = relations[i][1];
-        for(var j = 0; j < lines.length; j++) {
-            lines[j].setVisible(relShow);
-        }
-    }
-    //layer.draw();
 }
 
 Viewport.prototype.panLeft = function(amount) {
