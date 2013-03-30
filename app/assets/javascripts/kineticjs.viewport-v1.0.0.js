@@ -17,8 +17,8 @@ function Viewport(stage) {
 	// begin scale at 100%
     this.scale = 1.0;
     this.minimumScale = 0.5;
-    this.maximumScale = 1.5;
-    this.scaleRate = 0.03;
+    this.maximumScale = 2.0;
+    this.scaleRate = 0.05;
 
 	this.canvasWidth = stage.getWidth();
 	this.canvasHeight = stage.getHeight();

@@ -2036,28 +2036,28 @@ $(document).ready( function() {
 			case ArrowLeft:
 				//stageMoveX--;
 				viewport.panLeft(10);
-				updateX += 10;
+				updateX += 10 * (1/viewport.scale);
 				viewport.draw();
 				event.preventDefault();
 				break;
 				
 			case ArrowRight:
 				viewport.panRight(10);
-				updateX -= 10;
+				updateX -= 10 * (1/viewport.scale);
 				viewport.draw();
 				event.preventDefault();
 				break;
 				
 			case ArrowUp:
 				viewport.panUp(10);
-				updateY += 10;
+				updateY += 10 * (1/viewport.scale);
 				viewport.draw();
 				event.preventDefault();
 				break;
 				
 			case ArrowDown:
 				viewport.panDown(10);
-				updateY -= 10;
+				updateY -= 10 * (1/viewport.scale);
 				viewport.draw();
 				event.preventDefault();
 				break;
