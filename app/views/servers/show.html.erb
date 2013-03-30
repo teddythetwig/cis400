@@ -112,6 +112,8 @@ var viewport = new Viewport(stage);
 // JSON obj
 var JSONObj;
 
+var test = { "tables" : [{ "name" : "test" , "xval" : "-435" , "yval" : "54" , "attributes" : [{ "name" : "id" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "-436" , "yval" : "155" }]}, { "name" : "test1" , "xval" : "208" , "yval" : "-18" , "attributes" : [{ "name" : "tid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "414" , "yval" : "-35" }]}, { "name" : "test2" , "xval" : "209" , "yval" : "150" , "attributes" : [{ "name" : "id" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "442" , "yval" : "208" }]}], "relations" : [{ "name" : "myTests" , "xval" : "-51" , "yval" : "47" , "attributes" : [{ "name" : "id", "table" : "test"}, { "name" : "tid", "table" : "test1"}, { "name" : "id", "table" : "test2"}]}, { "name" : "anotherTest" , "xval" : "248" , "yval" : "56" , "attributes" : [{ "name" : "tid", "table" : "test1"}, { "name" : "id", "table" : "test2"}]}]};
+
 /********* Creation Methods *********/
 
 /* 
@@ -924,7 +926,8 @@ function convertFromJSON(source) {
   attributes = new Array();
   attrLines = new Array();
   viewport = new Viewport(stage);
-  JSONObj = eval ("(" + txt + ")");
+  JSONObj = source;//eval ("(" + source + ")");
+
 
   // Create tables
   for (var i = 0; i < JSONObj.tables.length; i++) {
@@ -950,11 +953,17 @@ function convertFromJSON(source) {
 
   // Create Relations
   for (var i = 0; i < JSONObj.relations.length; i++) {
-    //TODO: Fix this
     var relation = JSONObj.relations[i];
-
+    var relTables = new Array();
+    for (var j = 0; j < relation.attributes.length; j++) {
+      relTables.push(relation.attributes[j].table);
+    }
+    createRelation(relation.name, relTables, relation.xval, relation.yval);
   }
+}
 
+function testJSON() {
+  convertFromJSON(test);
 }
 
 /*
@@ -1995,7 +2004,8 @@ function isFinalized() {
       <a data-toggle="modal" href="#finalizeModal" class="btn btn-success" onclick="initFinalize()">Finalize</a>
       <a class="btn" onclick="convertToSQL()">Convert</a> <!-- Should be called in Finalize when modal is complete -->
       <a data-toggle="modal" href="#DBCode" class="btn" onClick="convertToCode()">Code</a>
-      <a href="#" class="btn" onClick="convertToJSON()">JSON</a>
+      <button class="btn" onClick="convertToJSON()">JSON</button>
+      <button class="btn" onClick="testJSON()">JSONTest</button>
     </div>
 
   </div>
