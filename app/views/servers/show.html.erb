@@ -653,8 +653,8 @@ function uniqueAttrName(attrName, tableName) {
 */
 function findAttr(attrName, tableName) {
     for(var i = 0; i < attributes.length; i++) {
-        if((attributes[i][0].get('.Atext')[0].getText().toLowerCase() == attrName) &&
-            (attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName)) {
+        if((attributes[i][0].get('.Atext')[0].getText().toLowerCase() == attrName.toLowerCase()) &&
+            (attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
             return attributes[i];
         }
     }
@@ -882,19 +882,23 @@ function convertToJSON () {
     for(var j = 0; j < relations[i][2].length; j++) {
       var tableName = relations[i][2][j].get('.text')[0].getText();
       var primary = getPrimaryKey(tableName);
-      var type = '';
-      switch(primary[2])
-      {
-      case 'text':
-          type = 'VARCHAR(256)';
-          break;
-      case 'number':
-          type = 'INTEGER';
-          break;
-      case 'date':
-          type = 'DATETIME';
+      if (primary != null) {
+        /*var type = '';
+        switch(primary[2])
+        {
+        case 'text':
+            type = 'VARCHAR(256)';
+            break;
+        case 'number':
+            type = 'INTEGER';
+            break;
+        case 'date':
+            type = 'DATETIME';
+        }*/
+        txt = txt + '{ "name" : "' + primary[0].get('.Atext')[0].getText() + '", "table" : "' + tableName + '"}';
+      } else {
+        txt = txt + '{ "name" : " ", "table" : "' + tableName + '"}';
       }
-      txt = txt + '{ "name" : "' + primary[0].get('.Atext')[0].getText() + '", "table" : "' + tableName + '"}';
       if((j + 1) < relations[i][2].length) {
         txt = txt + ', ';
       }
@@ -948,7 +952,7 @@ function convertFromJSON(source) {
   for (var i = 0; i < JSONObj.relations.length; i++) {
     //TODO: Fix this
     var relation = JSONObj.relations[i];
-    
+
   }
 
 }
