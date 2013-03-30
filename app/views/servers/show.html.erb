@@ -409,7 +409,7 @@ function createRelation(rname, tableArr, relX, relY){
         currGroup = group;
 
         document.getElementById('nameTitle').innerHTML = 'Relation Name: ';
-        document.getElementById('name').innerHTML = rname;
+        document.getElementById('name').innerHTML = group.get('.Rtext')[0].getText();
         group.get('.shape')[0].setStroke('lightsteelblue');
 
         document.getElementById('attributeTitle').innerHTML = 'Tables: ';
@@ -784,8 +784,7 @@ function findRelation(relName) {
 */
 function editRelationName(oldRelName, newRelName) {
     var rel = findRelation(oldRelName);
-    //TODO: Gotta figure out how to mess with this
-    rel[0].setName(newRelName);
+    rel.get('.Rtext')[0].setText(newRelName);
 }
 
 /*
@@ -907,15 +906,52 @@ function convertToJSON () {
   }
   txt = txt + ']}';
   alert(txt);
-  JSONObj = eval ("(" + txt + ")");   
+  JSONObj = eval ("(" + txt + ")");
 }
 
 /*
  * Updates current schema with provided JSON schema
  */
- function convertFromJSON(source) {
+function convertFromJSON(source) {
 
- }
+  //Reset global variables
+  tables = new Array();
+  relations = new Array();
+  attributes = new Array();
+  attrLines = new Array();
+  viewport = new Viewport(stage);
+  JSONObj = eval ("(" + txt + ")");
+
+  // Create tables
+  for (var i = 0; i < JSONObj.tables.length; i++) {
+    var table = JSONObj.tables[i];
+    createTable(table.name, table.xval, table.yval);
+    for (var j = 0; j < table.attributes.length; j++) {
+      var attr = table.attributes[j];
+      var type = '';
+      switch(attr.dataType)
+      {
+      case 'VARCHAR(256)':
+          type = 'text';
+          break;
+      case 'INTEGER':
+          type = 'number';
+          break;
+      case 'DATETIME':
+          type = 'date';
+      }
+      createAttr(attr.name, type, table.name, attr.primary, attr.notnull, attr.unique, attr.xval, attr.yval);
+    }
+  }
+
+  // Create Relations
+  for (var i = 0; i < JSONObj.relations.length; i++) {
+    //TODO: Fix this
+    var relation = JSONObj.relations[i];
+    
+  }
+
+}
 
 /*
  * Converts current graph to proper RDS SQL
