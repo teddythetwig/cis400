@@ -718,6 +718,58 @@ function editAttrPrimary(attrName, tableName, primary) {
 }
 
 /*
+* Modifies the not null status of provided attribute if possible
+*/
+function editAttrNotNull(attrName, tableName, notNull) {   
+    var attr = findAttr(attrName, tableName);
+    // check if this action makes sense
+    if(attr[3]) { // primary key is already not null
+        attr[4] = false;
+        return false;
+    }
+    // case 1: update, [true->false]
+    if(attr[4] && !notNull) {
+	attr[4] = false;
+	return true;
+    }
+    // case 2: update if possible, [false->true]
+    else if(!attr[4] && notNull) {
+	attr[4] = true;
+	return true;
+    }
+    // case 3: no change, [true->true] or [false->false]
+    else {
+      return false;
+    }
+}
+
+/*
+* Modifies the unique key status of provided attribute if possible
+*/
+function editAttrUnique(attrName, tableName, unique) {
+    var attr = findAttr(attrName, tableName);
+    // check if this action makes sense
+    if(attr[3]) { // primary key is already not null
+        attr[5] = false;
+        return false;
+    }
+    // case 1: update, [true->false]
+    if(attr[5] && !unique) {
+	attr[5] = false;
+	return true;
+    }
+    // case 2: update if possible, [false->true]
+    else if(!attr[5] && unique) {
+        attr[5] = true;
+        return true;
+    }
+    // case 3: no change, [true->true] or [false->false]
+    else {
+      return false;
+    }
+}
+
+/*
  * Deletes Attribute from attributes and the connected table
  */
 function deleteAttribute(attrName, tableName) {
@@ -1333,6 +1385,8 @@ function initNewAttr() {
   genSelectInnerHTML("newAttrType", datatypes, 0);
   document.getElementById("newAttrName").value = "";
   document.getElementById("setPrimary").checked = false;
+  document.getElementById("setNotNull").checked = false;
+  document.getElementById("setUnique").checked = false;
 }
 
 /*
@@ -1344,7 +1398,7 @@ function saveNewAttr(e) {
   var attrType = getSelectVal(document.getElementById("newAttrType"));
   var attrPrimary = document.getElementById("setPrimary").checked;
   var attrNotNull = document.getElementById("setNotNull").checked;
-  var attrUnique = false;
+  var attrUnique = document.getElementById("setUnique").checked;
   if(attrName != "" && uniqueAttrName(attrName, tableName)) {
     $('#newAttributeModal').modal('hide'); // hide modal on save
     createAttr(attrName, attrType, tableName, attrPrimary, attrNotNull, attrUnique, 525, 225);
@@ -1422,8 +1476,12 @@ function genAttrProps() {
   var attr = findAttr(attrName, tableName);
   var attrTypeIdx = datatypes.indexOf(attr[2]);
   var attrPrimary = ( (attr[3]) ? true : false );
+  var attrNotNull = ( (attr[4]) ? true : false );
+  var attrUnique = ( (attr[5]) ? true : false );
   document.getElementById("editAttrType").selectedIndex = attrTypeIdx;
   document.getElementById("editPrimary").checked = attrPrimary;
+  document.getElementById("editNotNull").checked = attrNotNull;
+  document.getElementById("editUnique").checked = attrUnique;
 }
 
 /*
@@ -1445,8 +1503,11 @@ function saveEditAttr(e) {
   var newAttrName = document.getElementById("editAttrName").value;
   var newAttrType = getSelectVal(document.getElementById("editAttrType"));
   var attrPrimary = document.getElementById("editPrimary").checked;
+  var attrNotNull = document.getElementById("editNotNull").checked;
+  var attrUnique = document.getElementById("editUnique").checked;
   if(oldAttrName == newAttrName) {
-    if(editAttrType(oldAttrName, tableName, newAttrType) || editAttrPrimary(newAttrName, tableName, attrPrimary)) {
+    if(editAttrType(oldAttrName, tableName, newAttrType) || editAttrPrimary(newAttrName, tableName, attrPrimary)
+       || editAttrNotNull(newAttrName, tableName, attrNotNull) || editAttrUnique(newAttrName, tableName, attrUnique)) {
       $('#editAttributeModal').modal('hide'); // hide modal on save
     } 
   }
@@ -1455,6 +1516,8 @@ function saveEditAttr(e) {
     editAttrName(oldAttrName, newAttrName, tableName);
     editAttrType(newAttrName, tableName, newAttrType);
     editAttrPrimary(newAttrName, tableName, attrPrimary);
+    editAttrNotNull(newAttrName, tableName, attrNotNull);
+    editAttrUnique(newAttrName, tableName, attrUnique);
   }
   else {
     alert("Attribute names must be unique within a table and nonempty.");
@@ -1817,7 +1880,11 @@ function isFinalized() {
       <select id="editAttrType">
       </select><br />
       <input type="checkbox" id="editPrimary" value="1">&nbsp;
-      <label for="editPrimary"><span style="border-bottom:1px dashed #000;" title="Primary Key: uniquely identifies records in this table, e.g. SSN identifies Person">Primary?</span><label>
+      <label for="editPrimary"><span style="border-bottom:1px dashed #000;" title="Primary Key: uniquely identifies records in this table, e.g. SSN identifies Person">Primary?</span><label><br />
+      <input type="checkbox" id="editNotNull" value="1">&nbsp;
+      <label for="editNotNull"><span style="border-bottom:1px dashed #000;" title="Not Null: attribute cannot be missing when added to table, e.g. Name is necessary to differentiate a person, but is not a unique identifier">Not Null?</span><label><br />
+      <input type="checkbox" id="editUnique" value="1">&nbsp;
+      <label for="editUnique"><span style="border-bottom:1px dashed #000;" title="Unique: attribute is unique in this table, e.g. Drivers License is unique but might not be a unique identifier for a Person">Unique?</span><label><br />
     </div>
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal">Close</button>
