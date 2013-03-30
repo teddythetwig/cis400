@@ -308,10 +308,10 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
     //Adds connection line
     var line = new Kinetic.Line({
         name: name,
-        points: [group.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50, 
-                 group.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25, 
-                 table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50,
-                 table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25],
+        points: [group.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
+                 group.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
+                 table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
+                 table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY],
         stroke: 'black',
         strokeWidth: 2,
         lineCap: 'round',
@@ -434,10 +434,10 @@ function createRelation(rname, tableArr, relX, relY){
         var currTable = rTables[i];
         var line = new Kinetic.Line({
             name: rname,
-            points: [group.getX()+currTable.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50, 
-                 group.getY()+currTable.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25, 
-                 currTable.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50,
-                 currTable.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25],
+            points: [group.getX()+currTable.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
+                 group.getY()+currTable.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
+                 currTable.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
+                 currTable.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY],
             stroke: 'red',
             strokeWidth: 5,
             lineCap: 'round',
