@@ -772,7 +772,7 @@ function onAttrShow() {
 */
 function findRelation(relName) {
     for(var i = 0; i < relations.length; i++) {
-        if(relations[i][0].getName().toLowerCase() == relName.toLowerCase()) {
+        if(relations[i][0].get('.Rtext')[0].getText().toLowerCase() == relName.toLowerCase()) {
             return relations[i];
         }
     }
@@ -780,10 +780,11 @@ function findRelation(relName) {
 }
 
 /*
-* Modifies the existing relation name to the provided relation name
+* Modifies the existing relation name to the provided relation name 
 */
 function editRelationName(oldRelName, newRelName) {
     var rel = findRelation(oldRelName);
+    //TODO: Gotta figure out how to mess with this
     rel[0].setName(newRelName);
 }
 
@@ -805,8 +806,12 @@ function editRelationType(relName, newRelType) {
  */
 function deleteRelation(relName) {
     for(var i = 0; i < relations.length; i++) {
-        if(relations[i][0].getName().toLowerCase() == relName.toLowerCase()) {
+        if(relations[i][0].get('.Rtext')[0].getText().toLowerCase() == relName.toLowerCase()) {
             relations[i][0].remove();
+            var lines = relations[i][1];
+            for(var j = 0; j < lines.length; j++) {
+              lines[j].remove();
+            }
             relations.splice(i, 1);
         }
     }
@@ -820,7 +825,7 @@ function deleteRelation(relName) {
  */
 function uniqueRelName(relName) {
     for(var i = 0; i < relations.length; i++) {
-        if(relations[i][0].getName().toLowerCase() == relName.toLowerCase()) {
+        if(relations[i][0].get('.Rtext')[0].getText().toLowerCase() == relName.toLowerCase()) {
             return false;
 	   }
     }
