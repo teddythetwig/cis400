@@ -874,7 +874,31 @@ function convertToJSON () {
   // Relations
   txt = txt + '], "relations" : [';
   for (var i = 0; i < relations.length; i++) {
-    txt = txt + '{ "name" : "' + relations[i][0].get('.Rtext')[0].getText() + '" , "xval" : "' + relations[i][0].getX() + '" , "yval" : "' + relations[i][0].getY() + '" , "tables" : [';
+    txt = txt + '{ "name" : "' + relations[i][0].get('.Rtext')[0].getText() + '" , "xval" : "' + relations[i][0].getX() + '" , "yval" : "' + relations[i][0].getY() + '" , "attributes" : [';
+    for(var j = 0; j < relations[i][2].length; j++) {
+      var tableName = relations[i][2][j].get('.text')[0].getText();
+      var primary = getPrimaryKey(tableName);
+      var type = '';
+      switch(primary[2])
+      {
+      case 'text':
+          type = 'VARCHAR(256)';
+          break;
+      case 'number':
+          type = 'INTEGER';
+          break;
+      case 'date':
+          type = 'DATETIME';
+      }
+      txt = txt + '{ "name" : "' + primary[0].get('.Atext')[0].getText() + '", "table" : "' + tableName + '"}';
+      if((j + 1) < relations[i][2].length) {
+        txt = txt + ', ';
+      }
+    }
+    txt = txt + ']}';
+    if ((i + 1) < relations.length) {
+      txt = txt + ', ';
+    }
   }
   txt = txt + ']}';
   alert(txt);
