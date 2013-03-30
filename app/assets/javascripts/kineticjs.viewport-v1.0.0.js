@@ -115,7 +115,7 @@ Viewport.prototype.getNode = function( nodeID ) {
 /// <summary>
 /// Adds the node to the viewport and returns the ID.
 /// </summary>
-Viewport.prototype.add = function(node, /* only required if node doesn't have it */ radius) {
+Viewport.prototype.add = function(node, /* only required if node doesn't have it */ radius, bottom) {
 
 	if( typeof( node.radius ) == "undefined" || node.radius < 1 ) {
 		// node didn't have a valid radius property
@@ -129,6 +129,9 @@ Viewport.prototype.add = function(node, /* only required if node doesn't have it
 			node.radius = radius;
 		}
 	}
+        if( typeof( bottom ) == "undefined" ) {
+	    bottom = false;
+	}
 
 	// get the new node ID and store in node
 	node.ID = this.getNewNodeID();
@@ -140,9 +143,13 @@ Viewport.prototype.add = function(node, /* only required if node doesn't have it
 	node.setX(node.getX() - this.viewLeft);
 	node.setY(node.getY() - this.viewTop);	
 
-	// record that the node is not visible, not added to layer
 	//node.isVisible = false;
-	node.setVisible(false);
+	//node.setVisible(false);
+	this.layer.add(node);
+        
+        if(bottom) {
+	    node.moveToBottom();
+	} 
 
 	// log event
 	log( "added a new node with ID = " + node.ID );
@@ -205,7 +212,7 @@ Viewport.prototype.updateVisibleNodes = function() {
 					// node isn't visible, and it needs to be
 					
 					// add node to layer
-					this.layer.add(node);
+					//this.layer.add(node);
 					
 					// flag node as visible
 
