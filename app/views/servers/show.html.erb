@@ -1430,6 +1430,8 @@ function saveNewAttr(e) {
     alert("The attribute name you selected is reserved by the system.");
     return;
   }
+  if(attrPrimary)     { attrNotNull = false; attrUnique = false; }
+  else if(attrUnique) { attrNotNull = false; }
   if(attrName != "" && uniqueAttrName(attrName, tableName)) {
     $('#newAttributeModal').modal('hide'); // hide modal on save
     createAttr(attrName, attrType, tableName, attrPrimary, attrNotNull, attrUnique, 525, 225);
@@ -1540,12 +1542,8 @@ function saveEditAttr(e) {
     alert("The attribute name you selected is reserved by the system.");
     return;
   }
-  if(oldAttrName == newAttrName) {
-    if(editAttrType(oldAttrName, tableName, newAttrType) || editAttrPrimary(newAttrName, tableName, attrPrimary)
-       || editAttrNotNull(newAttrName, tableName, attrNotNull) || editAttrUnique(newAttrName, tableName, attrUnique)) {
-      $('#editAttributeModal').modal('hide'); // hide modal on save
-    } 
-  }
+  if(attrPrimary)     { attrNotNull = false; attrUnique = false; }
+  else if(attrUnique) { attrNotNull = false; }
   else if(newAttrName != "" && uniqueAttrName(newAttrName, tableName)) {
     $('#editAttributeModal').modal('hide'); // hide modal on save
     editAttrName(oldAttrName, newAttrName, tableName);
