@@ -847,7 +847,8 @@ function findRelation(relName) {
 */
 function editRelationName(oldRelName, newRelName) {
     var rel = findRelation(oldRelName);
-    rel.get('.Rtext')[0].setText(newRelName);
+    rel[0].get('.Rtext')[0].setText(newRelName);
+    viewport.draw();
 }
 
 /*
