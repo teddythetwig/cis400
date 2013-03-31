@@ -1544,6 +1544,12 @@ function saveEditAttr(e) {
   }
   if(attrPrimary)     { attrNotNull = false; attrUnique = false; }
   else if(attrUnique) { attrNotNull = false; }
+  if(oldAttrName == newAttrName) {
+    if(editAttrType(oldAttrName, tableName, newAttrType) || editAttrPrimary(newAttrName, tableName, attrPrimary)
+      || editAttrNotNull(newAttrName, tableName, attrNotNull) || editAttrUnique(newAttrName, tableName, attrUnique)) {
+      $('#editAttributeModal').modal('hide'); // hide modal on save
+    } 
+  }
   else if(newAttrName != "" && uniqueAttrName(newAttrName, tableName)) {
     $('#editAttributeModal').modal('hide'); // hide modal on save
     editAttrName(oldAttrName, newAttrName, tableName);
