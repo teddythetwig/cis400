@@ -1,0 +1,12 @@
+-if !@instances.nil?
+  -@instances.each do |i|
+    %p
+      = i.name
+      = link_to 'edit', edit_user_server_instance_path(@user, @server, i)
+   
+    
+=form_for :instance do |f|
+  =f.text_field :name, :value => "Instance name"
+  =f.submit "Create Instance"
+
+

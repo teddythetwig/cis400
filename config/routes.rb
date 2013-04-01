@@ -2,11 +2,13 @@ CIS400::Application.routes.draw do
   devise_for :users, :path => 'accounts'
   
   resources :users do
-    resources :servers
+    resources :servers do 
+      resources :instances
+    end
   end
-  root :to => "users#index"
+  root :to => "users#show" 
   
-  post "/users/:user_id/servers/:server_id/query" => "servers#query"
+  post "/users/:user_id/servers/:server_id/instances/:id/query" => "instances#query"
   
   controller :nlp do
     get '/nlp' => :index

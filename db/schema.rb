@@ -11,7 +11,15 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130110164347) do
+ActiveRecord::Schema.define(:version => 20130401184458) do
+
+  create_table "instances", :force => true do |t|
+    t.integer  "server_id"
+    t.string   "name"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+    t.text     "db_json"
+  end
 
   create_table "servers", :force => true do |t|
     t.string   "url"
@@ -19,7 +27,6 @@ ActiveRecord::Schema.define(:version => 20130110164347) do
     t.integer  "user_id"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
-    t.text     "db_json"
   end
 
   create_table "users", :force => true do |t|

@@ -1,7 +1,9 @@
 class Server < ActiveRecord::Base
   belongs_to :user
+  has_many :instances, :dependent => :destroy
   validates_presence_of :name, :user
   validates_uniqueness_of :name
+  
   
   # These two callbacks ensure that the application server is syncronized with the RDS server in terms
   # of server existence
@@ -35,19 +37,12 @@ class Server < ActiveRecord::Base
   attr_accessor :sql
  
   
-  # Json values are stored in the database as a string, these methods allow working 
-  # with json as an object without the intermediate step of conversion
-  def db_json
-    ActiveSupport::JSON.decode(self[:db_json])
-  end
-  
-  def db_json=(value)
-    self[:db_json] = ActiveSupport::JSON.encode(value)
-  end
+ 
   
   # Executes query on remote server
-  def make_connection
-    self.sql ||= Mysql2::Client.new(:host => "#{self.url}", :username => "username#{self.user_id}", :password => "cis400", :port => 3306)
+  def make_connection database=nil
+    
+    self.sql ||= Mysql2::Client.new(:host => "#{self.url}", :username => "username#{self.user_id}", :password => "cis400", :port => 3306, :database=>"#{database}")
   end
 
 end
