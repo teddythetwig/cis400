@@ -972,7 +972,9 @@ function convertToJSON () {
       txt = txt + ', ';
     }
   }
-  txt = txt + ']}';
+
+  // Viewport
+  txt = txt + '], "viewport" : { "updateX" : "' + updateX + '", "updateY" : "' + updateY + '", "scale" : "' + viewport.scale + '"} }';
   alert(txt);
   JSONObj = eval ("(" + txt + ")");
 }
@@ -1022,6 +1024,11 @@ function convertFromJSON(source) {
     }
     createRelation(relation.name, relTables, relation.xval, relation.yval);
   }
+
+  // Set viewport
+  viewport.scale = JSONObj.viewport.scale;
+  updateX = JSONObj.viewport.updateX;
+  updateY = JSONObj.viewport.updateY;
 }
 
 function testJSON() {
