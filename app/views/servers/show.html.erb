@@ -119,7 +119,7 @@ var viewport = new Viewport(stage);
 // JSON obj
 var JSONObj;
 
-var test = { "tables" : [{ "name" : "test" , "xval" : "0" , "yval" : "0" , "attributes" : [{ "name" : "id" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "-436" , "yval" : "155" }]}, { "name" : "test1" , "xval" : "208" , "yval" : "-18" , "attributes" : [{ "name" : "tid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "414" , "yval" : "-35" }]}, { "name" : "test2" , "xval" : "209" , "yval" : "150" , "attributes" : [{ "name" : "id" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "442" , "yval" : "208" }]}], "relations" : [{ "name" : "myTests" , "xval" : "-51" , "yval" : "47" , "attributes" : [{ "name" : "id", "table" : "test"}, { "name" : "tid", "table" : "test1"}, { "name" : "id", "table" : "test2"}]}, { "name" : "anotherTest" , "xval" : "248" , "yval" : "56" , "attributes" : [{ "name" : "tid", "table" : "test1"}, { "name" : "id", "table" : "test2"}]}]};
+var test = { "tables" : [{ "name" : "Teacher" , "xval" : "180" , "yval" : "250" , "attributes" : [{ "name" : "tid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "40" , "yval" : "248" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "56" , "yval" : "308" }]}, { "name" : "Student" , "xval" : "720" , "yval" : "248" , "attributes" : [{ "name" : "sid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "942" , "yval" : "212" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "926" , "yval" : "294" }]}], "relations" : [{ "name" : "Teaches" , "xval" : "450" , "yval" : "216" , "attributes" : [{ "name" : "tid", "table" : "Teacher"}, { "name" : "sid", "table" : "Student"}]}]};
 
 /********* Creation Methods *********/
 
@@ -349,7 +349,7 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
 function createRelation(rname, tableArr, relX, relY){
 
     // Finds the table
-    var rType = new Array();
+    var rType = reltypes[0];
     var rLines = new Array();
     var rTables = new Array();
     for(var i = 0; i < tableArr.length; i++) {
@@ -1109,7 +1109,14 @@ function convertToSQL() {
                 code = code + 'DATETIME';
             }
 
-            code = code + ' NOT NULL REFERENCES ' + currTable.get('.text')[0].getText() + ' (' + primary[0].get('.Atext')[0].getText();
+            // Many to Many Relationship (and default)
+            if(relations[i][3] == reltypes[4] || relations[i][3] == reltypes[0]) {
+              code = code + ' NOT NULL REFERENCES ' + currTable.get('.text')[0].getText() + ' (' + primary[0].get('.Atext')[0].getText();
+            } else 
+            // One to One Relationship
+            if (relations[i][3] == reltypes[1]) {
+              code = code + ' UNIQUE NOT NULL REFERENCES ' + currTable.get('.text')[0].getText() + ' (' + primary[0].get('.Atext')[0].getText();
+            }
 
             if((j + 1) < relations[i][2].length) {
               code = code + '),\n\t';
@@ -1126,51 +1133,7 @@ function convertToSQL() {
             } else {
               code = code + ')\n)\n;\n\n';
             }
-        };
-        /*tableA = relations[i][1];
-        tableB = relations[i][2];
-        switch(relations[i][3])
-        {
-        case 'one-to-one':
-            code = code; //TODO: IMPLEMENT
-            break;
-        case 'one-to-many':
-            code = code; //TODO: IMPLEMENT
-            break;
-        case 'many-to-amy':
-            var primaryA = getPrimaryKey(tableA.get('.text')[0].getText());
-            var primaryB = getPrimaryKey(tableB.get('.text')[0].getText());
-            code = code + 'CREATE TABLE MYTEST.' + relations[i][0].getName() + '\n(\n\t' + primaryA[0].get('.Atext')[0].getText();
-            switch(primaryA[2])
-            {
-            case 'text':
-                code = code + 'VARCHAR(256)';
-                break;
-            case 'number':
-                code = code + 'INTEGER';
-                break;
-            case 'date':
-                code = code + 'DATETIME';
-            }
-
-            code = code + ' NOT NULL REFERENCES ' + tableA.get('.text')[0].getText() + ' (' + primaryA[0].get('.Atext')[0].getText() + '),\n\t'
-                + primaryB[0].get('.Atext')[0].getText();
-
-            switch(primaryB[2])
-            {
-            case 'text':
-                code = code + 'VARCHAR(256)';
-                break;
-            case 'number':
-                code = code + 'INTEGER';
-                break;
-            case 'date':
-                code = code + 'DATETIME';
-            }
-
-            code = code + ' NOT NULL REFERENCES ' + tableB.get('.text')[0].getText() + ' (' + primaryB[0].get('.Atext')[0].getText() + '),\n\tPRIMARY KEY (' +
-                primaryA[0].get('.Atext')[0].getText() + ', ' + primaryB[0].get('.Atext')[0].getText() + ')\n)\n;\n\n';
-        }*/
+        }
     }
     alert(code);
     submitQuery('<%= "/users/#{@user.id}/servers/#{@server.id}/query" %>', code, (function(response){alert(response[0])}));
@@ -1271,7 +1234,14 @@ function convertToCode() {
                 code = code + ' DATETIME';
             }
 
-            code = code + ' NOT NULL REFERENCES ' + currTable.get('.text')[0].getText() + ' (' + primary[0].get('.Atext')[0].getText() + '),</p><p>';
+            // Many to Many (and default)
+            if (relations[i][3] == reltypes[4] || relations[i][3] == reltypes[0]) {
+              code = code + ' NOT NULL REFERENCES ' + currTable.get('.text')[0].getText() + ' (' + primary[0].get('.Atext')[0].getText() + '),</p><p>';
+            } else
+            // One to One
+            if (relations[i][3] == reltypes[1]) {
+              code = code + ' UNIQUE NOT NULL REFERENCES ' + currTable.get('.text')[0].getText() + ' (' + primary[0].get('.Atext')[0].getText() + '),</p><p>';
+            }
 
             if((j + 1) == relations[i][2].length) {
               code = code + 'PRIMARY KEY (';
@@ -1286,51 +1256,7 @@ function convertToCode() {
             } else {
               code = code + ')</p><p>); ';
             }
-        };
-        /*tableA = relations[i][1];
-        tableB = relations[i][2];
-        switch(relations[i][3])
-        {
-        case 'one-to-one':
-            code = code; //TODO: IMPLEMENT
-            break;
-        case 'one-to-many':
-            code = code; //TODO: IMPLEMENT
-            break;
-        case 'many-to-amy':
-            var primaryA = getPrimaryKey(tableA.get('.text')[0].getText());
-            var primaryB = getPrimaryKey(tableB.get('.text')[0].getText());
-            code = code + 'CREATE TABLE ' + relations[i][0].getName() + '(</p><p>    ' + primaryA[0].get('.Atext')[0].getText();
-            switch(primaryA[2])
-            {
-            case 'text':
-                code = code + 'VARCHAR(256)';
-                break;
-            case 'number':
-                code = code + 'INTEGER';
-                break;
-            case 'date':
-                code = code + 'DATETIME';
-            }
-
-            code = code + ' NOT NULL REFERENCES ' + tableA.get('.text')[0].getText() + ' (' + primaryA[0].get('.Atext')[0].getText() + '),</p><p>    '
-                + primaryB[0].get('.Atext')[0].getText();
-
-            switch(primaryB[2])
-            {
-            case 'text':
-                code = code + 'VARCHAR(256)';
-                break;
-            case 'number':
-                code = code + 'INTEGER';
-                break;
-            case 'date':
-                code = code + 'DATETIME';
-            }
-
-            code = code + ' NOT NULL REFERENCES ' + tableB.get('.text')[0].getText() + ' (' + primaryB[0].get('.Atext')[0].getText() + '),\n\tPRIMARY KEY (' +
-                primaryA[0].get('.Atext')[0].getText() + ', ' + primaryB[0].get('.Atext')[0].getText() + ')</p><p>);</p><p>';
-        }*/
+        }
     }
     code = code + '</p>'
     document.getElementById("DBCodeMySQL").innerHTML = code;
@@ -2079,7 +2005,7 @@ function isFinalized() {
       <br /><br />
       <a data-toggle="modal" href="#finalizeModal" class="btn btn-success" onclick="initFinalize()">Finalize</a>
       <a class="btn" onclick="convertToSQL()">Convert</a> <!-- Should be called in Finalize when modal is complete -->
-      <a data-toggle="modal" href="#DBCode" class="btn" onClick="convertToCode()">Code</a>
+      <a data-toggle="modal" href="#DBCode" class="btn" onClick="convertToCode()">Show Code</a>
       <button class="btn" onClick="convertToJSON()">JSON</button>
     </div>
 
