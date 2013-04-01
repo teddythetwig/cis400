@@ -819,6 +819,15 @@ function onAttrShow() {
     viewport.draw();
 }
 
+/*
+* Checks if attribute name is valid
+*/
+function validAttrName(attrName) {
+  var name = attrName.toLowerCase();
+  if(attrName == "sysid") { return false; }
+  return true;
+}
+
 /********* Relation Functions *********/
 
 /*
@@ -838,7 +847,8 @@ function findRelation(relName) {
 */
 function editRelationName(oldRelName, newRelName) {
     var rel = findRelation(oldRelName);
-    rel.get('.Rtext')[0].setText(newRelName);
+    rel[0].get('.Rtext')[0].setText(newRelName);
+    viewport.draw();
 }
 
 /*
@@ -1343,6 +1353,12 @@ function saveNewAttr(e) {
   var attrPrimary = document.getElementById("setPrimary").checked;
   var attrNotNull = document.getElementById("setNotNull").checked;
   var attrUnique = document.getElementById("setUnique").checked;
+  if(!validAttrName(attrName)) {
+    alert("The attribute name you selected is reserved by the system.");
+    return;
+  }
+  if(attrPrimary)     { attrNotNull = false; attrUnique = false; }
+  else if(attrUnique) { attrNotNull = false; }
   if(attrName != "" && uniqueAttrName(attrName, tableName)) {
     $('#newAttributeModal').modal('hide'); // hide modal on save
     createAttr(attrName, attrType, tableName, attrPrimary, attrNotNull, attrUnique, 525, 225);
@@ -1449,9 +1465,15 @@ function saveEditAttr(e) {
   var attrPrimary = document.getElementById("editPrimary").checked;
   var attrNotNull = document.getElementById("editNotNull").checked;
   var attrUnique = document.getElementById("editUnique").checked;
+  if(!validAttrName(newAttrName)) {
+    alert("The attribute name you selected is reserved by the system.");
+    return;
+  }
+  if(attrPrimary)     { attrNotNull = false; attrUnique = false; }
+  else if(attrUnique) { attrNotNull = false; }
   if(oldAttrName == newAttrName) {
     if(editAttrType(oldAttrName, tableName, newAttrType) || editAttrPrimary(newAttrName, tableName, attrPrimary)
-       || editAttrNotNull(newAttrName, tableName, attrNotNull) || editAttrUnique(newAttrName, tableName, attrUnique)) {
+      || editAttrNotNull(newAttrName, tableName, attrNotNull) || editAttrUnique(newAttrName, tableName, attrUnique)) {
       $('#editAttributeModal').modal('hide'); // hide modal on save
     } 
   }
@@ -1667,7 +1689,7 @@ function finalizeNext(id) {
     var tname = tables[finalizeIdx-1].get('.text')[0].getText();
     if(pkey == "Don't Know") {
       pkey = "sysid";
-      createAttr(pkey, 'number', tname, true, 525, 225);
+      createAttr(pkey, 'number', tname, true, false, false, 525, 225);
     }
     else {
       editAttrPrimary(pkey, tname, true);
