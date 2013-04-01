@@ -1307,7 +1307,10 @@ function genSelectInnerHTML(id, arr, type, write) {
 * Returns value at current selcted index from HTML selector
 */
 function getSelectVal(select) {
-  return select.options[select.selectedIndex].value;
+  if(select == null) { return null; }
+  else {
+    return select.options[select.selectedIndex].value;
+  }
 }
 
 /*
@@ -1682,28 +1685,60 @@ function initFinalize() {
 */
 function finalizeNext(id) {
   // handle last finalization step
-  if(finalizeArr == 0) finalizeArr++;
+  var div = document.getElementById(id);
+
+  if(finalizeArr == 0) { 
+    finalizeArr++;
+  }
   else if(finalizeArr == 1) { // table constraint
     var pkey = getSelectVal(document.getElementById("finalizeSelector"));
-    alert("pkey: " + pkey);
     var tname = tables[finalizeIdx-1].get('.text')[0].getText();
+    if(finalizeIdx == tables.length || pkey == "sysid") { 
+      finalizeArr++;
+      finalizeIdx = 0;
+      finalizeNext(id);
+    }
+    //alert("pkey: " + pkey);
     if(pkey == "Don't Know") {
       pkey = "sysid";
       createAttr(pkey, 'number', tname, true, false, false, 525, 225);
+      div.innerHTML = "";
+      finalizeNext(id);
     }
     else {
       editAttrPrimary(pkey, tname, true);
+      finalizeNext(id);
     }
-    if(finalizeIdx == tables.length) { finalizeArr++; finalizeIdx = 0; }
   }
-  else if(finalizeArr == 2) { // reltaion constraint
-    if(finalizeIdx == relations.length) { finalizeArr++; finalizeIdx = 0; }
+  else if(finalizeArr == 2) { // attribute constraint
+    if(finalizeIdx == attributes.length) {
+      finalizeArr++;
+      finalizeIdx = 0;
+      finalizeNext(id);
+    }
+    else {
+      var attr = attributes[finalizeIdx-1];
+      if(attr == null) return;
+      var attrNotNull = document.getElementById("constrainNotNull");
+      (attrNotNull == null) ? attrNotNull = false : attrNotNull = attrNotNull.checked;
+      var attrUnique = document.getElementById("constrainUnique");
+      (attrUnique == null) ? attrUnique = false : attrUnique = attrUnique.checked;
+      if(attrUnique)       { attr[5] = true; }
+      else if(attrNotNull) { attr[4] = true; }
+    }
+  }
+  else if(finalizeArr == 3) { // reltaion constraint
+    if(finalizeIdx == relations.length) {
+      finalizeArr++;
+      finalizeIdx = 0;
+      finalizeNext(id);
+    }
+    else { /* update rel */ }
   }
   
   // determine if schema is now fully constrained
   if(!isFinalized()) { 
 
-    var div = document.getElementById(id);
     var html = "";
 
     /*
@@ -1713,8 +1748,8 @@ function finalizeNext(id) {
 
       // display next table constraint (primary key)
       var tableName = tables[finalizeIdx].get('.text')[0].getText();
-      html += "<h4>Table: " + tableName.toLowerCase() + "</h4>";
-      html += "<p>Which of the following attributes is the identifier for your table?</p>";
+      html += "<h4>Constrain Table: " + tableName.toLowerCase() + "</h4>";
+      html += "<p>Does one of the attributes in the list below uniquely identify a distinct table entry?<br /><em>e.g. For a person table, a social security number is unique for a given person and identifies a distinct person.</em><br />If so, select that attribute from the list.  Otherwise, select Don't Know.</p>";
 
       // generate table attrributes selector html
       if(obviousPrimaryKey(tableName)) {
@@ -1737,16 +1772,44 @@ function finalizeNext(id) {
       }
     }
     /*
-    * Case 2: Check relations array for constraints
+    * Case 2: Check attributes array for constraints
     */
     else if(finalizeArr == 2) {
 
       // display next relation constraint (relation types for connected tables)
-      html += "<h4>Relation: " + relations[finalizeIdx].get('.text')[0].getText().toLowerCase() + "</h4>";
-      html += "<p>Does [tableName1] have many [tableName2]?</p>";
-      html += "<p>Does [tableName2] have many [tableName1]?</p>";
+      //alert("attr type: " + attributes[finalizeIdx][2].get('.text')[0].getText());
+      //html += "<h4>Constrain Attribute: " + attributes[finalizeIdx][1].get('.text')[0].getText().toLowerCase() + "." + attributes[finalizeIdx][0].get('.text')[0].getText().toLowerCase() + "</h4>";
+      var attr = attributes[finalizeIdx];
+      if(attr!= null && !attr[3] && !attr[4] && !attr[5]) {
+        html += "<h4>Constrain Attribute: " + attr[1].get('.text')[0].getText().toLowerCase() +  "." + attr[0].get('.Atext')[0].getText().toLowerCase() + "</h4>";
+        html += "<p>Is the above attribute unique for all table entries?<br /><em>e.g. For a user accounts table, an email address is unique for every user account entry.</em><br />If so, check the box below.  Otherwise, leave it blank.</p>";
+      
+        html += "<input type=\"checkbox\" id=\"constrainUnique\" value=\"1\">&nbsp;\n<label for=\"constrainUnique\"><span style=\"border-bottom:1px dashed #000;\">Attribute is Unique</span><label><br />";
+      
+        html += "<p>If the above question does not apply, is the attribute required for every table entry, or is it an optional field?  If it is required, check the box below.  If it is optional, leave it blank.</p>";
+      
+        html += "<input type=\"checkbox\" id=\"constrainNotNull\" value=\"1\">&nbsp;\n<label for=\"constrainNotNull\"><span style=\"border-bottom:1px dashed #000;\">Attribute is Required</span><label><br />";
+     
+        div.innerHTML = html;
+
+        finalizeIdx++;
+      }
+      else {
+        finalizeIdx++;
+	finalizeNext(id);
+      }
+    }
+    /*
+    * Case 3: Check relations array for constraints
+    */
+    else if(finalizeArr == 3) {
+
+      // display next relation constraint (relation types for connected tables)
+      html += "<h4>Constrain Relation: " + relations[finalizeIdx].get('.text')[0].getText().toLowerCase() + "</h4>";
+      html += "<p>Does one of the attributes in the list below uniquely identify a distinct table entry?<br /><em>e.g. For a person table, a social security number is unique for a given person and identifies a distinct person.</em><br />If so, select that attribute from the list.  Otherwise, select Don't Know.</p>";
       
       div.innerHTML = html;
+
       finalizeIdx++;
     }
 
@@ -1759,7 +1822,7 @@ function finalizeNext(id) {
 }
 
 function isFinalized() {
-  return finalizeArr > 2;
+  return finalizeArr > 3;
 }
 
 </script>
