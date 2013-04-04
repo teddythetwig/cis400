@@ -32,7 +32,7 @@ class InstancesController < ApplicationController
   def update
     @instance = Instance.find(params[:id])
     logger.info(params[:json])
-    @instance.db_json = JSON.parse(params[:json])
+    @instance.db_json = params[:json]
     query = params[:query].gsub(/(\n|\t|\r)/, ' ').gsub(/>\s*</, '><').squeeze(' ').split("\;")
     query.reject!(&:blank?)
     logger.info("Parsed query: #{query.each{|t| puts t}}")

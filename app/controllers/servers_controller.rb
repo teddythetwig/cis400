@@ -40,7 +40,7 @@ class ServersController < ApplicationController
     @status = @server.check_status
     if @status != "available"
       flash[:notice] = "Server Status is: #{@status} Server is not available yet, please try again later"
-      redirect_to users_path(@user)
+      redirect_to user_path(@user)
     end
   end
   

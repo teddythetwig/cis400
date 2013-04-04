@@ -12,6 +12,6 @@ class User < ActiveRecord::Base
   
   #On user create, the RDS server will be initialized
   after_create do |s|
-    s.servers << Server.new(:name => "#{self.email.split("@").first}")
+    s.server = Server.new(:name => "#{self.email.split("@").first}")
   end
 end

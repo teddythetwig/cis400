@@ -14,7 +14,7 @@ class Instance < ActiveRecord::Base
   
   # Json values are stored in the database as a string
   def db_json
-    self[:db_json]
+    JSON.parse(self[:db_json])
   end
   
   def db_json=(value)

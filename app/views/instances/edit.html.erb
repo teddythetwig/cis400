@@ -42,7 +42,6 @@
         <option>Select Base Schema</option>
         <option>Test</option>
       </select>
-   
     </div>
     <div class="span2">
       <button class="btn btn-info btn-small" onClick="testJSON()">Load Schema</button>
@@ -80,8 +79,10 @@
   <script type="text/javascript">
 
 /********* Global Variables *********/
-//database name
-var dbName = '<%="#{@instance.name}"%>'
+
+// ID of the instance
+
+var dbInstance = '<%="#{@instance.name}"%>'
 
 // Position of current object
 var x, y;
@@ -122,9 +123,7 @@ var viewport = new Viewport(stage);
 // JSON obj
 var JSONObj;
 
-
-
-var test = { "tables" : [{ "name" : "Teacher" , "xval" : "180" , "yval" : "250" , "attributes" : [{ "name" : "tid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "40" , "yval" : "248" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "56" , "yval" : "308" }]}, { "name" : "Student" , "xval" : "720" , "yval" : "248" , "attributes" : [{ "name" : "sid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "942" , "yval" : "212" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "926" , "yval" : "294" }]}], "relations" : [{ "name" : "Teaches" , "xval" : "450" , "yval" : "216" , "attributes" : [{ "name" : "tid", "table" : "Teacher"}, { "name" : "sid", "table" : "Student"}]}]};
+var test = { "tables" : [{ "name" : "Teacher" , "xval" : "180" , "yval" : "250" , "attributes" : [{ "name" : "tid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "40" , "yval" : "248" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "56" , "yval" : "308" }]}, { "name" : "Student" , "xval" : "720" , "yval" : "248" , "attributes" : [{ "name" : "sid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "942" , "yval" : "212" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "926" , "yval" : "294" }]}], "relations" : [{ "name" : "Teaches" , "xval" : "450" , "yval" : "216" , "attributes" : [{ "name" : "tid", "table" : "Teacher"}, { "name" : "sid", "table" : "Student"}]}], "viewport" : { "updateX" : "0", "updateY" : "0", "scale" : "1"}};
 
 /********* Creation Methods *********/
 
@@ -363,7 +362,6 @@ function createRelation(rname, tableArr, relX, relY){
           alert('Table not found');
         } else {
           rTables.push(currTable);
-          rType.push('undefined');
         }
     }
 
@@ -977,7 +975,9 @@ function convertToJSON () {
       txt = txt + ', ';
     }
   }
-  txt = txt + ']}';
+
+  // Viewport
+  txt = txt + '], "viewport" : { "updateX" : "' + updateX + '", "updateY" : "' + updateY + '", "scale" : "' + viewport.scale + '"} }';
   alert(txt);
   JSONObj = eval ("(" + txt + ")");
   return txt;
@@ -1028,6 +1028,11 @@ function convertFromJSON(source) {
     }
     createRelation(relation.name, relTables, relation.xval, relation.yval);
   }
+
+  // Set viewport
+  viewport.setZoom(JSONObj.viewport.scale);
+  updateX = JSONObj.viewport.updateX;
+  updateY = JSONObj.viewport.updateY;
 }
 
 function testJSON() {
@@ -1047,8 +1052,6 @@ function testJSON() {
  * Converts current graph to proper RDS SQL
  */
 function convertToSQL() {
-  
-    //replace with userinput db name
     var code = '';
     var currName = '';
     var tableA, tableB;
@@ -1056,11 +1059,10 @@ function convertToSQL() {
 
     //Table Creation
     for (var i = 0; i < tables.length; i++) {
-    
+
         var primary = '';
         currName = tables[i].get('.text')[0].getText();
-        //replace with userinput db name
-        code = code + 'CREATE TABLE '+dbName+'.' + currName + '\n(\n';
+        code = code + 'CREATE TABLE ' + dbInstance + '.' + currName + '\n(\n';
         for (var j = 0; j < tables[i].attr.length; j++) {
 
             var currAttr = new Array();
@@ -1109,8 +1111,8 @@ function convertToSQL() {
 
     //Relation Table Creation
     for(var i = 0; i < relations.length; i++) {
-        //repace with user input db name
-        code = code + 'CREATE TABLE '+dbName+'.' + relations[i][0].get('.Rtext')[0].getText() + '\n(\n\t';
+
+        code = code + 'CREATE TABLE '+ dbInstance+'.' + relations[i][0].get('.Rtext')[0].getText() + '\n(\n\t';
         for(var j = 0; j < relations[i][2].length; j++) {
             var currTable = relations[i][2][j];
             var primary = getPrimaryKey(currTable.get('.text')[0].getText());
@@ -1155,15 +1157,13 @@ function convertToSQL() {
         }
     }
     alert(code);
-    submitQuery('<%= "/users/#{@user.id}/servers/#{@server.id}/instances/#{@instance.id}" %>', code,convertToJSON(), (function(response){alert(response[0])}));
+    submitQuery('<%= "/users/#{@user.id}/servers/#{@server.id}/instances/#{@instance.id}" %>', code, convertToJSON(), (function(response){alert(response[0])}));
 }
 
 /*
  * Converts current graph to MySQL
  */
 function convertToCode() {
-  
-    //replace with user input db name
     var code = '';
     var currName = '';
     var tableA, tableB;
@@ -1232,8 +1232,8 @@ function convertToCode() {
 
     //Relation Table Creation
     for(var i = 0; i < relations.length; i++) {
-        //replace with user input db name
-        code = code + 'CREATE TABLE '+dbName+'.' + relations[i][0].get('.Rtext')[0].getText() + '(</p><p>';
+
+        code = code + 'CREATE TABLE '+dbInstance+'.' + relations[i][0].get('.Rtext')[0].getText() + '(</p><p>';
         for(var j = 0; j < relations[i][2].length; j++) {
             var currTable = relations[i][2][j];
             if (!hasPrimaryKey(currTable.get('.text')[0].getText())) {
@@ -1318,7 +1318,10 @@ function genSelectInnerHTML(id, arr, type, write) {
 * Returns value at current selcted index from HTML selector
 */
 function getSelectVal(select) {
-  return select.options[select.selectedIndex].value;
+  if(select == null) { return null; }
+  else {
+    return select.options[select.selectedIndex].value;
+  }
 }
 
 /*
@@ -1653,7 +1656,7 @@ function submitQuery(path, query, json, callback){
   $.ajax({url: path,
     type: 'PUT',
     beforeSend: function(xhr){xhr.setRequestHeader('X-CSRF-TOKEN',$('meta[name="csrf-token"]').attr('content'))},
-    data: 'query=' + query+'&json=' + json,
+    data: 'query=' + query + '&json=' + json,
     success: function(response){callback(response)}
   });
   //$.post(path,q,callback);
@@ -1693,28 +1696,60 @@ function initFinalize() {
 */
 function finalizeNext(id) {
   // handle last finalization step
-  if(finalizeArr == 0) finalizeArr++;
+  var div = document.getElementById(id);
+
+  if(finalizeArr == 0) { 
+    finalizeArr++;
+  }
   else if(finalizeArr == 1) { // table constraint
     var pkey = getSelectVal(document.getElementById("finalizeSelector"));
-    alert("pkey: " + pkey);
     var tname = tables[finalizeIdx-1].get('.text')[0].getText();
+    if(finalizeIdx == tables.length || pkey == "sysid") { 
+      finalizeArr++;
+      finalizeIdx = 0;
+      finalizeNext(id);
+    }
+    //alert("pkey: " + pkey);
     if(pkey == "Don't Know") {
       pkey = "sysid";
       createAttr(pkey, 'number', tname, true, false, false, 525, 225);
+      div.innerHTML = "";
+      finalizeNext(id);
     }
     else {
       editAttrPrimary(pkey, tname, true);
+      finalizeNext(id);
     }
-    if(finalizeIdx == tables.length) { finalizeArr++; finalizeIdx = 0; }
   }
-  else if(finalizeArr == 2) { // reltaion constraint
-    if(finalizeIdx == relations.length) { finalizeArr++; finalizeIdx = 0; }
+  else if(finalizeArr == 2) { // attribute constraint
+    if(finalizeIdx == attributes.length) {
+      finalizeArr++;
+      finalizeIdx = 0;
+      finalizeNext(id);
+    }
+    else {
+      var attr = attributes[finalizeIdx-1];
+      if(attr == null) return;
+      var attrNotNull = document.getElementById("constrainNotNull");
+      (attrNotNull == null) ? attrNotNull = false : attrNotNull = attrNotNull.checked;
+      var attrUnique = document.getElementById("constrainUnique");
+      (attrUnique == null) ? attrUnique = false : attrUnique = attrUnique.checked;
+      if(attrUnique)       { attr[5] = true; }
+      else if(attrNotNull) { attr[4] = true; }
+    }
+  }
+  else if(finalizeArr == 3) { // reltaion constraint
+    if(finalizeIdx == relations.length) {
+      finalizeArr++;
+      finalizeIdx = 0;
+      finalizeNext(id);
+    }
+    else { /* update rel */ }
   }
   
   // determine if schema is now fully constrained
   if(!isFinalized()) { 
 
-    var div = document.getElementById(id);
     var html = "";
 
     /*
@@ -1724,8 +1759,8 @@ function finalizeNext(id) {
 
       // display next table constraint (primary key)
       var tableName = tables[finalizeIdx].get('.text')[0].getText();
-      html += "<h4>Table: " + tableName.toLowerCase() + "</h4>";
-      html += "<p>Which of the following attributes is the identifier for your table?</p>";
+      html += "<h4>Constrain Table: " + tableName.toLowerCase() + "</h4>";
+      html += "<p>Does one of the attributes in the list below uniquely identify a distinct table entry?<br /><em>e.g. For a person table, a social security number is unique for a given person and identifies a distinct person.</em><br />If so, select that attribute from the list.  Otherwise, select Don't Know.</p>";
 
       // generate table attrributes selector html
       if(obviousPrimaryKey(tableName)) {
@@ -1748,16 +1783,44 @@ function finalizeNext(id) {
       }
     }
     /*
-    * Case 2: Check relations array for constraints
+    * Case 2: Check attributes array for constraints
     */
     else if(finalizeArr == 2) {
 
       // display next relation constraint (relation types for connected tables)
-      html += "<h4>Relation: " + relations[finalizeIdx].get('.text')[0].getText().toLowerCase() + "</h4>";
-      html += "<p>Does [tableName1] have many [tableName2]?</p>";
-      html += "<p>Does [tableName2] have many [tableName1]?</p>";
+      //alert("attr type: " + attributes[finalizeIdx][2].get('.text')[0].getText());
+      //html += "<h4>Constrain Attribute: " + attributes[finalizeIdx][1].get('.text')[0].getText().toLowerCase() + "." + attributes[finalizeIdx][0].get('.text')[0].getText().toLowerCase() + "</h4>";
+      var attr = attributes[finalizeIdx];
+      if(attr!= null && !attr[3] && !attr[4] && !attr[5]) {
+        html += "<h4>Constrain Attribute: " + attr[1].get('.text')[0].getText().toLowerCase() +  "." + attr[0].get('.Atext')[0].getText().toLowerCase() + "</h4>";
+        html += "<p>Is the above attribute unique for all table entries?<br /><em>e.g. For a user accounts table, an email address is unique for every user account entry.</em><br />If so, check the box below.  Otherwise, leave it blank.</p>";
+      
+        html += "<input type=\"checkbox\" id=\"constrainUnique\" value=\"1\">&nbsp;\n<label for=\"constrainUnique\"><span style=\"border-bottom:1px dashed #000;\">Attribute is Unique</span><label><br />";
+      
+        html += "<p>If the above question does not apply, is the attribute required for every table entry, or is it an optional field?  If it is required, check the box below.  If it is optional, leave it blank.</p>";
+      
+        html += "<input type=\"checkbox\" id=\"constrainNotNull\" value=\"1\">&nbsp;\n<label for=\"constrainNotNull\"><span style=\"border-bottom:1px dashed #000;\">Attribute is Required</span><label><br />";
+     
+        div.innerHTML = html;
+
+        finalizeIdx++;
+      }
+      else {
+        finalizeIdx++;
+	finalizeNext(id);
+      }
+    }
+    /*
+    * Case 3: Check relations array for constraints
+    */
+    else if(finalizeArr == 3) {
+
+      // display next relation constraint (relation types for connected tables)
+      html += "<h4>Constrain Relation: " + relations[finalizeIdx].get('.text')[0].getText().toLowerCase() + "</h4>";
+      html += "<p>Does one of the attributes in the list below uniquely identify a distinct table entry?<br /><em>e.g. For a person table, a social security number is unique for a given person and identifies a distinct person.</em><br />If so, select that attribute from the list.  Otherwise, select Don't Know.</p>";
       
       div.innerHTML = html;
+
       finalizeIdx++;
     }
 
@@ -1770,7 +1833,7 @@ function finalizeNext(id) {
 }
 
 function isFinalized() {
-  return finalizeArr > 2;
+  return finalizeArr > 3;
 }
 
 </script>
@@ -2115,4 +2178,4 @@ $(document).ready( function() {
 		//event.preventDefault();
 	});
 });
-</script> 
+</script>
