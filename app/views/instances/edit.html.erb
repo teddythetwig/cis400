@@ -41,6 +41,7 @@
       <select id="schemaSelect">
         <option>Select Base Schema</option>
         <option>Test</option>
+        <option>Test2</option>
       </select>
     </div>
     <div class="span2">
@@ -132,6 +133,10 @@ var viewport = new Viewport(stage);
 var JSONObj;
 
 var test = { "tables" : [{ "name" : "Teacher" , "xval" : "180" , "yval" : "250" , "attributes" : [{ "name" : "tid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "40" , "yval" : "248" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "56" , "yval" : "308" }]}, { "name" : "Student" , "xval" : "720" , "yval" : "248" , "attributes" : [{ "name" : "sid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "942" , "yval" : "212" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "926" , "yval" : "294" }]}], "relations" : [{ "name" : "Teaches" , "xval" : "450" , "yval" : "216" , "attributes" : [{ "name" : "tid", "table" : "Teacher"}, { "name" : "sid", "table" : "Student"}]}], "viewport" : { "updateX" : "0", "updateY" : "0", "scale" : "1"}};
+
+var test2 = { "tables" : [{ "name" : "testMe" , "xval" : "895" , "yval" : "385" , "attributes" : []}], "relations" : [], "viewport" : { "updateX" : "370", "updateY" : "160", "scale" : "1"} };
+
+
 
 /********* Creation Methods *********/
 
@@ -965,7 +970,9 @@ function convertToJSON () {
   // Tables
   for (var i = 0; i < tables.length; i++) {
     var table = tables[i];
-    txt = txt + '{ "name" : "' + tables[i].get('.text')[0].getText() + '" , "xval" : "' + (tables[i].getX() + tables[i].origX) + '" , "yval" : "' + (tables[i].getY() + tables[i].origY) + '" , "attributes" : [';
+    var currXVal = tables[i].getX() + tables[i].origX;
+    var currYVal = tables[i].getY() + tables[i].origY;
+    txt = txt + '{ "name" : "' + tables[i].get('.text')[0].getText() + '" , "xval" : "' + currXVal + '" , "yval" : "' + currYVal + '" , "attributes" : [';
     // Table Attributes
     for (var j = 0; j < table.attr.length; j++) {
       var attr = findAttr(table.attr[j], tables[i].get('.text')[0].getText());
@@ -981,7 +988,9 @@ function convertToJSON () {
       case 'date':
           type = 'DATETIME';
       }
-      txt = txt + '{ "name" : "' + table.attr[j] + '" , "dataType" : "' + type + '" , "primary" : "' + attr[3] + '" , "notnull" : "' + attr[4] + '" , "unique" : "' + attr[5] + '" , "xval" : "' + (attr[0].getX() + attr[0].origX) + '" , "yval" : "' + (attr[0].getY() + attr[0].origY) + '" }';
+      currXVal = attr[i].getX() + attr[i].origX;
+      currYVal = attr[i].getY() + attr[i].origY;
+      txt = txt + '{ "name" : "' + table.attr[j] + '" , "dataType" : "' + type + '" , "primary" : "' + attr[3] + '" , "notnull" : "' + attr[4] + '" , "unique" : "' + attr[5] + '" , "xval" : "' + currXVal + '" , "yval" : "' + currYVal + '" }';
       if ((j + 1) < table.attr.length) {
         txt = txt + ', ';
       }
@@ -995,7 +1004,9 @@ function convertToJSON () {
   // Relations
   txt = txt + '], "relations" : [';
   for (var i = 0; i < relations.length; i++) {
-    txt = txt + '{ "name" : "' + relations[i][0].get('.Rtext')[0].getText() + '" , "xval" : "' + (relations[i][0].getX() + relations[i][0].origX) + '" , "yval" : "' + (relations[i][0].getY() + relations[i][0].origY) + '" , "attributes" : [';
+    var currXVal = relations[i][0].getX() + relations[i][0].origX;
+    var currYVal = relations[i][0].getY() + relations[i][0].origY;
+    txt = txt + '{ "name" : "' + relations[i][0].get('.Rtext')[0].getText() + '" , "xval" : "' + currXVal + '" , "yval" : "' + currYVal + '" , "attributes" : [';
     for(var j = 0; j < relations[i][2].length; j++) {
       var tableName = relations[i][2][j].get('.text')[0].getText();
       var primary = getPrimaryKey(tableName);
@@ -1034,7 +1045,7 @@ function convertToJSON () {
 }
 
 /*
- *
+ * Clears the diagram using delete Table function
  */
 function clearDiagram() {
 
@@ -1058,12 +1069,12 @@ function convertFromJSON(source) {
 
   // Create tables
   for (var i = 0; i < JSONObj.tables.length; i++) {
-    var table = JSONObj.tables[i];
-    createTable(table.name, table.xval, table.yval);
-    for (var j = 0; j < table.attributes.length; j++) {
-      var attr = table.attributes[j];
+    var myTable = JSONObj.tables[i];
+    createTable(myTable.name, myTable.xval, myTable.yval);
+    for (var j = 0; j < myTable.attributes.length; j++) {
+      var myAttr = myTable.attributes[j];
       var type = '';
-      switch(attr.dataType)
+      switch(myAttr.dataType)
       {
       case 'VARCHAR(256)':
           type = 'text';
@@ -1074,7 +1085,7 @@ function convertFromJSON(source) {
       case 'DATETIME':
           type = 'date';
       }
-      createAttr(attr.name, type, table.name, attr.primary, attr.notnull, attr.unique, attr.xval, attr.yval);
+      createAttr(myAttr.name, type, myTable.name, myAttr.primary, myAttr.notnull, myAttr.unique, myAttr.xval, myAttr.yval);
     }
   }
 
@@ -1087,9 +1098,12 @@ function convertFromJSON(source) {
     }
     createRelation(relation.name, relTables, relation.xval, relation.yval);
   }
-
+  
   // Set viewport
-  viewport.setZoom(JSONObj.viewport.scale);
+  if(JSONObj.viewport.scale != 1) {
+    viewport.setZoom(JSONObj.viewport.scale);
+    viewport.draw();
+  }
   updateX = JSONObj.viewport.updateX;
   updateY = JSONObj.viewport.updateY;
 }
@@ -1099,6 +1113,9 @@ function testJSON() {
   //var schemaSelected = e.options[e.selectedIndex].value;
   var schemaSelected = getSelectVal(document.getElementById("schemaSelect"));
   switch (schemaSelected) {
+    case 'Test2' :
+      convertFromJSON(test2);
+      break;
     case 'Test' :
       convertFromJSON(test);
       break;
@@ -1797,7 +1814,7 @@ function finalizeNext(id) {
       else if(attrNotNull) { attr[4] = true; }
     }
   }
-  else if(finalizeArr == 3) { // reltaion constraint
+  else if(finalizeArr == 3) { // relation constraint
     if(finalizeIdx == relations.length) {
       finalizeArr++;
       finalizeIdx = 0;
