@@ -40,6 +40,8 @@
     <div class="span3">
       <select id="schemaSelect">
         <option>Select Base Schema</option>
+        <option>Teacher-Student</option>
+        <option>Teacher-Student (U)</option>
         <option>Test</option>
       </select>
     </div>
@@ -58,27 +60,39 @@
         </div>
         <div class="modal-body">
           <h6>Keyboard Controls</h6>
-          <p><i class="icon-arrow-left"></i>   <small>Move diagram to the left</small></p>
-          <p><i class="icon-arrow-right"></i>   <small>Move diagram to the right</small></p>
-          <p><i class="icon-arrow-up"></i>   <small>Move diagram to the up</small></p>
-          <p><i class="icon-arrow-down"></i>   <small>Move diagram to the down</small></p>
+          <p><i class="icon-arrow-left"></i>   <small>Move diagram view to the left</small></p>
+          <p><i class="icon-arrow-right"></i>   <small>Move diagram view to the right</small></p>
+          <p><i class="icon-arrow-up"></i>   <small>Move diagram view up</small></p>
+          <p><i class="icon-arrow-down"></i>   <small>Move diagram view down</small></p>
 
           <h6>Mouse Controls</h6>
           <p><i class="icon-move"></i>   <small>Zoom in by scrolling down or left. Zoom out by scrolling up or right.</small></p>
         </div>
-        <div class="modal-footer">
-          <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-        </div>
       </div>
     </div>
-
   </div>
+  <!-- <div class="offset9">
+    <div class="row-fluid">
+      <div class="span7">
+          <h5>Invert Arrow Keys</h5>
+      </div>
+      <div class="span1">
+        <input id="invControls" onClick="onInvControls()" type="checkbox" style="float-right" checked>
+      </div>
+    </div>
+  </div>-->
   <br />
   <div id="container"></div>
   <script src="http://www.html5canvastutorials.com/libraries/kinetic-v4.3.0-beta2.js"></script>
   <script type="text/javascript">
 
 /********* Global Variables *********/
+
+// ID of the instance
+var dbInstance = "test";
+
+// Control inversion
+var invert = true;
 
 // Position of current object
 var x, y;
@@ -119,7 +133,13 @@ var viewport = new Viewport(stage);
 // JSON obj
 var JSONObj;
 
-var test = { "tables" : [{ "name" : "Teacher" , "xval" : "180" , "yval" : "250" , "attributes" : [{ "name" : "tid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "40" , "yval" : "248" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "56" , "yval" : "308" }]}, { "name" : "Student" , "xval" : "720" , "yval" : "248" , "attributes" : [{ "name" : "sid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "942" , "yval" : "212" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "926" , "yval" : "294" }]}], "relations" : [{ "name" : "Teaches" , "xval" : "450" , "yval" : "216" , "attributes" : [{ "name" : "tid", "table" : "Teacher"}, { "name" : "sid", "table" : "Student"}]}], "viewport" : { "updateX" : "0", "updateY" : "0", "scale" : "1"}};
+var ts = { "tables" : [{ "name" : "Teacher" , "xval" : "180" , "yval" : "250" , "attributes" : [{ "name" : "tid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "40" , "yval" : "248" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "56" , "yval" : "308" }]}, { "name" : "Student" , "xval" : "720" , "yval" : "248" , "attributes" : [{ "name" : "sid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "942" , "yval" : "212" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "926" , "yval" : "294" }]}], "relations" : [{ "name" : "Teaches" , "xval" : "450" , "yval" : "216" , "attributes" : [{ "name" : "tid", "table" : "Teacher"}, { "name" : "sid", "table" : "Student"}]}], "viewport" : { "updateX" : "0", "updateY" : "0", "scale" : "1"}};
+
+var tsu = { "tables" : [{ "name" : "Teacher" , "xval" : "180" , "yval" : "250" , "attributes" : [{ "name" : "tid" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "40" , "yval" : "248" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "56" , "yval" : "308" }]}, { "name" : "Student" , "xval" : "720" , "yval" : "248" , "attributes" : [{ "name" : "sid" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "942" , "yval" : "212" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "926" , "yval" : "294" }]}], "relations" : [{ "name" : "Teaches" , "xval" : "450" , "yval" : "216" , "attributes" : [{ "name" : "tid", "table" : "Teacher"}, { "name" : "sid", "table" : "Student"}]}], "viewport" : { "updateX" : "0", "updateY" : "0", "scale" : "1"}};
+
+var test = { "tables" : [{ "name" : "testMe" , "xval" : "895" , "yval" : "385" , "attributes" : []}], "relations" : [], "viewport" : { "updateX" : "370", "updateY" : "160", "scale" : "1"} };
+
+
 
 /********* Creation Methods *********/
 
@@ -162,13 +182,17 @@ function createTable(tableName, rectX, rectY) {
         cornerRadius: 10
     });
 
-    //Add Elements to group  
+    // Add Elements to group  
     group.add(rect);
     group.add(complexText);
 
-    //Adds an empty attributes and neighbors array
+    // Adds an empty attributes and neighbors array
     group.attr = new Array();
     group.neighbors = new Array();
+
+    // Add original x and y positions
+    group.origX = rectX;
+    group.origY = rectY;
 
     // Event handling
     group.on('mouseover', function() {
@@ -232,7 +256,7 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
         return;
     }
 
-    if (hasPrimaryKey(tableName) && primary) {
+    if (hasPrimaryKey(tableName) && (primary == true)) {
         alert('Table already contains Primary Attribute');
         return;
     }
@@ -271,6 +295,10 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
     //Add Elements to group  
     group.add(rect);
     group.add(complexText);
+
+    // Add original x and y positions
+    group.origX = rectX;
+    group.origY = rectY;
 
     //Adding attributes to attribute (AttrGroup, ParentTable, Datatype, PrimaryKey, NotNull, Unique)
     var attGroup = [group, table, type, primary, notNull, unique];
@@ -317,10 +345,14 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
     //Adds connection line
     var line = new Kinetic.Line({
         name: name,
-        points: [group.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
-                 group.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
-                 table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
-                 table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY],
+        // points: [group.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
+        //          group.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
+        //          table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
+        //          table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY],
+        points: [group.getX()+group.origX+group.getChildren()[0].getWidth()/2-updateX, 
+                 group.getY()+group.origY+group.getChildren()[0].getHeight()/2-updateY, 
+                 table.getX()+table.origX+table.getChildren()[0].getWidth()/2-updateX,
+                 table.getY()+table.origY+table.getChildren()[0].getHeight()/2-updateY],
         stroke: 'black',
         strokeWidth: 2,
         lineCap: 'round',
@@ -396,6 +428,10 @@ function createRelation(rname, tableArr, relX, relY){
     group.add(ell);
     group.add(complexText);
 
+    // Add original x and y positions
+    group.origX = relX;
+    group.origY = relY;
+
     // Event handling
     group.on('mouseover', function() {
         document.body.style.cursor = 'pointer';
@@ -435,10 +471,14 @@ function createRelation(rname, tableArr, relX, relY){
         var currTable = rTables[i];
         var line = new Kinetic.Line({
             name: rname,
-            points: [group.getX()+currTable.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
-                 group.getY()+currTable.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
-                 currTable.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
-                 currTable.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY],
+            // points: [group.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
+            //      group.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
+            //      currTable.getX()+currTable.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
+            //      currTable.getY()+currTable.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY],
+            points: [group.getX()+group.origX+group.getChildren()[0].getWidth()/2-updateX, 
+                 group.getY()+group.origY+group.getChildren()[0].getHeight()/2-updateY, 
+                 currTable.getX()+currTable.origX+currTable.getChildren()[0].getWidth()/2-updateX,
+                 currTable.getY()+currTable.origY+currTable.getChildren()[0].getHeight()/2-updateY],
             stroke: 'red',
             strokeWidth: 5,
             lineCap: 'round',
@@ -470,10 +510,15 @@ function update() {
             var table = relations[i][2][j];
             var line = lines[j];
 	    
-            line.setPoints([table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
-                 table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
-                 rel.getX()+rel.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
-                 rel.getY()+rel.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY]);
+            // line.setPoints([table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
+            //      table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
+            //      rel.getX()+rel.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
+            //      rel.getY()+rel.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY]);
+
+            line.setPoints([table.getX()+table.origX+table.getChildren()[0].getWidth()/2-updateX, 
+                 table.getY()+table.origY+table.getChildren()[0].getHeight()/2-updateY, 
+                 rel.getX()+rel.origX+rel.getChildren()[0].getWidth()/2-updateX,
+                 rel.getY()+rel.origY+rel.getChildren()[0].getHeight()/2-updateY]);
 	    
             //layer.draw();
             viewport.draw();
@@ -485,10 +530,15 @@ function update() {
         var line = attrLines[i][0];
         var table = attrLines[i][1];
         var attr = attrLines[i][2];
-        line.setPoints([attr.getX()+attr.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
-                 attr.getY()+attr.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
-                 table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
-                 table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY]);
+        // line.setPoints([attr.getX()+attr.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
+        //          attr.getY()+attr.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
+        //          table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
+        //          table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY]);
+
+        line.setPoints([attr.getX()+attr.origX+attr.getChildren()[0].getWidth()/2-updateX, 
+                 attr.getY()+attr.origY+attr.getChildren()[0].getHeight()/2-updateY, 
+                 table.getX()+table.origX+table.getChildren()[0].getWidth()/2-updateX,
+                 table.getY()+table.origY+table.getChildren()[0].getHeight()/2-updateY]);
         //layer.draw();
         viewport.draw();
     }
@@ -547,10 +597,10 @@ function hasPrimaryKey(tableName) {
     var table = findTable(tableName);
     for(var i = 0; i < table.attr.length; i++) {
 	    var attrName = table.attr[i];
-        var attr = findAttr(attrName, tableName);
-        if(attr[3]) {
-            return true;
-        }
+      var attr = findAttr(attrName, tableName);
+      if(attr[3] == true) {
+        return true;
+      }
     }
     return false;
 }
@@ -593,35 +643,58 @@ function deleteTable(tableName) {
     // Deletes attribute lines from attrLines array
     for(var i = 0; i < attrLines.length; i++) {
         if((attrLines[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
-            if(attrShow) {
-                attrLines[i][0].remove();
-            }
-            attrLines.splice(i, 1);
-	    i--;
+          if(attrShow) {
+            attrLines[i][0].remove();
+          }
+          attrLines.splice(i, 1);
+	        i--;
         }
     }
     
     // Deletes connected attributes from attributes table
     for(var i = 0; i < attributes.length; i++) {
         if(attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
-            if(attrShow) {
-                attributes[i][0].remove();
-            }
-            attributes.splice(i, 1);
-	    i--;
+          if(attrShow) {
+            attributes[i][0].remove();
+          }
+          attributes.splice(i, 1);
+	        i--;
         }
     }
     
     // Deletes relations connected with table
-     for(var i = 0; i < relations.length; i++) {
-         if((relations[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) ||
-            (relations[i][2].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
-             relations[i][0].remove();
-             relations.splice(i,1);
-	     i--;
-         }
-         
-     }
+    for (var i = 0; i < relations.length; i++) {
+      var found = false;
+
+      // Check if relation contains currentTable
+      for (var j = 0; j < relations[i][2].length; j++) {
+        var curr = relations[i][2][j];
+        if (curr.get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
+          found = true;
+          break;
+        }
+      }
+
+      if (found == true) {
+
+        // Remove all relation lines
+        for (var j = 0; j < relations[i][1].length; j++) {
+          relations[i][1][j].remove();
+        }
+
+        // Remove relation table
+        relations[i][0].remove();
+        relations.splice(i,1);
+        i--;
+      }
+         // if((relations[i][0].get('.Rtext')[0].getText().toLowerCase() == tableName.toLowerCase()) ||
+         //    (relations[i][2].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
+         //     relations[i][0].remove();
+         //     relations.splice(i,1);
+	        //    i--;
+         // }     
+    }
+
     // Delete table from tables array
     for(var i = 0; i < tables.length; i++) {
         if(tables[i].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
@@ -903,6 +976,13 @@ function onRelShow() {
 }
 
 /*
+ * Invert Controls check
+ */
+function onInvControls() {
+    invert = document.getElementById("invControls").checked;
+}
+
+/*
  * Converts schema into JSON schema
  */
 function convertToJSON () {
@@ -911,7 +991,9 @@ function convertToJSON () {
   // Tables
   for (var i = 0; i < tables.length; i++) {
     var table = tables[i];
-    txt = txt + '{ "name" : "' + tables[i].get('.text')[0].getText() + '" , "xval" : "' + tables[i].getX() + '" , "yval" : "' + tables[i].getY() + '" , "attributes" : [';
+    var currXVal = tables[i].getX() + tables[i].origX;
+    var currYVal = tables[i].getY() + tables[i].origY;
+    txt = txt + '{ "name" : "' + tables[i].get('.text')[0].getText() + '" , "xval" : "' + currXVal + '" , "yval" : "' + currYVal + '" , "attributes" : [';
     // Table Attributes
     for (var j = 0; j < table.attr.length; j++) {
       var attr = findAttr(table.attr[j], tables[i].get('.text')[0].getText());
@@ -927,7 +1009,9 @@ function convertToJSON () {
       case 'date':
           type = 'DATETIME';
       }
-      txt = txt + '{ "name" : "' + table.attr[j] + '" , "dataType" : "' + type + '" , "primary" : "' + attr[3] + '" , "notnull" : "' + attr[4] + '" , "unique" : "' + attr[5] + '" , "xval" : "' + attr[0].getX() + '" , "yval" : "' + attr[0].getY() + '" }';
+      currXVal = attr[i].getX() + attr[i].origX;
+      currYVal = attr[i].getY() + attr[i].origY;
+      txt = txt + '{ "name" : "' + table.attr[j] + '" , "dataType" : "' + type + '" , "primary" : "' + attr[3] + '" , "notnull" : "' + attr[4] + '" , "unique" : "' + attr[5] + '" , "xval" : "' + currXVal + '" , "yval" : "' + currYVal + '" }';
       if ((j + 1) < table.attr.length) {
         txt = txt + ', ';
       }
@@ -941,7 +1025,9 @@ function convertToJSON () {
   // Relations
   txt = txt + '], "relations" : [';
   for (var i = 0; i < relations.length; i++) {
-    txt = txt + '{ "name" : "' + relations[i][0].get('.Rtext')[0].getText() + '" , "xval" : "' + relations[i][0].getX() + '" , "yval" : "' + relations[i][0].getY() + '" , "attributes" : [';
+    var currXVal = relations[i][0].getX() + relations[i][0].origX;
+    var currYVal = relations[i][0].getY() + relations[i][0].origY;
+    txt = txt + '{ "name" : "' + relations[i][0].get('.Rtext')[0].getText() + '" , "xval" : "' + currXVal + '" , "yval" : "' + currYVal + '" , "attributes" : [';
     for(var j = 0; j < relations[i][2].length; j++) {
       var tableName = relations[i][2][j].get('.text')[0].getText();
       var primary = getPrimaryKey(tableName);
@@ -976,6 +1062,21 @@ function convertToJSON () {
   txt = txt + '], "viewport" : { "updateX" : "' + updateX + '", "updateY" : "' + updateY + '", "scale" : "' + viewport.scale + '"} }';
   alert(txt);
   JSONObj = eval ("(" + txt + ")");
+  return txt;
+}
+
+/*
+ * Clears the diagram using delete Table
+ */
+function clearDiagram() {
+
+  // Delete every table and anything attached to it
+  while(tables.length > 0) {
+    deleteTable(tables[0].get('.text')[0].getText().toLowerCase());
+  }
+
+  // Reset global variables
+  viewport = new Viewport(stage);
 }
 
 /*
@@ -983,23 +1084,18 @@ function convertToJSON () {
  */
 function convertFromJSON(source) {
 
-  //Reset global variables
-  tables = new Array();
-  relations = new Array();
-  attributes = new Array();
-  attrLines = new Array();
-  viewport = new Viewport(stage);
+  clearDiagram();
   JSONObj = source;//eval ("(" + source + ")");
 
 
   // Create tables
   for (var i = 0; i < JSONObj.tables.length; i++) {
-    var table = JSONObj.tables[i];
-    createTable(table.name, table.xval, table.yval);
-    for (var j = 0; j < table.attributes.length; j++) {
-      var attr = table.attributes[j];
+    var myTable = JSONObj.tables[i];
+    createTable(myTable.name, parseInt(myTable.xval), parseInt(myTable.yval));
+    for (var j = 0; j < myTable.attributes.length; j++) {
+      var myAttr = myTable.attributes[j];
       var type = '';
-      switch(attr.dataType)
+      switch(myAttr.dataType)
       {
       case 'VARCHAR(256)':
           type = 'text';
@@ -1010,7 +1106,10 @@ function convertFromJSON(source) {
       case 'DATETIME':
           type = 'date';
       }
-      createAttr(attr.name, type, table.name, attr.primary, attr.notnull, attr.unique, attr.xval, attr.yval);
+      (myAttr.primary == "true") ? myAttr.primary = true : myAttr.primary = false;
+      (myAttr.notnull == "true") ? myAttr.notnull = true : myAttr.notnull = false;
+      (myAttr.unique == "true") ? myAttr.unique = true : myAttr.unique = false;
+      createAttr(myAttr.name, type, myTable.name, myAttr.primary, myAttr.notnull, myAttr.unique, parseInt(myAttr.xval), parseInt(myAttr.yval));
     }
   }
 
@@ -1021,13 +1120,16 @@ function convertFromJSON(source) {
     for (var j = 0; j < relation.attributes.length; j++) {
       relTables.push(relation.attributes[j].table);
     }
-    createRelation(relation.name, relTables, relation.xval, relation.yval);
+    createRelation(relation.name, relTables, parseInt(relation.xval), parseInt(relation.yval));
   }
-
+  
   // Set viewport
-  viewport.setZoom(JSONObj.viewport.scale);
-  updateX = JSONObj.viewport.updateX;
-  updateY = JSONObj.viewport.updateY;
+  if(JSONObj.viewport.scale != 1) {
+    viewport.setZoom(parseInt(JSONObj.viewport.scale));
+    viewport.draw();
+  }
+  updateX = parseInt(JSONObj.viewport.updateX);
+  updateY = parseInt(JSONObj.viewport.updateY);
 }
 
 function testJSON() {
@@ -1035,6 +1137,12 @@ function testJSON() {
   //var schemaSelected = e.options[e.selectedIndex].value;
   var schemaSelected = getSelectVal(document.getElementById("schemaSelect"));
   switch (schemaSelected) {
+    case 'Teacher-Student' :
+      convertFromJSON(ts);
+      break;
+    case 'Teacher-Student (U)' :
+      convertFromJSON(tsu);
+      break;
     case 'Test' :
       convertFromJSON(test);
       break;
@@ -1047,7 +1155,7 @@ function testJSON() {
  * Converts current graph to proper RDS SQL
  */
 function convertToSQL() {
-    var code = 'CREATE DATABASE MYTEST%3B\n';
+    var code = '';
     var currName = '';
     var tableA, tableB;
 
@@ -1057,7 +1165,7 @@ function convertToSQL() {
 
         var primary = '';
         currName = tables[i].get('.text')[0].getText();
-        code = code + 'CREATE TABLE MYTEST.' + currName + '\n(\n';
+        code = code + 'CREATE TABLE ' + dbInstance + '.' + currName + '\n(\n';
         for (var j = 0; j < tables[i].attr.length; j++) {
 
             var currAttr = new Array();
@@ -1107,7 +1215,7 @@ function convertToSQL() {
     //Relation Table Creation
     for(var i = 0; i < relations.length; i++) {
 
-        code = code + 'CREATE TABLE MYTEST.' + relations[i][0].get('.Rtext')[0].getText() + '\n(\n\t';
+        code = code + 'CREATE TABLE '+ dbInstance+'.' + relations[i][0].get('.Rtext')[0].getText() + '\n(\n\t';
         for(var j = 0; j < relations[i][2].length; j++) {
             var currTable = relations[i][2][j];
             var primary = getPrimaryKey(currTable.get('.text')[0].getText());
@@ -1152,14 +1260,13 @@ function convertToSQL() {
         }
     }
     alert(code);
-    submitQuery('<%= "/users/#{@user.id}/servers/#{@server.id}/query" %>', code, convertToJSON(), (function(response){alert(response[0])}));
 }
 
 /*
  * Converts current graph to MySQL
  */
 function convertToCode() {
-    var code = '<p>CREATE DATABASE MYTEST;</p><p>USE MYTEST;</p><p>';
+    var code = '';
     var currName = '';
     var tableA, tableB;
 
@@ -1228,7 +1335,7 @@ function convertToCode() {
     //Relation Table Creation
     for(var i = 0; i < relations.length; i++) {
 
-        code = code + 'CREATE TABLE MYTEST.' + relations[i][0].get('.Rtext')[0].getText() + '(</p><p>';
+        code = code + 'CREATE TABLE '+dbInstance+'.' + relations[i][0].get('.Rtext')[0].getText() + '(</p><p>';
         for(var j = 0; j < relations[i][2].length; j++) {
             var currTable = relations[i][2][j];
             if (!hasPrimaryKey(currTable.get('.text')[0].getText())) {
@@ -1647,11 +1754,11 @@ function delRelation(e) {
 /*
 * Sends post request to query endpoint
 */
-function submitQuery(path, query, callback){
+function submitQuery(path, query, json, callback){
   $.ajax({url: path,
-    type: 'POST',
+    type: 'PUT',
     beforeSend: function(xhr){xhr.setRequestHeader('X-CSRF-TOKEN',$('meta[name="csrf-token"]').attr('content'))},
-    data: 'query=' + query,
+    data: 'query=' + query + '&json=' + json,
     success: function(response){callback(response)}
   });
   //$.post(path,q,callback);
@@ -1680,7 +1787,7 @@ function submitQuery(path, query, callback){
 * Initializes modal to finalize database schema
 */
 function initFinalize() {
-  finalizeNext("finalizeModalDiv");
+  finalize("finalizeModalDiv");
 }
 
 /*
@@ -1689,104 +1796,131 @@ function initFinalize() {
 * Either continues to next finalization step, or
 *   closes the modal if all steps are complete
 */
-function finalizeNext(id) {
-  // handle last finalization step
-  var div = document.getElementById(id);
+function finalize(id) {
+  if(!isFinalized()) {
 
-  if(finalizeArr == 0) { 
-    finalizeArr++;
-  }
-  else if(finalizeArr == 1) { // table constraint
-    var pkey = getSelectVal(document.getElementById("finalizeSelector"));
-    var tname = tables[finalizeIdx-1].get('.text')[0].getText();
-    if(finalizeIdx == tables.length || pkey == "sysid") { 
-      finalizeArr++;
-      finalizeIdx = 0;
-      finalizeNext(id);
-    }
-    //alert("pkey: " + pkey);
-    if(pkey == "Don't Know") {
-      pkey = "sysid";
-      createAttr(pkey, 'number', tname, true, false, false, 525, 225);
-      div.innerHTML = "";
-      finalizeNext(id);
-    }
-    else {
-      editAttrPrimary(pkey, tname, true);
-      finalizeNext(id);
-    }
-  }
-  else if(finalizeArr == 2) { // attribute constraint
-    if(finalizeIdx == attributes.length) {
-      finalizeArr++;
-      finalizeIdx = 0;
-      finalizeNext(id);
-    }
-    else {
-      var attr = attributes[finalizeIdx-1];
-      if(attr == null) return;
-      var attrNotNull = document.getElementById("constrainNotNull");
-      (attrNotNull == null) ? attrNotNull = false : attrNotNull = attrNotNull.checked;
-      var attrUnique = document.getElementById("constrainUnique");
-      (attrUnique == null) ? attrUnique = false : attrUnique = attrUnique.checked;
-      if(attrUnique)       { attr[5] = true; }
-      else if(attrNotNull) { attr[4] = true; }
-    }
-  }
-  else if(finalizeArr == 3) { // reltaion constraint
-    if(finalizeIdx == relations.length) {
-      finalizeArr++;
-      finalizeIdx = 0;
-      finalizeNext(id);
-    }
-    else { /* update rel */ }
-  }
-  
-  // determine if schema is now fully constrained
-  if(!isFinalized()) { 
-
+    // handle last finalization step
+    var div = document.getElementById(id);
     var html = "";
+    div.innerHTML = html;
 
-    /*
-    * Case 1: Check tables array for constraints
-    */
-    if(finalizeArr == 1) {
-
+    if(finalizeArr == 0) { // first pass 
+      finalizeArr++;
+    }
+    else if(finalizeArr == 1) { // table constraint
       // display next table constraint (primary key)
       var tableName = tables[finalizeIdx].get('.text')[0].getText();
-      html += "<h4>Constrain Table: " + tableName.toLowerCase() + "</h4>";
-      html += "<p>Does one of the attributes in the list below uniquely identify a distinct table entry?<br /><em>e.g. For a person table, a social security number is unique for a given person and identifies a distinct person.</em><br />If so, select that attribute from the list.  Otherwise, select Don't Know.</p>";
+      var pkey = getSelectVal(document.getElementById("finalizeSelector"));
 
-      // generate table attrributes selector html
-      if(obviousPrimaryKey(tableName)) {
+      while(pkey != "sysid" && obviousPrimaryKey(tableName) && finalizeIdx < tables.length-1) {
+        finalizeIdx++;
+        tableName = tables[finalizeIdx].get('.text')[0].getText();
+      }
+      
+      if(pkey == "Don't Know") {
+        pkey = "sysid";
+        createAttr(pkey, 'number', tname, true, false, false, 525, 225);
+        finalizeIdx++;
+        tableName = tables[finalizeIdx].get('.text')[0].getText();
+      }
+      else if(pkey != null) {
+        editAttrPrimary(pkey, tname, true);
+        finalizeIdx++;
+        tableName = tables[finalizeIdx].get('.text')[0].getText();
+      }
+
+      if(finalizeIdx == tables.length) { 
+        finalizeArr++;
+        finalizeIdx = 0;
+        return;
+      }
+
+      finalizeTableHTML(tableName);
+    }
+    else if(finalizeArr == 2) { // attribute constraint
+      // display next attribute constraint (not null or unique)
+      var attr = attributes[finalizeIdx];
+
+      if(attr == null) { return; }
+      var attrNotNull = document.getElementById("constrainNotNull");
+      (attrNotNull == null) ? attrNotNull = null : attrNotNull = attrNotNull.checked;
+      var attrUnique = document.getElementById("constrainUnique");
+      (attrUnique == null) ? attrUnique = null : attrUnique = attrUnique.checked;
+      if(attrUnique) { 
+	attr[5] = true; 
+	finalizeIdx++; 
+	attr = attributes[finalizeIdx];
+      }
+      else if(attrNotNull) {
+	attr[4] = true;
 	finalizeIdx++;
-        finalizeNext(id);
+	attr = attributes[finalizeIdx];
+      }
+      else if(attrUnique != null && attrNotNull != null) { 
+	finalizeIdx++;
+	attr = attributes[finalizeIdx];
+      }
+      else { return; }
+
+      while((attr[3] || attr[4] || attr[5]) && finalizeIdx < attributes.length-1) {
+        finalizeIdx++;
+        attr = attributes[finalizeIdx];
+      }
+
+      if(finalizeIdx == attributes.length) {
+        finalizeArr++;
+        finalizeIdx = 0;
+        return;
+      }
+
+      finalizeAttrHTML(attr);
+    }
+    else if(finalizeArr == 3) { // reltaion constraint
+      if(finalizeIdx == relations.length) {
+        finalizeArr++;
       }
       else {
-        var attrs = getAttrs(tableName);
-        html += "<select id='finalizeSelector'>" + genSelectInnerHTML("finalizeSelector", attrs, 0, 0) + "</select>";
-    
-        div.innerHTML = html;
-    
-        // Don't know option - generate automatic sysid
-        var opt = document.createElement("option");
-        opt.text = "Don't Know";
-        var sel = document.getElementById("finalizeSelector");
-        sel.add(opt, sel.options[null]);
-        
+        // display next relation constraint (relation types for connected tables)
+        finalizeRelHTML();
         finalizeIdx++;
       }
     }
-    /*
-    * Case 2: Check attributes array for constraints
-    */
-    else if(finalizeArr == 2) {
+  }
+  else { // database schema is fully constrained
+    finalizeArr = 0; finalizeIdx = 0;
+    $('#finalizeModal').modal('hide'); // hide modal on completion of schema finalization
+    // after this point we can convert our JS objects into SQL to send to RDS
+  }
+}
 
-      // display next relation constraint (relation types for connected tables)
-      //alert("attr type: " + attributes[finalizeIdx][2].get('.text')[0].getText());
-      //html += "<h4>Constrain Attribute: " + attributes[finalizeIdx][1].get('.text')[0].getText().toLowerCase() + "." + attributes[finalizeIdx][0].get('.text')[0].getText().toLowerCase() + "</h4>";
-      var attr = attributes[finalizeIdx];
-      if(attr!= null && !attr[3] && !attr[4] && !attr[5]) {
+function isFinalized() {
+  return finalizeArr > 3;
+}
+
+/*
+* Generates HTML for finalizing table constraints
+*/
+function finalizeTableHTML(tableName) {
+      html += "<h4>Constrain Table: " + tableName.toLowerCase() + "</h4>";
+      html += "<p>Does one of the attributes in the list below uniquely identify a distinct table entry?<br /><em>e.g. For a person table, a social security number is unique for a given person and identifies a distinct person.</em><br />If so, select that attribute from the list.  Otherwise, select Don't Know.</p>";
+
+      var attrs = getAttrs(tableName);
+      html += "<select id='finalizeSelector'>" + genSelectInnerHTML("finalizeSelector", attrs, 0, 0) + "</select>";
+    
+      div.innerHTML = html;
+    
+      // Don't know option - generate automatic sysid
+      var opt = document.createElement("option");
+      opt.text = "Don't Know";
+      var sel = document.getElementById("finalizeSelector");
+      sel.add(opt, sel.options[null]);
+      sel.selectedIndex = -1;
+}
+
+/*
+* Generates HTML for finalizing attribute constraints
+*/
+function finalizeAttrHTML(attr) {
         html += "<h4>Constrain Attribute: " + attr[1].get('.text')[0].getText().toLowerCase() +  "." + attr[0].get('.Atext')[0].getText().toLowerCase() + "</h4>";
         html += "<p>Is the above attribute unique for all table entries?<br /><em>e.g. For a user accounts table, an email address is unique for every user account entry.</em><br />If so, check the box below.  Otherwise, leave it blank.</p>";
       
@@ -1797,40 +1931,17 @@ function finalizeNext(id) {
         html += "<input type=\"checkbox\" id=\"constrainNotNull\" value=\"1\">&nbsp;\n<label for=\"constrainNotNull\"><span style=\"border-bottom:1px dashed #000;\">Attribute is Required</span><label><br />";
      
         div.innerHTML = html;
+}
 
-        finalizeIdx++;
-      }
-      else {
-        finalizeIdx++;
-	finalizeNext(id);
-      }
-    }
-    /*
-    * Case 3: Check relations array for constraints
-    */
-    else if(finalizeArr == 3) {
-
-      // display next relation constraint (relation types for connected tables)
-      html += "<h4>Constrain Relation: " + relations[finalizeIdx].get('.text')[0].getText().toLowerCase() + "</h4>";
-      html += "<p>Does one of the attributes in the list below uniquely identify a distinct table entry?<br /><em>e.g. For a person table, a social security number is unique for a given person and identifies a distinct person.</em><br />If so, select that attribute from the list.  Otherwise, select Don't Know.</p>";
+/*
+* Generates HTML for finalizing relation constraints
+*/
+function finalizeRelHTML() {
+        html += "<h4>Constrain Relation: " + relations[finalizeIdx].get('.text')[0].getText().toLowerCase() + "</h4>";
+        html += "<p>Does one of the attributes in the list below uniquely identify a distinct table entry?<br /><em>e.g. For a person table, a social security number is unique for a given person and identifies a distinct person.</em><br />If so, select that attribute from the list.  Otherwise, select Don't Know.</p>";
       
-      div.innerHTML = html;
-
-      finalizeIdx++;
-    }
-
-  }
-  else { // schema is fully constrained at this point
-    finalizeArr = 0; 
-    $('#finalizeModal').modal('hide'); // hide modal on completion of schema finalization
-    // after this point we can convert our JS objects into SQL to send to RDS
-  }
+        div.innerHTML = html;
 }
-
-function isFinalized() {
-  return finalizeArr > 3;
-}
-
 </script>
 
   <!-- newTableModal -->
@@ -2095,9 +2206,10 @@ function isFinalized() {
       <a data-toggle="modal" href="#deleteRelationModal" class="btn btn-danger" onclick="initDelRelation()">Disconnect</a>
       <br /><br />
       <a data-toggle="modal" href="#finalizeModal" class="btn btn-success" onclick="initFinalize()">Finalize</a>
-      <a class="btn" onclick="convertToSQL()">Convert</a> <!-- Should be called in Finalize when modal is complete -->
+      <!-- <a class="btn" onclick="convertToSQL()">Convert</a> --> <!-- Should be called in Finalize when modal is complete -->
       <a data-toggle="modal" href="#DBCode" class="btn" onClick="convertToCode()">Show Code</a>
       <button class="btn" onClick="convertToJSON()">JSON</button>
+      <a class="btn btn-danger" onclick="clearDiagram()">Clear Schema</a>
     </div>
 
   </div>
@@ -2143,6 +2255,12 @@ $(document).ready( function() {
 				//stageMoveX--;
 				viewport.panLeft(10);
 				updateX += 10 * (1/viewport.scale);
+        /*
+        if(invert == true)
+          updateX += 10 * (1/viewport.scale);
+        else
+          updateX -= 10 * (1/viewport.scale);
+        */
 				viewport.draw();
 				event.preventDefault();
 				break;
@@ -2150,6 +2268,12 @@ $(document).ready( function() {
 			case ArrowRight:
 				viewport.panRight(10);
 				updateX -= 10 * (1/viewport.scale);
+        /*
+        if(invert == true)
+          updateX -= 10 * (1/viewport.scale);
+        else
+          updateX += 10 * (1/viewport.scale);
+        */
 				viewport.draw();
 				event.preventDefault();
 				break;
@@ -2157,6 +2281,12 @@ $(document).ready( function() {
 			case ArrowUp:
 				viewport.panUp(10);
 				updateY += 10 * (1/viewport.scale);
+        /*
+        if(invert == true)
+          updateY += 10 * (1/viewport.scale);
+        else
+          updateY -= 10 * (1/viewport.scale);
+        */
 				viewport.draw();
 				event.preventDefault();
 				break;
@@ -2164,6 +2294,12 @@ $(document).ready( function() {
 			case ArrowDown:
 				viewport.panDown(10);
 				updateY -= 10 * (1/viewport.scale);
+        /*
+        if(invert == true)
+          updateX -= 10 * (1/viewport.scale);
+        else
+          updateX += 10 * (1/viewport.scale);
+        */
 				viewport.draw();
 				event.preventDefault();
 				break;
@@ -2174,4 +2310,3 @@ $(document).ready( function() {
 	});
 });
 </script>
-

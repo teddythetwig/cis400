@@ -132,10 +132,11 @@ var viewport = new Viewport(stage);
 // JSON obj
 var JSONObj;
 
-var test = { "tables" : [{ "name" : "Teacher" , "xval" : "180" , "yval" : "250" , "attributes" : [{ "name" : "tid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "40" , "yval" : "248" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "56" , "yval" : "308" }]}, { "name" : "Student" , "xval" : "720" , "yval" : "248" , "attributes" : [{ "name" : "sid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "942" , "yval" : "212" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "926" , "yval" : "294" }]}], "relations" : [{ "name" : "Teaches" , "xval" : "450" , "yval" : "216" , "attributes" : [{ "name" : "tid", "table" : "Teacher"}, { "name" : "sid", "table" : "Student"}]}], "viewport" : { "updateX" : "0", "updateY" : "0", "scale" : "1"}};
+var ts = { "tables" : [{ "name" : "Teacher" , "xval" : "180" , "yval" : "250" , "attributes" : [{ "name" : "tid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "40" , "yval" : "248" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "56" , "yval" : "308" }]}, { "name" : "Student" , "xval" : "720" , "yval" : "248" , "attributes" : [{ "name" : "sid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "942" , "yval" : "212" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "926" , "yval" : "294" }]}], "relations" : [{ "name" : "Teaches" , "xval" : "450" , "yval" : "216" , "attributes" : [{ "name" : "tid", "table" : "Teacher"}, { "name" : "sid", "table" : "Student"}]}], "viewport" : { "updateX" : "0", "updateY" : "0", "scale" : "1"}};
 
-var test2 = { "tables" : [{ "name" : "testMe" , "xval" : "895" , "yval" : "385" , "attributes" : []}], "relations" : [], "viewport" : { "updateX" : "370", "updateY" : "160", "scale" : "1"} };
+var tsu = { "tables" : [{ "name" : "Teacher" , "xval" : "180" , "yval" : "250" , "attributes" : [{ "name" : "tid" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "40" , "yval" : "248" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "56" , "yval" : "308" }]}, { "name" : "Student" , "xval" : "720" , "yval" : "248" , "attributes" : [{ "name" : "sid" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "942" , "yval" : "212" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "926" , "yval" : "294" }]}], "relations" : [{ "name" : "Teaches" , "xval" : "450" , "yval" : "216" , "attributes" : [{ "name" : "tid", "table" : "Teacher"}, { "name" : "sid", "table" : "Student"}]}], "viewport" : { "updateX" : "0", "updateY" : "0", "scale" : "1"}};
 
+var test = { "tables" : [{ "name" : "testMe" , "xval" : "895" , "yval" : "385" , "attributes" : []}], "relations" : [], "viewport" : { "updateX" : "370", "updateY" : "160", "scale" : "1"} };
 
 
 /********* Creation Methods *********/
@@ -1103,6 +1104,9 @@ function convertFromJSON(source) {
       case 'DATETIME':
           type = 'date';
       }
+      (myAttr.primary == "true") ? myAttr.primary = true : myAttr.primary = false;
+      (myAttr.notnull == "true") ? myAttr.notnull = true : myAttr.notnull = false;
+      (myAttr.unique == "true") ? myAttr.unique = true : myAttr.unique = false;
       createAttr(myAttr.name, type, myTable.name, myAttr.primary, myAttr.notnull, myAttr.unique, parseInt(myAttr.xval), parseInt(myAttr.yval));
     }
   }
@@ -1131,8 +1135,11 @@ function testJSON() {
   //var schemaSelected = e.options[e.selectedIndex].value;
   var schemaSelected = getSelectVal(document.getElementById("schemaSelect"));
   switch (schemaSelected) {
-    case 'Test2' :
-      convertFromJSON(test2);
+    case 'Teacher-Student' :
+      convertFromJSON(ts);
+      break;
+    case 'Teacher-Student (U)' :
+      convertFromJSON(tsu);
       break;
     case 'Test' :
       convertFromJSON(test);
