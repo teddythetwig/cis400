@@ -166,13 +166,17 @@ function createTable(tableName, rectX, rectY) {
         cornerRadius: 10
     });
 
-    //Add Elements to group  
+    // Add Elements to group  
     group.add(rect);
     group.add(complexText);
 
-    //Adds an empty attributes and neighbors array
+    // Adds an empty attributes and neighbors array
     group.attr = new Array();
     group.neighbors = new Array();
+
+    // Add original x and y positions
+    group.origX = rectX;
+    group.origY = rectY;
 
     // Event handling
     group.on('mouseover', function() {
@@ -236,7 +240,7 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
         return;
     }
 
-    if (hasPrimaryKey(tableName) && primary) {
+    if (hasPrimaryKey(tableName) && (primary == true)) {
         alert('Table already contains Primary Attribute');
         return;
     }
@@ -275,6 +279,10 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
     //Add Elements to group  
     group.add(rect);
     group.add(complexText);
+
+    // Add original x and y positions
+    group.origX = rectX;
+    group.origY = rectY;
 
     //Adding attributes to attribute (AttrGroup, ParentTable, Datatype, PrimaryKey, NotNull, Unique)
     var attGroup = [group, table, type, primary, notNull, unique];
@@ -400,6 +408,10 @@ function createRelation(rname, tableArr, relX, relY){
     group.add(ell);
     group.add(complexText);
 
+    // Add original x and y positions
+    group.origX = relX;
+    group.origY = relY;
+
     // Event handling
     group.on('mouseover', function() {
         document.body.style.cursor = 'pointer';
@@ -439,10 +451,10 @@ function createRelation(rname, tableArr, relX, relY){
         var currTable = rTables[i];
         var line = new Kinetic.Line({
             name: rname,
-            points: [group.getX()+currTable.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
-                 group.getY()+currTable.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
-                 currTable.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
-                 currTable.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY],
+            points: [group.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
+                 group.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
+                 currTable.getX()+currTable.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
+                 currTable.getY()+currTable.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY],
             stroke: 'red',
             strokeWidth: 5,
             lineCap: 'round',
@@ -551,10 +563,10 @@ function hasPrimaryKey(tableName) {
     var table = findTable(tableName);
     for(var i = 0; i < table.attr.length; i++) {
 	    var attrName = table.attr[i];
-        var attr = findAttr(attrName, tableName);
-        if(attr[3]) {
-            return true;
-        }
+      var attr = findAttr(attrName, tableName);
+      if(attr[3] == true) {
+        return true;
+      }
     }
     return false;
 }
@@ -597,35 +609,58 @@ function deleteTable(tableName) {
     // Deletes attribute lines from attrLines array
     for(var i = 0; i < attrLines.length; i++) {
         if((attrLines[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
-            if(attrShow) {
-                attrLines[i][0].remove();
-            }
-            attrLines.splice(i, 1);
-	    i--;
+          if(attrShow) {
+            attrLines[i][0].remove();
+          }
+          attrLines.splice(i, 1);
+	        i--;
         }
     }
     
     // Deletes connected attributes from attributes table
     for(var i = 0; i < attributes.length; i++) {
         if(attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
-            if(attrShow) {
-                attributes[i][0].remove();
-            }
-            attributes.splice(i, 1);
-	    i--;
+          if(attrShow) {
+            attributes[i][0].remove();
+          }
+          attributes.splice(i, 1);
+	        i--;
         }
     }
     
     // Deletes relations connected with table
-     for(var i = 0; i < relations.length; i++) {
-         if((relations[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) ||
-            (relations[i][2].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
-             relations[i][0].remove();
-             relations.splice(i,1);
-	     i--;
-         }
-         
-     }
+    for (var i = 0; i < relations.length; i++) {
+      var found = false;
+
+      // Check if relation contains currentTable
+      for (var j = 0; j < relations[i][2].length; j++) {
+        var curr = relations[i][2][j];
+        if (curr.get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
+          found = true;
+          break;
+        }
+      }
+
+      if (found == true) {
+
+        // Remove all relation lines
+        for (var j = 0; j < relations[i][1].length; j++) {
+          relations[i][1][j].remove();
+        }
+
+        // Remove relation table
+        relations[i][0].remove();
+        relations.splice(i,1);
+        i--;
+      }
+         // if((relations[i][0].get('.Rtext')[0].getText().toLowerCase() == tableName.toLowerCase()) ||
+         //    (relations[i][2].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
+         //     relations[i][0].remove();
+         //     relations.splice(i,1);
+	        //    i--;
+         // }     
+    }
+
     // Delete table from tables array
     for(var i = 0; i < tables.length; i++) {
         if(tables[i].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
@@ -915,7 +950,7 @@ function convertToJSON () {
   // Tables
   for (var i = 0; i < tables.length; i++) {
     var table = tables[i];
-    txt = txt + '{ "name" : "' + tables[i].get('.text')[0].getText() + '" , "xval" : "' + tables[i].getX() + '" , "yval" : "' + tables[i].getY() + '" , "attributes" : [';
+    txt = txt + '{ "name" : "' + tables[i].get('.text')[0].getText() + '" , "xval" : "' + (tables[i].getX() + tables[i].origX) + '" , "yval" : "' + (tables[i].getY() + tables[i].origY) + '" , "attributes" : [';
     // Table Attributes
     for (var j = 0; j < table.attr.length; j++) {
       var attr = findAttr(table.attr[j], tables[i].get('.text')[0].getText());
@@ -931,7 +966,7 @@ function convertToJSON () {
       case 'date':
           type = 'DATETIME';
       }
-      txt = txt + '{ "name" : "' + table.attr[j] + '" , "dataType" : "' + type + '" , "primary" : "' + attr[3] + '" , "notnull" : "' + attr[4] + '" , "unique" : "' + attr[5] + '" , "xval" : "' + attr[0].getX() + '" , "yval" : "' + attr[0].getY() + '" }';
+      txt = txt + '{ "name" : "' + table.attr[j] + '" , "dataType" : "' + type + '" , "primary" : "' + attr[3] + '" , "notnull" : "' + attr[4] + '" , "unique" : "' + attr[5] + '" , "xval" : "' + (attr[0].getX() + attr[0].origX) + '" , "yval" : "' + (attr[0].getY() + attr[0].origY) + '" }';
       if ((j + 1) < table.attr.length) {
         txt = txt + ', ';
       }
@@ -945,7 +980,7 @@ function convertToJSON () {
   // Relations
   txt = txt + '], "relations" : [';
   for (var i = 0; i < relations.length; i++) {
-    txt = txt + '{ "name" : "' + relations[i][0].get('.Rtext')[0].getText() + '" , "xval" : "' + relations[i][0].getX() + '" , "yval" : "' + relations[i][0].getY() + '" , "attributes" : [';
+    txt = txt + '{ "name" : "' + relations[i][0].get('.Rtext')[0].getText() + '" , "xval" : "' + (relations[i][0].getX() + relations[i][0].origX) + '" , "yval" : "' + (relations[i][0].getY() + relations[i][0].origY) + '" , "attributes" : [';
     for(var j = 0; j < relations[i][2].length; j++) {
       var tableName = relations[i][2][j].get('.text')[0].getText();
       var primary = getPrimaryKey(tableName);
@@ -984,16 +1019,29 @@ function convertToJSON () {
 }
 
 /*
+ *
+ */
+function clearDiagram() {
+
+  // Delete every table and anything attached to it
+  while(tables.length > 0) {
+    deleteTable(tables[0].get('.text')[0].getText().toLowerCase());
+  }
+
+  // Reset global variables
+  // tables = new Array();
+  // relations = new Array();
+  // attributes = new Array();
+  // attrLines = new Array();
+  // viewport = new Viewport(stage);
+}
+
+/*
  * Updates current schema with provided JSON schema
  */
 function convertFromJSON(source) {
 
-  //Reset global variables
-  tables = new Array();
-  relations = new Array();
-  attributes = new Array();
-  attrLines = new Array();
-  viewport = new Viewport(stage);
+  clearDiagram();
   JSONObj = source;//eval ("(" + source + ")");
 
 
@@ -2100,9 +2148,10 @@ function isFinalized() {
       <a data-toggle="modal" href="#deleteRelationModal" class="btn btn-danger" onclick="initDelRelation()">Disconnect</a>
       <br /><br />
       <a data-toggle="modal" href="#finalizeModal" class="btn btn-success" onclick="initFinalize()">Finalize</a>
-      <a class="btn" onclick="convertToSQL()">Convert</a> <!-- Should be called in Finalize when modal is complete -->
+      <!-- <a class="btn" onclick="convertToSQL()">Convert</a> --> <!-- Should be called in Finalize when modal is complete -->
       <a data-toggle="modal" href="#DBCode" class="btn" onClick="convertToCode()">Show Code</a>
       <button class="btn" onClick="convertToJSON()">JSON</button>
+      <a class="btn btn-danger" onclick="clearDiagram()">Clear Schema</a>
     </div>
 
   </div>
