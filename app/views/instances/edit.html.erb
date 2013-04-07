@@ -58,21 +58,27 @@
         </div>
         <div class="modal-body">
           <h6>Keyboard Controls</h6>
-          <p><i class="icon-arrow-left"></i>   <small>Move diagram to the left</small></p>
-          <p><i class="icon-arrow-right"></i>   <small>Move diagram to the right</small></p>
-          <p><i class="icon-arrow-up"></i>   <small>Move diagram to the up</small></p>
-          <p><i class="icon-arrow-down"></i>   <small>Move diagram to the down</small></p>
+          <p><i class="icon-arrow-left"></i>   <small>Move diagram view to the left</small></p>
+          <p><i class="icon-arrow-right"></i>   <small>Move diagram view to the right</small></p>
+          <p><i class="icon-arrow-up"></i>   <small>Move diagram view up</small></p>
+          <p><i class="icon-arrow-down"></i>   <small>Move diagram view down</small></p>
 
           <h6>Mouse Controls</h6>
           <p><i class="icon-move"></i>   <small>Zoom in by scrolling down or left. Zoom out by scrolling up or right.</small></p>
         </div>
-        <div class="modal-footer">
-          <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-        </div>
       </div>
     </div>
-
   </div>
+  <!-- <div class="offset9">
+    <div class="row-fluid">
+      <div class="span7">
+          <h5>Invert Arrow Keys</h5>
+      </div>
+      <div class="span1">
+        <input id="invControls" onClick="onInvControls()" type="checkbox" style="float-right" checked>
+      </div>
+    </div>
+  </div>-->
   <br />
   <div id="container"></div>
   <script src="http://www.html5canvastutorials.com/libraries/kinetic-v4.3.0-beta2.js"></script>
@@ -81,8 +87,10 @@
 /********* Global Variables *********/
 
 // ID of the instance
-
 var dbInstance = '<%="#{@instance.name}"%>'
+
+// Control inversion
+var invert = true;
 
 // Position of current object
 var x, y;
@@ -942,6 +950,13 @@ function onRelShow() {
 }
 
 /*
+ * Invert Controls check
+ */
+function onInvControls() {
+    invert = document.getElementById("invControls").checked;
+}
+
+/*
  * Converts schema into JSON schema
  */
 function convertToJSON () {
@@ -1029,11 +1044,7 @@ function clearDiagram() {
   }
 
   // Reset global variables
-  // tables = new Array();
-  // relations = new Array();
-  // attributes = new Array();
-  // attrLines = new Array();
-  // viewport = new Viewport(stage);
+  viewport = new Viewport(stage);
 }
 
 /*
@@ -2197,6 +2208,12 @@ $(document).ready( function() {
 				//stageMoveX--;
 				viewport.panLeft(10);
 				updateX += 10 * (1/viewport.scale);
+        /*
+        if(invert == true)
+          updateX += 10 * (1/viewport.scale);
+        else
+          updateX -= 10 * (1/viewport.scale);
+        */
 				viewport.draw();
 				event.preventDefault();
 				break;
@@ -2204,6 +2221,12 @@ $(document).ready( function() {
 			case ArrowRight:
 				viewport.panRight(10);
 				updateX -= 10 * (1/viewport.scale);
+        /*
+        if(invert == true)
+          updateX -= 10 * (1/viewport.scale);
+        else
+          updateX += 10 * (1/viewport.scale);
+        */
 				viewport.draw();
 				event.preventDefault();
 				break;
@@ -2211,6 +2234,12 @@ $(document).ready( function() {
 			case ArrowUp:
 				viewport.panUp(10);
 				updateY += 10 * (1/viewport.scale);
+        /*
+        if(invert == true)
+          updateY += 10 * (1/viewport.scale);
+        else
+          updateY -= 10 * (1/viewport.scale);
+        */
 				viewport.draw();
 				event.preventDefault();
 				break;
@@ -2218,6 +2247,12 @@ $(document).ready( function() {
 			case ArrowDown:
 				viewport.panDown(10);
 				updateY -= 10 * (1/viewport.scale);
+        /*
+        if(invert == true)
+          updateX -= 10 * (1/viewport.scale);
+        else
+          updateX += 10 * (1/viewport.scale);
+        */
 				viewport.draw();
 				event.preventDefault();
 				break;
