@@ -104,7 +104,7 @@ tables = new Array();
 datatypes = new Array("text", "number", "date");
 
 // List of allowable relation types
-reltypes = new Array("undefined", "one-to-one", "one-to-many", "many-to-one", "many-to-many");
+reltypes = new Array("undefined", "one-to-one", "many-to-many");
 
 // List of attributes
 attributes = new Array();
@@ -491,7 +491,7 @@ function createRelation(rname, tableArr, relX, relY){
     }
 
     // Adding group of line and tables to realtions array (Line obj, FirstTable, SecondTable, Directionality)
-    // 'undefined', 'one-to-one', 'one-to-many', 'many-to-many'
+    // 'undefined', 'one-to-one', 'many-to-many'
     var currRelation = [group, rLines, rTables, rType];
     relations.push(currRelation);
     //layer.draw();
@@ -1810,9 +1810,9 @@ function finalize(id) {
       var tableName = tables[finalizeIdx].get('.text')[0].getText();
       var pkey = getSelectVal(document.getElementById("finalizeSelector"));
 
-      while(pkey != "sysid" && obviousPrimaryKey(tableName) && finalizeIdx < tables.length-1) {
-        finalizeIdx++;
+      while(pkey != "sysid" && obviousPrimaryKey(tableName) && finalizeIdx < tables.length) {
         tableName = tables[finalizeIdx].get('.text')[0].getText();
+        finalizeIdx++;
       }
       
       if(pkey == "Don't Know") {
@@ -1874,9 +1874,6 @@ function finalize(id) {
 	  attr = attributes[finalizeIdx];
 	}
       }
-      else {
-	
-      }
 
       while((attr[3] || attr[4] || attr[5]) && finalizeIdx < attributes.length-1) {
         finalizeIdx++;
@@ -1900,18 +1897,47 @@ function finalize(id) {
       }
     }
     else if(finalizeArr == 3) { // reltaion constraint
+      var one_to_one = document.getElementById("constrainOTO");
+      var many_to_many = document.getElementById("constrainMTM");
+      if(many_to_many) one_to_one = false;
+      if(one_to_one != null) {
+        one_to_one = one_to_one.checked;
+        many_to_many = many_to_many.checked;
+        rel = relations[finalizeIdx];
+        if(one_to_one) {
+          rel[3] = "one-to-one";
+          finalizeIdx++;
+        }
+        else {
+          rel[3] = "many-to-many";
+          finalizeIdx++;
+         }
+      }
+
       if(finalizeIdx >= relations.length) {
         finalizeArr++;
+        finalize("finalizeModalDiv");
+        return;
       }
       else {
         // display next relation constraint (relation types for connected tables)
-        finalizeRelHTML(div);
-        finalizeIdx++;
+	rel = relations[finalizeIdx];
+        while(rel[3] != "undefined") {
+	  finalizeIdx++;
+          if(finalizeIdx < relations.length) {
+	    rel=relations[finalizeIdx];
+	  }
+	  else {
+	    finalize("finalizeModalDiv");
+	    return;
+	  }
+	}
+        finalizeRelHTML(div, rel);
       }
     }
   }
   else { // database schema is fully constrained
-    finalizeArr = 0; finalizeIdx = 0;
+    finalizeArr = 1; finalizeIdx = 0;
     $('#finalizeModal').modal('hide'); // hide modal on completion of schema finalization
     // after this point we can convert our JS objects into SQL to send to RDS
   }
@@ -1962,12 +1988,22 @@ function finalizeAttrHTML(div, attr) {
 /*
 * Generates HTML for finalizing relation constraints
 */
-function finalizeRelHTML(div) {
+function finalizeRelHTML(div, rel) {
+        var tname1 = rel[2][0].get('.text')[0].getText();
+	var tname2 = rel[2][1].get('.text')[0].getText();
+	var reltype = rel[3];
+
         var html = "";
-        //html += "<h4>Constrain Relation: " + relations[finalizeIdx].get('.text')[0].getText().toLowerCase() + "</h4>";
-	html += "<h4>Constrain Relations</h4>";
-      
-        div.innerHTML = html;
+        html += "<h4>Constrain Relation: " + rel[0].get('.Rtext')[0].getText().toLowerCase() + "</h4>";
+	html += "<p>Does an instance of <strong>" + tname1  +  "</strong> have a single corresponding instance of <strong>" + tname2 + "</strong>?<br /><em>e.g. A <strong>Person</strong> instance could be required to have a single corresponding <strong>DriversLicense</strong> instance</em>.<br />If so, make a selection below.</p>";
+        
+        html += "<input type=\"checkbox\" id=\"constrainOTO\" value=\"1\">&nbsp;\n<label for=\"constrainOTO\"><span style=\"border-bottom:1px dashed #000;\">one-to-one</span><label><br />";
+	
+	html += "<br /><p>Otherwise, are there several instances of <strong>" + tname1 + "</strong> that can correspond to several instances of <strong>" + tname2 + "</strong>?<br /><em>e.g. An instance of <strong>Author</strong> could have several corresponding instances of <strong>Book</strong> instance</em> (multiple books per author), and an instance of <strong>Book</strong> could also have several corresponding instances of <strong>Author</strong> (multiple authors per book).<br />If so, make a selection below.</p>";
+
+        html += "<input type=\"checkbox\" id=\"constrainMTM\" value=\"1\">&nbsp;\n<label for=\"constrainMTM\"><span style=\"border-bottom:1px dashed #000;\">many-to-many</span><label><br />";
+
+	div.innerHTML = html;
 }
 </script>
 
