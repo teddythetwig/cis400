@@ -125,7 +125,7 @@ var currGroup = new Kinetic.Group();
 
 // Finalization variable
 var finalizeIdx = 0;
-var finalizeArr = 0;
+var finalizeArr = 1;
 
 // Viewport
 var viewport = new Viewport(stage);
@@ -135,7 +135,7 @@ var JSONObj;
 
 var ts = { "tables" : [{ "name" : "Teacher" , "xval" : "180" , "yval" : "250" , "attributes" : [{ "name" : "tid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "40" , "yval" : "248" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "56" , "yval" : "308" }]}, { "name" : "Student" , "xval" : "720" , "yval" : "248" , "attributes" : [{ "name" : "sid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "942" , "yval" : "212" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "926" , "yval" : "294" }]}], "relations" : [{ "name" : "Teaches" , "xval" : "450" , "yval" : "216" , "attributes" : [{ "name" : "tid", "table" : "Teacher"}, { "name" : "sid", "table" : "Student"}]}], "viewport" : { "updateX" : "0", "updateY" : "0", "scale" : "1"}};
 
-var tsu = { "tables" : [{ "name" : "Teacher" , "xval" : "180" , "yval" : "250" , "attributes" : [{ "name" : "tid" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "40" , "yval" : "248" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "56" , "yval" : "308" }]}, { "name" : "Student" , "xval" : "720" , "yval" : "248" , "attributes" : [{ "name" : "sid" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "942" , "yval" : "212" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "926" , "yval" : "294" }]}], "relations" : [{ "name" : "Teaches" , "xval" : "450" , "yval" : "216" , "attributes" : [{ "name" : "tid", "table" : "Teacher"}, { "name" : "sid", "table" : "Student"}]}], "viewport" : { "updateX" : "0", "updateY" : "0", "scale" : "1"}};
+var tsu = { "tables" : [{ "name" : "Teacher" , "xval" : "180" , "yval" : "250" , "attributes" : [{ "name" : "teacher_id" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "40" , "yval" : "248" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "56" , "yval" : "308" }]}, { "name" : "Student" , "xval" : "720" , "yval" : "248" , "attributes" : [{ "name" : "student_id" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "942" , "yval" : "212" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "926" , "yval" : "294" }]}], "relations" : [{ "name" : "Teaches" , "xval" : "450" , "yval" : "216" , "attributes" : [{ "name" : "id", "table" : "Teacher"}, { "name" : "id", "table" : "Student"}]}], "viewport" : { "updateX" : "0", "updateY" : "0", "scale" : "1"}};
 
 var test = { "tables" : [{ "name" : "testMe" , "xval" : "895" , "yval" : "385" , "attributes" : []}], "relations" : [], "viewport" : { "updateX" : "370", "updateY" : "160", "scale" : "1"} };
 
@@ -1075,7 +1075,8 @@ function clearDiagram() {
     deleteTable(tables[0].get('.text')[0].getText().toLowerCase());
   }
 
-  // Reset global variables
+  // Reset global variables and screen
+  updateX = 0; updateY = 0;
   viewport = new Viewport(stage);
 }
 
@@ -1802,12 +1803,9 @@ function finalize(id) {
     // handle last finalization step
     var div = document.getElementById(id);
     var html = "";
-    div.innerHTML = html;
+    //div.innerHTML = html;
 
-    if(finalizeArr == 0) { // first pass 
-      finalizeArr++;
-    }
-    else if(finalizeArr == 1) { // table constraint
+    if(finalizeArr == 1) { // table constraint
       // display next table constraint (primary key)
       var tableName = tables[finalizeIdx].get('.text')[0].getText();
       var pkey = getSelectVal(document.getElementById("finalizeSelector"));
@@ -1819,29 +1817,39 @@ function finalize(id) {
       
       if(pkey == "Don't Know") {
         pkey = "sysid";
-        createAttr(pkey, 'number', tname, true, false, false, 525, 225);
+        createAttr(pkey, 'number', tableName, true, false, false, 525, 225);
         finalizeIdx++;
-        tableName = tables[finalizeIdx].get('.text')[0].getText();
+	if(finalizeIdx != tables.length) {
+          tableName = tables[finalizeIdx].get('.text')[0].getText();
+	}
       }
       else if(pkey != null) {
-        editAttrPrimary(pkey, tname, true);
+        editAttrPrimary(pkey, tableName, true);
         finalizeIdx++;
-        tableName = tables[finalizeIdx].get('.text')[0].getText();
+        if(finalizeIdx != tables.length) {
+          tableName = tables[finalizeIdx].get('.text')[0].getText();
+	}
       }
 
-      if(finalizeIdx == tables.length) { 
+      if(finalizeIdx >= tables.length) { 
         finalizeArr++;
         finalizeIdx = 0;
-        return;
+	finalize("finalizeModalDiv");
+	return;
       }
 
-      finalizeTableHTML(tableName);
+      finalizeTableHTML(div, tableName);
     }
     else if(finalizeArr == 2) { // attribute constraint
       // display next attribute constraint (not null or unique)
       var attr = attributes[finalizeIdx];
-
-      if(attr == null) { return; }
+      
+      if(attr == null) { 
+	finalizeArr++;
+	finalizeIdx = 0;
+	finalize("finalizeModalDiv");
+	return;
+      }
       var attrNotNull = document.getElementById("constrainNotNull");
       (attrNotNull == null) ? attrNotNull = null : attrNotNull = attrNotNull.checked;
       var attrUnique = document.getElementById("constrainUnique");
@@ -1849,39 +1857,55 @@ function finalize(id) {
       if(attrUnique) { 
 	attr[5] = true; 
 	finalizeIdx++; 
-	attr = attributes[finalizeIdx];
+        if(finalizeIdx != attributes.length) {
+	  attr = attributes[finalizeIdx];
+	}
       }
       else if(attrNotNull) {
 	attr[4] = true;
 	finalizeIdx++;
-	attr = attributes[finalizeIdx];
+        if(finalizeIdx != attributes.length) {
+	  attr = attributes[finalizeIdx];
+	}
       }
       else if(attrUnique != null && attrNotNull != null) { 
 	finalizeIdx++;
-	attr = attributes[finalizeIdx];
+        if(finalizeIdx != attributes.length) {
+	  attr = attributes[finalizeIdx];
+	}
       }
-      else { return; }
+      else {
+	
+      }
 
       while((attr[3] || attr[4] || attr[5]) && finalizeIdx < attributes.length-1) {
         finalizeIdx++;
         attr = attributes[finalizeIdx];
       }
 
-      if(finalizeIdx == attributes.length) {
+      if(finalizeIdx >= attributes.length) {
         finalizeArr++;
         finalizeIdx = 0;
-        return;
+        finalize("finalizeModalDiv");
+	return;
       }
 
-      finalizeAttrHTML(attr);
+      if(attr[0].get('.Atext')[0].getText() != "sysid") {
+        finalizeAttrHTML(div, attr);
+      }
+      else {
+	finalizeIdx++;
+	finalize("finalizeModalDiv");
+	return;
+      }
     }
     else if(finalizeArr == 3) { // reltaion constraint
-      if(finalizeIdx == relations.length) {
+      if(finalizeIdx >= relations.length) {
         finalizeArr++;
       }
       else {
         // display next relation constraint (relation types for connected tables)
-        finalizeRelHTML();
+        finalizeRelHTML(div);
         finalizeIdx++;
       }
     }
@@ -1900,7 +1924,8 @@ function isFinalized() {
 /*
 * Generates HTML for finalizing table constraints
 */
-function finalizeTableHTML(tableName) {
+function finalizeTableHTML(div, tableName) {
+      var html = "";
       html += "<h4>Constrain Table: " + tableName.toLowerCase() + "</h4>";
       html += "<p>Does one of the attributes in the list below uniquely identify a distinct table entry?<br /><em>e.g. For a person table, a social security number is unique for a given person and identifies a distinct person.</em><br />If so, select that attribute from the list.  Otherwise, select Don't Know.</p>";
 
@@ -1920,7 +1945,8 @@ function finalizeTableHTML(tableName) {
 /*
 * Generates HTML for finalizing attribute constraints
 */
-function finalizeAttrHTML(attr) {
+function finalizeAttrHTML(div, attr) {
+        var html = "";
         html += "<h4>Constrain Attribute: " + attr[1].get('.text')[0].getText().toLowerCase() +  "." + attr[0].get('.Atext')[0].getText().toLowerCase() + "</h4>";
         html += "<p>Is the above attribute unique for all table entries?<br /><em>e.g. For a user accounts table, an email address is unique for every user account entry.</em><br />If so, check the box below.  Otherwise, leave it blank.</p>";
       
@@ -1936,9 +1962,10 @@ function finalizeAttrHTML(attr) {
 /*
 * Generates HTML for finalizing relation constraints
 */
-function finalizeRelHTML() {
-        html += "<h4>Constrain Relation: " + relations[finalizeIdx].get('.text')[0].getText().toLowerCase() + "</h4>";
-        html += "<p>Does one of the attributes in the list below uniquely identify a distinct table entry?<br /><em>e.g. For a person table, a social security number is unique for a given person and identifies a distinct person.</em><br />If so, select that attribute from the list.  Otherwise, select Don't Know.</p>";
+function finalizeRelHTML(div) {
+        var html = "";
+        //html += "<h4>Constrain Relation: " + relations[finalizeIdx].get('.text')[0].getText().toLowerCase() + "</h4>";
+	html += "<h4>Constrain Relations</h4>";
       
         div.innerHTML = html;
 }
@@ -2144,7 +2171,7 @@ function finalizeRelHTML() {
       </div>
       <div class="modal-footer">
         <button class="btn" data-dismiss="modal">Close</button>
-        <button id="finalizeBtn" class="btn btn-primary" onclick="finalizeNext('finalizeModalDiv')">Add Constraint</button>
+        <button id="finalizeBtn" class="btn btn-primary" onclick="finalize('finalizeModalDiv')">Add Constraint</button>
       </div>
     </div>
 
