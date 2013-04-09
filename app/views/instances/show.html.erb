@@ -1880,6 +1880,10 @@ function finalize(id) {
         attr = attributes[finalizeIdx];
       }
 
+      if(finalizeIdx == attributes.length-1) {
+        if(attr[3] || attr[4] || attr[5]) finalizeIdx++; // exception: skip last attr, already constrained
+      }
+
       if(finalizeIdx >= attributes.length) {
         finalizeArr++;
         finalizeIdx = 0;
