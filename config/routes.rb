@@ -6,7 +6,7 @@ CIS400::Application.routes.draw do
       resources :instances
     end
   end
-  root :to => "users#show" 
+  root :to => "servers#show" 
   
   post "/users/:user_id/servers/:server_id/instances/:id/query" => "instances#query"
   

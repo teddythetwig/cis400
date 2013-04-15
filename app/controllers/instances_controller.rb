@@ -2,8 +2,6 @@ class InstancesController < ApplicationController
   before_filter :authenticate_user! , :current_user_and_server
   before_filter :is_owned, :only =>[:edit, :new, :query, :update ]
   before_filter :make_connection, :only => [:query, :update]
- 
-
   def index
     @instances = @server.instances 
   end
@@ -16,7 +14,6 @@ class InstancesController < ApplicationController
     begin
       @instance = Instance.new(params[:instance])
       @instance.server = @server
-      
       @instance.save
       redirect_to edit_user_server_instance_path(@user,@server,@instance)
     rescue

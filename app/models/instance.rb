@@ -2,7 +2,8 @@ class Instance < ActiveRecord::Base
   attr_accessible :name, :server_id
   belongs_to :server
   
-  before_create do
+  before_save do
+    logger.debug("creating new database at #{Time.now}")
     self.server.make_connection
     self.server.sql.query("CREATE DATABASE #{self.name}")
   end
