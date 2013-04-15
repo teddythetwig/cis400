@@ -94,7 +94,7 @@ var csv = '';
 
 $(document).ready(function() {
   $('#csvfile').change(function(e){
-    $('#testSubfile').val($(this).val());
+    $('#testSubfile').val($(this).val().replace("C:\\fakepath\\", ""));
     if (e.target.files != undefined) {
       var reader = new FileReader();
       reader.onload = function(e) {
@@ -2043,8 +2043,36 @@ function finalizeRelHTML(div, rel) {
 
 /********* CSV Methods *********/
 
+function initCSVInput() {
+  genSelectInnerHTML("inputCSVTableName", tables, 1);
+}
+
 function addCSVData() {
-  return false;
+
+  // Retrieving Table Information
+  var attrTypes = new Array();
+  var csvTableName = getSelectVal(document.getElementById("inputCSVTableName"));
+  var tableAttributes = getAttrs(csvTableName);
+  for (var i = 0; i < tableAttributes.length; i++) {
+    var currType = findAttr(tableAttributes[i], csvTableName)[2];
+    attrTypes.push(currType);
+  }
+
+
+  // Parse CSV file to double array
+  var csvValues = new Array();
+  var csvLines = csv.split(/\r\n|\n/);
+  for (var i = 0; i < csvLines.length; i++) {
+    var entries = csvLines[i].split(',');
+    if (attrTypes.length != entries.length) {
+      alert("Entry in line: " + i + "of csv file does not match the table attributes.");
+      return false;
+    }
+
+  }
+
+
+  return true;
   //TODO: have some parsing magic happen on that parse var
 }
 </script>
@@ -2318,7 +2346,7 @@ function addCSVData() {
     </div>
   </div>
 
-  <p><button href="#uploadModal" data-toggle="modal" class="btn btn-primary">Upload File</button></p>
+  <p><button href="#uploadModal" data-toggle="modal" class="btn btn-primary" onclick="initCSVInput()">Upload File</button></p>
 
   <!-- Modal -->
   <div id="uploadModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -2327,6 +2355,10 @@ function addCSVData() {
       <h4 id="myModalLabel">Upload CSV File</h4>
     </div>
     <div class="modal-body">
+      <h5>Choose Table</h5>
+      <select id="inputCSVTableName">
+      </select>
+      <h5>Choose File</h5>
       <form>
         <input type="file" id="csvfile" style="display:none"/>
         <div class="input-append">
