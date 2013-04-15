@@ -2063,17 +2063,56 @@ function addCSVData() {
   var csvValues = new Array();
   var csvLines = csv.split(/\r\n|\n/);
   for (var i = 0; i < csvLines.length; i++) {
-    var entries = csvLines[i].split(',');
+    var entries = csvLines[i].split(',|;');
     if (attrTypes.length != entries.length) {
       alert("Entry in line: " + i + "of csv file does not match the table attributes.");
       return false;
     }
+    var entry = new Array()
+    for (var j = 0; j < attrTypes.length; j++) {
+      switch(attrTypes[j]) {
+        case 'text':
+          if(entries[j].match(/^[-\sa-zA-Z]*$/)) { // Currently allows for blank strings
+            entry.push(entries[j]);
+          }
+          break;
+        case 'number':
+          if(entries[j].match(/^\d+$/)) {
+            entry.push(parseInt(entries[j]));
+          }
+          break;
+        case 'date':
+          if(entries[j].match()) {
 
+          }
+      }
+    }
+    csvValues.push(entry);
   }
 
 
+  // Sending insert statements to database
+  for (var i = 0; i < csvValues.length; i++) {
+    var insertTxt = 'INSERT INTO ' + csvTableName + '\nVALUES (';
+    for (var j = 0; j < csvValues[i].length; j++) {
+      if(attrTypes[j] == 'text') {
+        insertTxt = insertTxt + "'" + csvValues[i][j] + "'";
+      } else {
+        insertTxt = insertTxt + csvValues[i][j];
+      }
+
+      if((j+ 1) < csvValues[i].length) {
+        insertTxt = insertTxt + ', ';
+      } else {
+        insertTxt = insertTxt + ')';
+      }
+    }
+
+    //Send insert statement to database
+  }
+
   return true;
-  //TODO: have some parsing magic happen on that parse var
+  //TODO: figure out how to only use required fields
 }
 </script>
 
