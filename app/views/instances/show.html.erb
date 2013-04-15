@@ -50,7 +50,7 @@
     <div class="span2">
       <button class="btn btn-info btn-small" onClick="testJSON()">Load Schema</button>
     </div>
-  
+
     <div class="offset9">
       <p><a href="#controlModal" data-toggle="modal"><small>Keyboard/Mouse Controls  </small></a><i class="icon-book"></i></p>
 
@@ -87,6 +87,25 @@
   <div id="container"></div>
   <script src="http://www.html5canvastutorials.com/libraries/kinetic-v4.3.0-beta2.js"></script>
   <script type="text/javascript">
+
+/********* File Reader JQuery *********/
+
+var csv = '';
+
+$(document).ready(function() {
+  $('#csvfile').change(function(e){
+    $('#testSubfile').val($(this).val());
+    if (e.target.files != undefined) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        csv = e.target.result;
+      };
+      reader.readAsText(e.target.files.item(0));
+    }
+    return false;
+
+  });
+});
 
 /********* Global Variables *********/
 
@@ -149,7 +168,7 @@ var test = { "tables" : [{ "name" : "testMe" , "xval" : "895" , "yval" : "385" ,
 
 /********* Creation Methods *********/
 
-/* 
+/*
 * Creates table
 * Note: Check table name is unique before calling.
 */
@@ -188,7 +207,7 @@ function createTable(tableName, rectX, rectY) {
         cornerRadius: 10
     });
 
-    // Add Elements to group  
+    // Add Elements to group
     group.add(rect);
     group.add(complexText);
 
@@ -206,7 +225,7 @@ function createTable(tableName, rectX, rectY) {
     });
     group.on('mouseout', function() {
         document.body.style.cursor = 'default';
-    });  
+    });
     group.on('mousedown', function() {
         if(currGroup.getChildren().length > 0) {
             currGroup.get('.shape')[0].setStroke('black');
@@ -236,18 +255,18 @@ function createTable(tableName, rectX, rectY) {
     group.on('dragstart dragmove', function(){
         update();
     });
-    
-    //Add group to table array  
+
+    //Add group to table array
     tables.push(group);
 
     //Add group to stage
     //layer.add(group);
     //stage.add(layer);
-    viewport.add(group,1150); 
+    viewport.add(group,1150);
     viewport.draw();
 }
 
-/* 
+/*
 * Creates attribute
 */
 function createAttr(name, type, tableName, primary, notNull, unique, rectX, rectY) {
@@ -298,7 +317,7 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
       cornerRadius: 10
     });
 
-    //Add Elements to group  
+    //Add Elements to group
     group.add(rect);
     group.add(complexText);
 
@@ -318,7 +337,7 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
     });
     group.on('mouseout', function() {
         document.body.style.cursor = 'default';
-    });  
+    });
     group.on('mousedown', function() {
         if(currGroup.getChildren().length > 0) {
             currGroup.get('.shape')[0].setStroke('black');
@@ -340,23 +359,23 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
         document.getElementById('attributeTitle').innerHTML = 'Attribute Type: ';
         document.getElementById('attribute').innerHTML = attGroup[2];
     });
-    
+
     group.on('dragstart dragmove', function(){
         update();
     });
 
-    //Add group to attributes array  
+    //Add group to attributes array
     attributes.push(attGroup);
-    
+
     //Adds connection line
     var line = new Kinetic.Line({
         name: name,
-        // points: [group.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
-        //          group.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
+        // points: [group.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
+        //          group.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY,
         //          table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
         //          table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY],
-        points: [group.getX()+group.origX+group.getChildren()[0].getWidth()/2-updateX, 
-                 group.getY()+group.origY+group.getChildren()[0].getHeight()/2-updateY, 
+        points: [group.getX()+group.origX+group.getChildren()[0].getWidth()/2-updateX,
+                 group.getY()+group.origY+group.getChildren()[0].getHeight()/2-updateY,
                  table.getX()+table.origX+table.getChildren()[0].getWidth()/2-updateX,
                  table.getY()+table.origY+table.getChildren()[0].getHeight()/2-updateY],
         stroke: 'black',
@@ -364,11 +383,11 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
         lineCap: 'round',
         lineJoin: 'round'
     });
-    
+
     var lineGroup = [line, table, group];
 
     attrLines.push(lineGroup);
-    
+
     //Add group to stage
     //layer.add(group);
     //layer.add(line);
@@ -430,7 +449,7 @@ function createRelation(rname, tableArr, relX, relY){
       cornerRadius: 10
     });
 
-    //Add Elements to group  
+    //Add Elements to group
     group.add(ell);
     group.add(complexText);
 
@@ -444,7 +463,7 @@ function createRelation(rname, tableArr, relX, relY){
     });
     group.on('mouseout', function() {
         document.body.style.cursor = 'default';
-    });  
+    });
     group.on('mousedown', function() {
         if(currGroup.getChildren().length > 0) {
             currGroup.get('.shape')[0].setStroke('black');
@@ -465,7 +484,7 @@ function createRelation(rname, tableArr, relX, relY){
              document.getElementById('attribute').innerHTML = tablesText;
         }
     });
-    
+
     group.on('dragstart dragmove', function(){
         update();
     });
@@ -477,12 +496,12 @@ function createRelation(rname, tableArr, relX, relY){
         var currTable = rTables[i];
         var line = new Kinetic.Line({
             name: rname,
-            // points: [group.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
-            //      group.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
+            // points: [group.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
+            //      group.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY,
             //      currTable.getX()+currTable.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
             //      currTable.getY()+currTable.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY],
-            points: [group.getX()+group.origX+group.getChildren()[0].getWidth()/2-updateX, 
-                 group.getY()+group.origY+group.getChildren()[0].getHeight()/2-updateY, 
+            points: [group.getX()+group.origX+group.getChildren()[0].getWidth()/2-updateX,
+                 group.getY()+group.origY+group.getChildren()[0].getHeight()/2-updateY,
                  currTable.getX()+currTable.origX+currTable.getChildren()[0].getWidth()/2-updateX,
                  currTable.getY()+currTable.origY+currTable.getChildren()[0].getHeight()/2-updateY],
             stroke: 'red',
@@ -515,34 +534,34 @@ function update() {
         for(var j = 0; j < lines.length; j++) {
             var table = relations[i][2][j];
             var line = lines[j];
-	    
-            // line.setPoints([table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
-            //      table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
+
+            // line.setPoints([table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
+            //      table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY,
             //      rel.getX()+rel.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
             //      rel.getY()+rel.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY]);
 
-            line.setPoints([table.getX()+table.origX+table.getChildren()[0].getWidth()/2-updateX, 
-                 table.getY()+table.origY+table.getChildren()[0].getHeight()/2-updateY, 
+            line.setPoints([table.getX()+table.origX+table.getChildren()[0].getWidth()/2-updateX,
+                 table.getY()+table.origY+table.getChildren()[0].getHeight()/2-updateY,
                  rel.getX()+rel.origX+rel.getChildren()[0].getWidth()/2-updateX,
                  rel.getY()+rel.origY+rel.getChildren()[0].getHeight()/2-updateY]);
-	    
+
             //layer.draw();
             viewport.draw();
         }
     }
-    
+
     // Updates attribute lines
     for(var i = 0; i < attrLines.length; i++) {
         var line = attrLines[i][0];
         var table = attrLines[i][1];
         var attr = attrLines[i][2];
-        // line.setPoints([attr.getX()+attr.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
-        //          attr.getY()+attr.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
+        // line.setPoints([attr.getX()+attr.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
+        //          attr.getY()+attr.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY,
         //          table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
         //          table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY]);
 
-        line.setPoints([attr.getX()+attr.origX+attr.getChildren()[0].getWidth()/2-updateX, 
-                 attr.getY()+attr.origY+attr.getChildren()[0].getHeight()/2-updateY, 
+        line.setPoints([attr.getX()+attr.origX+attr.getChildren()[0].getWidth()/2-updateX,
+                 attr.getY()+attr.origY+attr.getChildren()[0].getHeight()/2-updateY,
                  table.getX()+table.origX+table.getChildren()[0].getWidth()/2-updateX,
                  table.getY()+table.origY+table.getChildren()[0].getHeight()/2-updateY]);
         //layer.draw();
@@ -559,7 +578,7 @@ function update() {
 function findTable(name) {
     for(var i = 0; i < tables.length; i++) {
         if(name.toLowerCase() == tables[i].get('.text')[0].getText().toLowerCase()) {
-            return tables[i];        
+            return tables[i];
         }
     }
     return null;
@@ -656,7 +675,7 @@ function deleteTable(tableName) {
 	        i--;
         }
     }
-    
+
     // Deletes connected attributes from attributes table
     for(var i = 0; i < attributes.length; i++) {
         if(attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
@@ -667,7 +686,7 @@ function deleteTable(tableName) {
 	        i--;
         }
     }
-    
+
     // Deletes relations connected with table
     for (var i = 0; i < relations.length; i++) {
       var found = false;
@@ -698,7 +717,7 @@ function deleteTable(tableName) {
          //     relations[i][0].remove();
          //     relations.splice(i,1);
 	        //    i--;
-         // }     
+         // }
     }
 
     // Delete table from tables array
@@ -709,7 +728,7 @@ function deleteTable(tableName) {
             break;
         }
     }
-    
+
     //layer.draw();
     viewport.draw();
 }
@@ -800,7 +819,7 @@ function editAttrPrimary(attrName, tableName, primary) {
 /*
 * Modifies the not null status of provided attribute if possible
 */
-function editAttrNotNull(attrName, tableName, notNull) {   
+function editAttrNotNull(attrName, tableName, notNull) {
     var attr = findAttr(attrName, tableName);
     // check if this action makes sense
     if(attr[3]) { // primary key is already not null
@@ -864,7 +883,7 @@ function deleteAttribute(attrName, tableName) {
             }
         }
     }
-    
+
     // Deletes attribute lines from attrLines array
     for(var i = 0; i < attrLines.length; i++) {
         if((attrLines[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) &&
@@ -874,7 +893,7 @@ function deleteAttribute(attrName, tableName) {
             break;
         }
     }
-    
+
     // Deletes attribute from attributes array
     for(var i = 0; i < attributes.length; i++) {
         if((attributes[i][0].get('.Atext')[0].getText().toLowerCase() == attrName.toLowerCase()) &&
@@ -884,7 +903,7 @@ function deleteAttribute(attrName, tableName) {
             break;
         }
     }
-    
+
     //layer.draw();
     viewport.draw();
 }
@@ -921,7 +940,7 @@ function findRelation(relName) {
 }
 
 /*
-* Modifies the existing relation name to the provided relation name 
+* Modifies the existing relation name to the provided relation name
 */
 function editRelationName(oldRelName, newRelName) {
     var rel = findRelation(oldRelName);
@@ -936,7 +955,7 @@ function editRelationType(relName, newRelType) {
     var rel = findRelation(relName);
     if(rel[3] == newRelType)
       return false;
-    else { 
+    else {
       rel[3] = newRelType;
       return true;
     }
@@ -956,7 +975,7 @@ function deleteRelation(relName) {
             relations.splice(i, 1);
         }
     }
-    
+
     //layer.draw();
     viewport.draw();
 }
@@ -1129,7 +1148,7 @@ function convertFromJSON(source) {
     }
     createRelation(relation.name, relTables, parseInt(relation.xval), parseInt(relation.yval));
   }
-  
+
   // Set viewport
   if(JSONObj.viewport.scale != 1) {
     viewport.setZoom(parseInt(JSONObj.viewport.scale));
@@ -1249,7 +1268,7 @@ function convertToSQL() {
             // Many to Many Relationship (and default)
             if(relations[i][3] == reltypes[4] || relations[i][3] == reltypes[0]) {
               code = code + ' NOT NULL REFERENCES ' + currTable.get('.text')[0].getText() + ' (' + primary[0].get('.Atext')[0].getText();
-            } else 
+            } else
             // One to One Relationship
             if (relations[i][3] == reltypes[1]) {
               code = code + ' UNIQUE NOT NULL REFERENCES ' + currTable.get('.text')[0].getText() + ' (' + primary[0].get('.Atext')[0].getText();
@@ -1402,7 +1421,7 @@ function convertToCode() {
 
 /********* HTML Helper Functions *********/
 /*
-* Generates HTML to dynamically populate selectors 
+* Generates HTML to dynamically populate selectors
 * from dynamic data structures
 */
 function genSelectInnerHTML(id, arr, type, write) {
@@ -1580,7 +1599,7 @@ function genRelProps() {
   var relName = getSelectVal(document.getElementById("relNameC"));
   var rel = findRelation(relName);
   var relTypeIdx = reltypes.indexOf(rel[3]);
-  document.getElementById("editRelType").selectedIndex = relTypeIdx; 
+  document.getElementById("editRelType").selectedIndex = relTypeIdx;
 }
 
 /*
@@ -1604,7 +1623,7 @@ function saveEditAttr(e) {
     if(editAttrType(oldAttrName, tableName, newAttrType) || editAttrPrimary(newAttrName, tableName, attrPrimary)
       || editAttrNotNull(newAttrName, tableName, attrNotNull) || editAttrUnique(newAttrName, tableName, attrUnique)) {
       $('#editAttributeModal').modal('hide'); // hide modal on save
-    } 
+    }
   }
   else if(newAttrName != "" && uniqueAttrName(newAttrName, tableName)) {
     $('#editAttributeModal').modal('hide'); // hide modal on save
@@ -1776,14 +1795,14 @@ function submitQuery(path, query, json, callback){
   });
   //$.post(path,q,callback);
  /*
- 
+
   method = "post";
-  
+
   var form = document.createElement("form");
   form.setAttribute("method", method);
   form.setAttribute("path", path);
-  
-  for(var key in params) { 
+
+  for(var key in params) {
     var hiddenField = document.createElement("input");
     hiddenField.setAttribute("type", "hidden");
     hiddenField.setAttribute("name", key);
@@ -1793,7 +1812,7 @@ function submitQuery(path, query, json, callback){
   document.body.appendChild(form);
   form.submit();
   */
-  
+
 }
 
 /*
@@ -1826,7 +1845,7 @@ function finalize(id) {
         tableName = tables[finalizeIdx].get('.text')[0].getText();
         finalizeIdx++;
       }
-      
+
       if(pkey == "Don't Know") {
         pkey = "sysid";
         createAttr(pkey, 'number', tableName, true, false, false, 525, 225);
@@ -1843,7 +1862,7 @@ function finalize(id) {
 	}
       }
 
-      if(finalizeIdx >= tables.length) { 
+      if(finalizeIdx >= tables.length) {
         finalizeArr++;
         finalizeIdx = 0;
 	finalize("finalizeModalDiv");
@@ -1855,8 +1874,8 @@ function finalize(id) {
     else if(finalizeArr == 2) { // attribute constraint
       // display next attribute constraint (not null or unique)
       var attr = attributes[finalizeIdx];
-      
-      if(attr == null) { 
+
+      if(attr == null) {
 	finalizeArr++;
 	finalizeIdx = 0;
 	finalize("finalizeModalDiv");
@@ -1866,9 +1885,9 @@ function finalize(id) {
       (attrNotNull == null) ? attrNotNull = null : attrNotNull = attrNotNull.checked;
       var attrUnique = document.getElementById("constrainUnique");
       (attrUnique == null) ? attrUnique = null : attrUnique = attrUnique.checked;
-      if(attrUnique) { 
-	attr[5] = true; 
-	finalizeIdx++; 
+      if(attrUnique) {
+	attr[5] = true;
+	finalizeIdx++;
         if(finalizeIdx != attributes.length) {
 	  attr = attributes[finalizeIdx];
 	}
@@ -1880,7 +1899,7 @@ function finalize(id) {
 	  attr = attributes[finalizeIdx];
 	}
       }
-      else if(attrUnique != null && attrNotNull != null) { 
+      else if(attrUnique != null && attrNotNull != null) {
 	finalizeIdx++;
         if(finalizeIdx != attributes.length) {
 	  attr = attributes[finalizeIdx];
@@ -1973,9 +1992,9 @@ function finalizeTableHTML(div, tableName) {
 
       var attrs = getAttrs(tableName);
       html += "<select id='finalizeSelector'>" + genSelectInnerHTML("finalizeSelector", attrs, 0, 0) + "</select>";
-    
+
       div.innerHTML = html;
-    
+
       // Don't know option - generate automatic sysid
       var opt = document.createElement("option");
       opt.text = "Don't Know";
@@ -1991,13 +2010,13 @@ function finalizeAttrHTML(div, attr) {
         var html = "";
         html += "<h4>Constrain Attribute: " + attr[1].get('.text')[0].getText().toLowerCase() +  "." + attr[0].get('.Atext')[0].getText().toLowerCase() + "</h4>";
         html += "<p>Is the above attribute unique for all table entries?<br /><em>e.g. For a user accounts table, an email address is unique for every user account entry.</em><br />If so, check the box below.  Otherwise, leave it blank.</p>";
-      
+
         html += "<input type=\"checkbox\" id=\"constrainUnique\" value=\"1\">&nbsp;\n<label for=\"constrainUnique\"><span style=\"border-bottom:1px dashed #000;\">Attribute is Unique</span><label><br />";
-      
+
         html += "<p>If the above question does not apply, is the attribute required for every table entry, or is it an optional field?  If it is required, check the box below.  If it is optional, leave it blank.</p>";
-      
+
         html += "<input type=\"checkbox\" id=\"constrainNotNull\" value=\"1\">&nbsp;\n<label for=\"constrainNotNull\"><span style=\"border-bottom:1px dashed #000;\">Attribute is Required</span><label><br />";
-     
+
         div.innerHTML = html;
 }
 
@@ -2012,14 +2031,21 @@ function finalizeRelHTML(div, rel) {
         var html = "";
         html += "<h4>Constrain Relation: " + rel[0].get('.Rtext')[0].getText().toLowerCase() + "</h4>";
 	html += "<p>Does an instance of <strong>" + tname1  +  "</strong> have a single corresponding instance of <strong>" + tname2 + "</strong>?<br /><em>e.g. A <strong>Person</strong> instance could be required to have a single corresponding <strong>DriversLicense</strong> instance</em>.<br />If so, make a selection below.</p>";
-        
+
         html += "<input type=\"checkbox\" id=\"constrainOTO\" value=\"1\">&nbsp;\n<label for=\"constrainOTO\"><span style=\"border-bottom:1px dashed #000;\">one-to-one</span><label><br />";
-	
+
 	html += "<br /><p>Otherwise, are there several instances of <strong>" + tname1 + "</strong> that can correspond to several instances of <strong>" + tname2 + "</strong>?<br /><em>e.g. An instance of <strong>Author</strong> could have several corresponding instances of <strong>Book</strong> instance</em> (multiple books per author), and an instance of <strong>Book</strong> could also have several corresponding instances of <strong>Author</strong> (multiple authors per book).<br />If so, make a selection below.</p>";
 
         html += "<input type=\"checkbox\" id=\"constrainMTM\" value=\"1\">&nbsp;\n<label for=\"constrainMTM\"><span style=\"border-bottom:1px dashed #000;\">many-to-many</span><label><br />";
 
 	div.innerHTML = html;
+}
+
+/********* CSV Methods *********/
+
+function addCSVData() {
+  return false;
+  //TODO: have some parsing magic happen on that parse var
 }
 </script>
 
@@ -2118,8 +2144,8 @@ function finalizeRelHTML(div, rel) {
   </div>
 
   <br />
-  <div class="row">  
- 
+  <div class="row">
+
   <!-- deleteTableModal -->
   <div id="deleteTableModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="deleteTableModalLabel" aria-hidden="true">
     <div class="modal-header">
@@ -2195,7 +2221,7 @@ function finalizeRelHTML(div, rel) {
       <button id="editRelBtn" class="btn btn-primary" onclick="editRelation()">Edit relation</button>
     </div>
   </div>
-  
+
   <!-- deleteRelationModal -->
     <div id="deleteRelationModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="deleteRelationModalLabel" aria-hidden="true">
       <div class="modal-header">
@@ -2241,7 +2267,7 @@ function finalizeRelHTML(div, rel) {
         <button class="btn" data-dismiss="modal">Close</button>
       </div>
     </div>
-   
+
  <!-- table info display -->
     <div class="span8">
         <div class="row-fluid">
@@ -2290,17 +2316,48 @@ function finalizeRelHTML(div, rel) {
       <button class="btn" onClick="convertToJSON()">JSON</button>
       <a class="btn btn-danger" onclick="clearDiagram()">Clear Schema</a>
     </div>
-
   </div>
 
+  <p><button href="#uploadModal" data-toggle="modal" class="btn btn-primary">Upload File</button></p>
+
+  <!-- Modal -->
+  <div id="uploadModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h4 id="myModalLabel">Upload CSV File</h4>
+    </div>
+    <div class="modal-body">
+      <form>
+        <input type="file" id="csvfile" style="display:none"/>
+        <div class="input-append">
+          <input type="text" name="subfile" id="testSubfile" class="input-xlarge">
+          <a class="btn" onclick="$('#csvfile').click();">Browse</a>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Close</button>
+      <button id="uploadBtn" class="btn btn-success" onclick="addCSVData()"><i class="icon-arrow-up icon-white"></i>Upload</button>
+    </div>
+  </div>
+
+      <!-- <div class="controls form-search">
+        <input type="file" name="thefile" id="thefile" class="input-xlarge" style="position: fixed; top: -100px; left: -100px;"/>
+        <input type="file" class="input-xlarge" id="input05" style="position: fixed; top: -100px; left: -100px;">
+        <input type="text" class="" disabled="" size="40">
+        <button type="button" class="btn btn-primary" id="thefile">
+          <i class="icon-arrow-up icon-white"></i> Open CSV File
+        </button>
+      </div> -->
 </div>
 <script type="text/javascript">
+
 $(document).ready( function() {
     // bind mouse wheel to affect scale
 	$('#container').bind('mousewheel', function(event, delta) {
-		
+
 		// (delta will be 1 or -1)
-		
+
 		switch( delta ) {
 			case -1:
 				viewport.zoomOut();
@@ -2311,22 +2368,22 @@ $(document).ready( function() {
 				viewport.draw();
 				break;
 		}
-		
+
 		// oh yeah, cancel the scroll!
 		event.preventDefault();
 	});
-	
+
 	var ArrowLeft = 37;
 	var ArrowRight = 39;
 	var ArrowUp = 38;
 	var ArrowDown = 40;
-	
+
 	//var xOffset = 0;
 	//var yOffset = 0;
 	$(document).keydown(function(event){
-		
+
 		var keyCode = event.keyCode;
-		
+
 		//var stageMoveX = 0;
 		//var stageMoveY = 0;
 		switch( keyCode ) {
@@ -2343,7 +2400,7 @@ $(document).ready( function() {
 				viewport.draw();
 				event.preventDefault();
 				break;
-				
+
 			case ArrowRight:
 				viewport.panRight(10);
 				updateX -= 10 * (1/viewport.scale);
@@ -2356,7 +2413,7 @@ $(document).ready( function() {
 				viewport.draw();
 				event.preventDefault();
 				break;
-				
+
 			case ArrowUp:
 				viewport.panUp(10);
 				updateY += 10 * (1/viewport.scale);
@@ -2369,7 +2426,7 @@ $(document).ready( function() {
 				viewport.draw();
 				event.preventDefault();
 				break;
-				
+
 			case ArrowDown:
 				viewport.panDown(10);
 				updateY -= 10 * (1/viewport.scale);
@@ -2383,7 +2440,7 @@ $(document).ready( function() {
 				event.preventDefault();
 				break;
 		}
-			
+
 		// oh yeah, cancel the click!
 		//event.preventDefault();
 	});
