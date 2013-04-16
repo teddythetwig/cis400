@@ -1,5 +1,4 @@
-
-<h1><%= "Welcome, #{@server.name}!"%></h1>
-<%=link_to "My instances", user_server_instances_path(@user, @server)%>
-
-
+<div class="container">
+  <h1><%= "Welcome, #{@server.name}!"%></h1>
+  <%=link_to "My instances", user_server_instances_path(@user, @server)%>
+</div>
