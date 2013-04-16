@@ -11,7 +11,7 @@ class Server < ActiveRecord::Base
     #initialize db on the rds servers
     #change this from hardcoding the password, on the first time it should set it
     #should also hash username or something to prevent info leak
-    $RDS.create_db_instance(:db_instance_identifier => "#{name}", :allocated_storage => 5,:db_instance_class => "db.t1.micro",:engine => "MySQL",:master_username=>"username#{user.id}",:master_user_password=>"cis400")
+    $RDS.create_db_instance(:db_instance_identifier => "#{name}", :allocated_storage => 5,:db_instance_class => "db.t1.micro",:engine => "MySQL",:master_username=>"username#{user.id + Rails.env}",:master_user_password=>"cis400")
     #check if connection is valid, if not, return error and cause transaction rollback
   end
   
