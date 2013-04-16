@@ -40,14 +40,17 @@
     <div class="span3">
       <select id="schemaSelect">
         <option>Select Base Schema</option>
+        <option>Teacher-Student</option>
+        <option>Employee-Department</option>
+        <option>Author-Book-Category</option>
+        <option>Teacher-Student (U)</option>
         <option>Test</option>
-        <option>Test2</option>
       </select>
     </div>
     <div class="span2">
       <button class="btn btn-info btn-small" onClick="testJSON()">Load Schema</button>
     </div>
-  
+
     <div class="offset9">
       <p><a href="#controlModal" data-toggle="modal"><small>Keyboard/Mouse Controls  </small></a><i class="icon-book"></i></p>
 
@@ -65,7 +68,7 @@
           <p><i class="icon-arrow-down"></i>   <small>Move diagram view down</small></p>
 
           <h6>Mouse Controls</h6>
-          <p><i class="icon-move"></i>   <small>Zoom in by scrolling down or left. Zoom out by scrolling up or right.</small></p>
+          <p><i class="icon-move"></i><small>Zoom in by scrolling down or left. Zoom out by scrolling up or right.</small></p>
         </div>
       </div>
     </div>
@@ -85,10 +88,29 @@
   <script src="http://www.html5canvastutorials.com/libraries/kinetic-v4.3.0-beta2.js"></script>
   <script type="text/javascript">
 
+/********* File Reader JQuery *********/
+
+var csv = '';
+
+$(document).ready(function() {
+  $('#csvfile').change(function(e){
+    $('#testSubfile').val($(this).val().replace("C:\\fakepath\\", ""));
+    if (e.target.files != undefined) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        csv = e.target.result;
+      };
+      reader.readAsText(e.target.files.item(0));
+    }
+    return false;
+
+  });
+});
+
 /********* Global Variables *********/
 
 // ID of the instance
-var dbInstance = '<%="#{@instance.name}"%>'
+var dbInstance = "test";
 
 // Control inversion
 var invert = true;
@@ -103,7 +125,7 @@ tables = new Array();
 datatypes = new Array("text", "number", "date");
 
 // List of allowable relation types
-reltypes = new Array("undefined", "one-to-one", "one-to-many", "many-to-one", "many-to-many");
+reltypes = new Array("undefined", "one-to-one", "many-to-many");
 
 // List of attributes
 attributes = new Array();
@@ -124,7 +146,7 @@ var currGroup = new Kinetic.Group();
 
 // Finalization variable
 var finalizeIdx = 0;
-var finalizeArr = 0;
+var finalizeArr = 1;
 
 // Viewport
 var viewport = new Viewport(stage);
@@ -132,16 +154,21 @@ var viewport = new Viewport(stage);
 // JSON obj
 var JSONObj;
 
+var book = { "tables" : [{ "name" : "Book" , "xval" : "463" , "yval" : "137" , "attributes" : [{ "name" : "b_id" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "335" , "yval" : "81" }, { "name" : "title" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "444" , "yval" : "74" }, { "name" : "isbn" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "534" , "yval" : "72" }, { "name" : "publish_date" , "dataType" : "DATETIME" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "637" , "yval" : "65" }]}, { "name" : "Author" , "xval" : "148" , "yval" : "315" , "attributes" : [{ "name" : "a_id" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "41" , "yval" : "395" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "21" , "yval" : "315" }]}, { "name" : "Category" , "xval" : "766" , "yval" : "328" , "attributes" : [{ "name" : "c_id" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "1006" , "yval" : "298" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "940" , "yval" : "400" }]}], "relations" : [{ "name" : "Auth_Book" , "xval" : "337" , "yval" : "215" , "attributes" : [{ "name" : "a_id", "table" : "author"}, { "name" : "b_id", "table" : "Book"}]}, { "name" : "Cat_Book" , "xval" : "652" , "yval" : "216" , "attributes" : [{ "name" : "c_id", "table" : "Category"}, { "name" : "b_id", "table" : "Book"}]}], "viewport" : { "updateX" : "0", "updateY" : "0", "scale" : "1"} }
+
+var ed = { "tables" : [{ "name" : "Employee" , "xval" : "192" , "yval" : "223" , "attributes" : [{ "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "38" , "yval" : "281" }, { "name" : "e_id" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "22" , "yval" : "176" }, { "name" : "start_date" , "dataType" : "DATETIME" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "67" , "yval" : "356" }, { "name" : "salary" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "224" , "yval" : "377" }]}, { "name" : "Department" , "xval" : "707" , "yval" : "110" , "attributes" : [{ "name" : "dep_no" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "904" , "yval" : "43" }, { "name" : "dep_name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "894" , "yval" : "179" }]}], "relations" : [{ "name" : "dep_emp" , "xval" : "499" , "yval" : "176" , "attributes" : [{ "name" : "e_id", "table" : "Employee"}, { "name" : "dep_no", "table" : "Department"}]}], "viewport" : { "updateX" : "0", "updateY" : "0", "scale" : "1"} }
+
 var ts = { "tables" : [{ "name" : "Teacher" , "xval" : "180" , "yval" : "250" , "attributes" : [{ "name" : "tid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "40" , "yval" : "248" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "56" , "yval" : "308" }]}, { "name" : "Student" , "xval" : "720" , "yval" : "248" , "attributes" : [{ "name" : "sid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "942" , "yval" : "212" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "926" , "yval" : "294" }]}], "relations" : [{ "name" : "Teaches" , "xval" : "450" , "yval" : "216" , "attributes" : [{ "name" : "tid", "table" : "Teacher"}, { "name" : "sid", "table" : "Student"}]}], "viewport" : { "updateX" : "0", "updateY" : "0", "scale" : "1"}};
 
-var tsu = { "tables" : [{ "name" : "Teacher" , "xval" : "180" , "yval" : "250" , "attributes" : [{ "name" : "tid" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "40" , "yval" : "248" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "56" , "yval" : "308" }]}, { "name" : "Student" , "xval" : "720" , "yval" : "248" , "attributes" : [{ "name" : "sid" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "942" , "yval" : "212" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "926" , "yval" : "294" }]}], "relations" : [{ "name" : "Teaches" , "xval" : "450" , "yval" : "216" , "attributes" : [{ "name" : "tid", "table" : "Teacher"}, { "name" : "sid", "table" : "Student"}]}], "viewport" : { "updateX" : "0", "updateY" : "0", "scale" : "1"}};
+var tsu = { "tables" : [{ "name" : "Teacher" , "xval" : "180" , "yval" : "250" , "attributes" : [{ "name" : "teacher_id" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "40" , "yval" : "248" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "56" , "yval" : "308" }]}, { "name" : "Student" , "xval" : "720" , "yval" : "248" , "attributes" : [{ "name" : "student_id" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "942" , "yval" : "212" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "926" , "yval" : "294" }]}], "relations" : [{ "name" : "Teaches" , "xval" : "450" , "yval" : "216" , "attributes" : [{ "name" : "id", "table" : "Teacher"}, { "name" : "id", "table" : "Student"}]}], "viewport" : { "updateX" : "0", "updateY" : "0", "scale" : "1"}};
 
 var test = { "tables" : [{ "name" : "testMe" , "xval" : "895" , "yval" : "385" , "attributes" : []}], "relations" : [], "viewport" : { "updateX" : "370", "updateY" : "160", "scale" : "1"} };
 
 
+
 /********* Creation Methods *********/
 
-/* 
+/*
 * Creates table
 * Note: Check table name is unique before calling.
 */
@@ -180,7 +207,7 @@ function createTable(tableName, rectX, rectY) {
         cornerRadius: 10
     });
 
-    // Add Elements to group  
+    // Add Elements to group
     group.add(rect);
     group.add(complexText);
 
@@ -198,7 +225,7 @@ function createTable(tableName, rectX, rectY) {
     });
     group.on('mouseout', function() {
         document.body.style.cursor = 'default';
-    });  
+    });
     group.on('mousedown', function() {
         if(currGroup.getChildren().length > 0) {
             currGroup.get('.shape')[0].setStroke('black');
@@ -228,18 +255,18 @@ function createTable(tableName, rectX, rectY) {
     group.on('dragstart dragmove', function(){
         update();
     });
-    
-    //Add group to table array  
+
+    //Add group to table array
     tables.push(group);
 
     //Add group to stage
     //layer.add(group);
     //stage.add(layer);
-    viewport.add(group,1150); 
+    viewport.add(group,1150);
     viewport.draw();
 }
 
-/* 
+/*
 * Creates attribute
 */
 function createAttr(name, type, tableName, primary, notNull, unique, rectX, rectY) {
@@ -290,7 +317,7 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
       cornerRadius: 10
     });
 
-    //Add Elements to group  
+    //Add Elements to group
     group.add(rect);
     group.add(complexText);
 
@@ -310,7 +337,7 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
     });
     group.on('mouseout', function() {
         document.body.style.cursor = 'default';
-    });  
+    });
     group.on('mousedown', function() {
         if(currGroup.getChildren().length > 0) {
             currGroup.get('.shape')[0].setStroke('black');
@@ -332,23 +359,23 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
         document.getElementById('attributeTitle').innerHTML = 'Attribute Type: ';
         document.getElementById('attribute').innerHTML = attGroup[2];
     });
-    
+
     group.on('dragstart dragmove', function(){
         update();
     });
 
-    //Add group to attributes array  
+    //Add group to attributes array
     attributes.push(attGroup);
-    
+
     //Adds connection line
     var line = new Kinetic.Line({
         name: name,
-        // points: [group.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
-        //          group.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
+        // points: [group.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
+        //          group.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY,
         //          table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
         //          table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY],
-        points: [group.getX()+group.origX+group.getChildren()[0].getWidth()/2-updateX, 
-                 group.getY()+group.origY+group.getChildren()[0].getHeight()/2-updateY, 
+        points: [group.getX()+group.origX+group.getChildren()[0].getWidth()/2-updateX,
+                 group.getY()+group.origY+group.getChildren()[0].getHeight()/2-updateY,
                  table.getX()+table.origX+table.getChildren()[0].getWidth()/2-updateX,
                  table.getY()+table.origY+table.getChildren()[0].getHeight()/2-updateY],
         stroke: 'black',
@@ -356,11 +383,11 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
         lineCap: 'round',
         lineJoin: 'round'
     });
-    
+
     var lineGroup = [line, table, group];
 
     attrLines.push(lineGroup);
-    
+
     //Add group to stage
     //layer.add(group);
     //layer.add(line);
@@ -422,7 +449,7 @@ function createRelation(rname, tableArr, relX, relY){
       cornerRadius: 10
     });
 
-    //Add Elements to group  
+    //Add Elements to group
     group.add(ell);
     group.add(complexText);
 
@@ -436,7 +463,7 @@ function createRelation(rname, tableArr, relX, relY){
     });
     group.on('mouseout', function() {
         document.body.style.cursor = 'default';
-    });  
+    });
     group.on('mousedown', function() {
         if(currGroup.getChildren().length > 0) {
             currGroup.get('.shape')[0].setStroke('black');
@@ -457,7 +484,7 @@ function createRelation(rname, tableArr, relX, relY){
              document.getElementById('attribute').innerHTML = tablesText;
         }
     });
-    
+
     group.on('dragstart dragmove', function(){
         update();
     });
@@ -469,12 +496,12 @@ function createRelation(rname, tableArr, relX, relY){
         var currTable = rTables[i];
         var line = new Kinetic.Line({
             name: rname,
-            // points: [group.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
-            //      group.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
+            // points: [group.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
+            //      group.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY,
             //      currTable.getX()+currTable.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
             //      currTable.getY()+currTable.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY],
-            points: [group.getX()+group.origX+group.getChildren()[0].getWidth()/2-updateX, 
-                 group.getY()+group.origY+group.getChildren()[0].getHeight()/2-updateY, 
+            points: [group.getX()+group.origX+group.getChildren()[0].getWidth()/2-updateX,
+                 group.getY()+group.origY+group.getChildren()[0].getHeight()/2-updateY,
                  currTable.getX()+currTable.origX+currTable.getChildren()[0].getWidth()/2-updateX,
                  currTable.getY()+currTable.origY+currTable.getChildren()[0].getHeight()/2-updateY],
             stroke: 'red',
@@ -489,7 +516,7 @@ function createRelation(rname, tableArr, relX, relY){
     }
 
     // Adding group of line and tables to realtions array (Line obj, FirstTable, SecondTable, Directionality)
-    // 'undefined', 'one-to-one', 'one-to-many', 'many-to-many'
+    // 'undefined', 'one-to-one', 'many-to-many'
     var currRelation = [group, rLines, rTables, rType];
     relations.push(currRelation);
     //layer.draw();
@@ -507,34 +534,34 @@ function update() {
         for(var j = 0; j < lines.length; j++) {
             var table = relations[i][2][j];
             var line = lines[j];
-	    
-            // line.setPoints([table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
-            //      table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
+
+            // line.setPoints([table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
+            //      table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY,
             //      rel.getX()+rel.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
             //      rel.getY()+rel.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY]);
 
-            line.setPoints([table.getX()+table.origX+table.getChildren()[0].getWidth()/2-updateX, 
-                 table.getY()+table.origY+table.getChildren()[0].getHeight()/2-updateY, 
+            line.setPoints([table.getX()+table.origX+table.getChildren()[0].getWidth()/2-updateX,
+                 table.getY()+table.origY+table.getChildren()[0].getHeight()/2-updateY,
                  rel.getX()+rel.origX+rel.getChildren()[0].getWidth()/2-updateX,
                  rel.getY()+rel.origY+rel.getChildren()[0].getHeight()/2-updateY]);
-	    
+
             //layer.draw();
             viewport.draw();
         }
     }
-    
+
     // Updates attribute lines
     for(var i = 0; i < attrLines.length; i++) {
         var line = attrLines[i][0];
         var table = attrLines[i][1];
         var attr = attrLines[i][2];
-        // line.setPoints([attr.getX()+attr.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX, 
-        //          attr.getY()+attr.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY, 
+        // line.setPoints([attr.getX()+attr.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
+        //          attr.getY()+attr.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY,
         //          table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
         //          table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY]);
 
-        line.setPoints([attr.getX()+attr.origX+attr.getChildren()[0].getWidth()/2-updateX, 
-                 attr.getY()+attr.origY+attr.getChildren()[0].getHeight()/2-updateY, 
+        line.setPoints([attr.getX()+attr.origX+attr.getChildren()[0].getWidth()/2-updateX,
+                 attr.getY()+attr.origY+attr.getChildren()[0].getHeight()/2-updateY,
                  table.getX()+table.origX+table.getChildren()[0].getWidth()/2-updateX,
                  table.getY()+table.origY+table.getChildren()[0].getHeight()/2-updateY]);
         //layer.draw();
@@ -551,7 +578,7 @@ function update() {
 function findTable(name) {
     for(var i = 0; i < tables.length; i++) {
         if(name.toLowerCase() == tables[i].get('.text')[0].getText().toLowerCase()) {
-            return tables[i];        
+            return tables[i];
         }
     }
     return null;
@@ -648,7 +675,7 @@ function deleteTable(tableName) {
 	        i--;
         }
     }
-    
+
     // Deletes connected attributes from attributes table
     for(var i = 0; i < attributes.length; i++) {
         if(attributes[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) {
@@ -659,7 +686,7 @@ function deleteTable(tableName) {
 	        i--;
         }
     }
-    
+
     // Deletes relations connected with table
     for (var i = 0; i < relations.length; i++) {
       var found = false;
@@ -690,7 +717,7 @@ function deleteTable(tableName) {
          //     relations[i][0].remove();
          //     relations.splice(i,1);
 	        //    i--;
-         // }     
+         // }
     }
 
     // Delete table from tables array
@@ -701,7 +728,7 @@ function deleteTable(tableName) {
             break;
         }
     }
-    
+
     //layer.draw();
     viewport.draw();
 }
@@ -792,7 +819,7 @@ function editAttrPrimary(attrName, tableName, primary) {
 /*
 * Modifies the not null status of provided attribute if possible
 */
-function editAttrNotNull(attrName, tableName, notNull) {   
+function editAttrNotNull(attrName, tableName, notNull) {
     var attr = findAttr(attrName, tableName);
     // check if this action makes sense
     if(attr[3]) { // primary key is already not null
@@ -856,7 +883,7 @@ function deleteAttribute(attrName, tableName) {
             }
         }
     }
-    
+
     // Deletes attribute lines from attrLines array
     for(var i = 0; i < attrLines.length; i++) {
         if((attrLines[i][1].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase()) &&
@@ -866,7 +893,7 @@ function deleteAttribute(attrName, tableName) {
             break;
         }
     }
-    
+
     // Deletes attribute from attributes array
     for(var i = 0; i < attributes.length; i++) {
         if((attributes[i][0].get('.Atext')[0].getText().toLowerCase() == attrName.toLowerCase()) &&
@@ -876,7 +903,7 @@ function deleteAttribute(attrName, tableName) {
             break;
         }
     }
-    
+
     //layer.draw();
     viewport.draw();
 }
@@ -913,7 +940,7 @@ function findRelation(relName) {
 }
 
 /*
-* Modifies the existing relation name to the provided relation name 
+* Modifies the existing relation name to the provided relation name
 */
 function editRelationName(oldRelName, newRelName) {
     var rel = findRelation(oldRelName);
@@ -928,7 +955,7 @@ function editRelationType(relName, newRelType) {
     var rel = findRelation(relName);
     if(rel[3] == newRelType)
       return false;
-    else { 
+    else {
       rel[3] = newRelType;
       return true;
     }
@@ -948,7 +975,7 @@ function deleteRelation(relName) {
             relations.splice(i, 1);
         }
     }
-    
+
     //layer.draw();
     viewport.draw();
 }
@@ -1007,8 +1034,8 @@ function convertToJSON () {
       case 'date':
           type = 'DATETIME';
       }
-      currXVal = attr[i].getX() + attr[i].origX;
-      currYVal = attr[i].getY() + attr[i].origY;
+      currXVal = attr[0].getX() + attr[0].origX;
+      currYVal = attr[0].getY() + attr[0].origY;
       txt = txt + '{ "name" : "' + table.attr[j] + '" , "dataType" : "' + type + '" , "primary" : "' + attr[3] + '" , "notnull" : "' + attr[4] + '" , "unique" : "' + attr[5] + '" , "xval" : "' + currXVal + '" , "yval" : "' + currYVal + '" }';
       if ((j + 1) < table.attr.length) {
         txt = txt + ', ';
@@ -1073,7 +1100,8 @@ function clearDiagram() {
     deleteTable(tables[0].get('.text')[0].getText().toLowerCase());
   }
 
-  // Reset global variables
+  // Reset global variables and screen
+  updateX = 0; updateY = 0;
   viewport = new Viewport(stage);
 }
 
@@ -1120,7 +1148,7 @@ function convertFromJSON(source) {
     }
     createRelation(relation.name, relTables, parseInt(relation.xval), parseInt(relation.yval));
   }
-  
+
   // Set viewport
   if(JSONObj.viewport.scale != 1) {
     viewport.setZoom(parseInt(JSONObj.viewport.scale));
@@ -1137,6 +1165,12 @@ function testJSON() {
   switch (schemaSelected) {
     case 'Teacher-Student' :
       convertFromJSON(ts);
+      break;
+    case 'Author-Book-Category' :
+      convertFromJSON(book);
+      break;
+    case 'Employee-Department' :
+      convertFromJSON(ed);
       break;
     case 'Teacher-Student (U)' :
       convertFromJSON(tsu);
@@ -1234,7 +1268,7 @@ function convertToSQL() {
             // Many to Many Relationship (and default)
             if(relations[i][3] == reltypes[4] || relations[i][3] == reltypes[0]) {
               code = code + ' NOT NULL REFERENCES ' + currTable.get('.text')[0].getText() + ' (' + primary[0].get('.Atext')[0].getText();
-            } else 
+            } else
             // One to One Relationship
             if (relations[i][3] == reltypes[1]) {
               code = code + ' UNIQUE NOT NULL REFERENCES ' + currTable.get('.text')[0].getText() + ' (' + primary[0].get('.Atext')[0].getText();
@@ -1258,7 +1292,6 @@ function convertToSQL() {
         }
     }
     alert(code);
-    submitQuery('<%= "/users/#{@user.id}/servers/#{@server.id}/instances/#{@instance.id}" %>', code, convertToJSON(), (function(response){alert(response[0])}));
 }
 
 /*
@@ -1388,7 +1421,7 @@ function convertToCode() {
 
 /********* HTML Helper Functions *********/
 /*
-* Generates HTML to dynamically populate selectors 
+* Generates HTML to dynamically populate selectors
 * from dynamic data structures
 */
 function genSelectInnerHTML(id, arr, type, write) {
@@ -1532,6 +1565,19 @@ function genAttrList(id1, id2) {
   document.getElementById(id2).selectedIndex = -1; // need to trigger js event
 }
 
+/*
+* Generates HTML to insert attributes into db
+*/
+function genAttrsInput() {
+  var html = "";
+  var tname = getSelectVal(document.getElementById("inputManualTableName"));
+  var table = findTable(tname);
+  for(i=0; i<table.attr.length; i++) {
+    html += "<label for=\"attr" + i + "\">" + table.attr[i] + "</label>\n<input type=\"text\" id=\"attr" + i + "\">\n<br />";
+  }
+  document.getElementById("manualInputDiv").innerHTML = html;
+}
+
 function getAttrs(tableName) {
   var attrs = new Array();
   table = findTable(tableName);
@@ -1566,7 +1612,7 @@ function genRelProps() {
   var relName = getSelectVal(document.getElementById("relNameC"));
   var rel = findRelation(relName);
   var relTypeIdx = reltypes.indexOf(rel[3]);
-  document.getElementById("editRelType").selectedIndex = relTypeIdx; 
+  document.getElementById("editRelType").selectedIndex = relTypeIdx;
 }
 
 /*
@@ -1590,7 +1636,7 @@ function saveEditAttr(e) {
     if(editAttrType(oldAttrName, tableName, newAttrType) || editAttrPrimary(newAttrName, tableName, attrPrimary)
       || editAttrNotNull(newAttrName, tableName, attrNotNull) || editAttrUnique(newAttrName, tableName, attrUnique)) {
       $('#editAttributeModal').modal('hide'); // hide modal on save
-    } 
+    }
   }
   else if(newAttrName != "" && uniqueAttrName(newAttrName, tableName)) {
     $('#editAttributeModal').modal('hide'); // hide modal on save
@@ -1760,33 +1806,15 @@ function submitQuery(path, query, json, callback){
     data: 'query=' + query + '&json=' + json,
     success: function(response){callback(response)}
   });
-  //$.post(path,q,callback);
- /*
- 
-  method = "post";
-  
-  var form = document.createElement("form");
-  form.setAttribute("method", method);
-  form.setAttribute("path", path);
-  
-  for(var key in params) { 
-    var hiddenField = document.createElement("input");
-    hiddenField.setAttribute("type", "hidden");
-    hiddenField.setAttribute("name", key);
-    hiddenField.setAttribute("value", params[key]);
-    form.appendChild(hiddenField);
-  }
-  document.body.appendChild(form);
-  form.submit();
-  */
-  
 }
+
+function redirect_to_show() { document.location.href = '<%="/users/#{@user.id}/servers/#{@server.id}/instances/#{@instance.id}"%>'; }
 
 /*
 * Initializes modal to finalize database schema
 */
 function initFinalize() {
-  finalizeNext("finalizeModalDiv");
+  finalize("finalizeModalDiv");
 }
 
 /*
@@ -1795,139 +1823,151 @@ function initFinalize() {
 * Either continues to next finalization step, or
 *   closes the modal if all steps are complete
 */
-function finalizeNext(id) {
-  // handle last finalization step
-  var div = document.getElementById(id);
+function finalize(id) {
+  if(!isFinalized()) {
 
-  if(finalizeArr == 0) { 
-    finalizeArr++;
-  }
-  else if(finalizeArr == 1) { // table constraint
-    var pkey = getSelectVal(document.getElementById("finalizeSelector"));
-    var tname = tables[finalizeIdx-1].get('.text')[0].getText();
-    if(finalizeIdx == tables.length || pkey == "sysid") { 
-      finalizeArr++;
-      finalizeIdx = 0;
-      finalizeNext(id);
-    }
-    //alert("pkey: " + pkey);
-    if(pkey == "Don't Know") {
-      pkey = "sysid";
-      createAttr(pkey, 'number', tname, true, false, false, 525, 225);
-      div.innerHTML = "";
-      finalizeNext(id);
-    }
-    else {
-      editAttrPrimary(pkey, tname, true);
-      finalizeNext(id);
-    }
-  }
-  else if(finalizeArr == 2) { // attribute constraint
-    if(finalizeIdx == attributes.length) {
-      finalizeArr++;
-      finalizeIdx = 0;
-      finalizeNext(id);
-    }
-    else {
-      var attr = attributes[finalizeIdx-1];
-      if(attr == null) return;
-      var attrNotNull = document.getElementById("constrainNotNull");
-      (attrNotNull == null) ? attrNotNull = false : attrNotNull = attrNotNull.checked;
-      var attrUnique = document.getElementById("constrainUnique");
-      (attrUnique == null) ? attrUnique = false : attrUnique = attrUnique.checked;
-      if(attrUnique)       { attr[5] = true; }
-      else if(attrNotNull) { attr[4] = true; }
-    }
-  }
-  else if(finalizeArr == 3) { // relation constraint
-    if(finalizeIdx == relations.length) {
-      finalizeArr++;
-      finalizeIdx = 0;
-      finalizeNext(id);
-    }
-    else { /* update rel */ }
-  }
-  
-  // determine if schema is now fully constrained
-  if(!isFinalized()) { 
-
+    // handle last finalization step
+    var div = document.getElementById(id);
     var html = "";
+    //div.innerHTML = html;
 
-    /*
-    * Case 1: Check tables array for constraints
-    */
-    if(finalizeArr == 1) {
-
+    if(finalizeArr == 1) { // table constraint
       // display next table constraint (primary key)
       var tableName = tables[finalizeIdx].get('.text')[0].getText();
-      html += "<h4>Constrain Table: " + tableName.toLowerCase() + "</h4>";
-      html += "<p>Does one of the attributes in the list below uniquely identify a distinct table entry?<br /><em>e.g. For a person table, a social security number is unique for a given person and identifies a distinct person.</em><br />If so, select that attribute from the list.  Otherwise, select Don't Know.</p>";
+      var pkey = getSelectVal(document.getElementById("finalizeSelector"));
 
-      // generate table attrributes selector html
-      if(obviousPrimaryKey(tableName)) {
-	finalizeIdx++;
-        finalizeNext(id);
-      }
-      else {
-        var attrs = getAttrs(tableName);
-        html += "<select id='finalizeSelector'>" + genSelectInnerHTML("finalizeSelector", attrs, 0, 0) + "</select>";
-    
-        div.innerHTML = html;
-    
-        // Don't know option - generate automatic sysid
-        var opt = document.createElement("option");
-        opt.text = "Don't Know";
-        var sel = document.getElementById("finalizeSelector");
-        sel.add(opt, sel.options[null]);
-        
+      while(pkey != "sysid" && obviousPrimaryKey(tableName) && finalizeIdx < tables.length) {
+        tableName = tables[finalizeIdx].get('.text')[0].getText();
         finalizeIdx++;
       }
-    }
-    /*
-    * Case 2: Check attributes array for constraints
-    */
-    else if(finalizeArr == 2) {
 
-      // display next relation constraint (relation types for connected tables)
-      //alert("attr type: " + attributes[finalizeIdx][2].get('.text')[0].getText());
-      //html += "<h4>Constrain Attribute: " + attributes[finalizeIdx][1].get('.text')[0].getText().toLowerCase() + "." + attributes[finalizeIdx][0].get('.text')[0].getText().toLowerCase() + "</h4>";
+      if(pkey == "Don't Know") {
+        pkey = "sysid";
+        createAttr(pkey, 'number', tableName, true, false, false, 525, 225);
+        finalizeIdx++;
+	if(finalizeIdx != tables.length) {
+          tableName = tables[finalizeIdx].get('.text')[0].getText();
+	}
+      }
+      else if(pkey != null) {
+        editAttrPrimary(pkey, tableName, true);
+        finalizeIdx++;
+        if(finalizeIdx != tables.length) {
+          tableName = tables[finalizeIdx].get('.text')[0].getText();
+	}
+      }
+
+      if(finalizeIdx >= tables.length) {
+        finalizeArr++;
+        finalizeIdx = 0;
+	finalize("finalizeModalDiv");
+	return;
+      }
+
+      finalizeTableHTML(div, tableName);
+    }
+    else if(finalizeArr == 2) { // attribute constraint
+      // display next attribute constraint (not null or unique)
       var attr = attributes[finalizeIdx];
-      if(attr!= null && !attr[3] && !attr[4] && !attr[5]) {
-        html += "<h4>Constrain Attribute: " + attr[1].get('.text')[0].getText().toLowerCase() +  "." + attr[0].get('.Atext')[0].getText().toLowerCase() + "</h4>";
-        html += "<p>Is the above attribute unique for all table entries?<br /><em>e.g. For a user accounts table, an email address is unique for every user account entry.</em><br />If so, check the box below.  Otherwise, leave it blank.</p>";
-      
-        html += "<input type=\"checkbox\" id=\"constrainUnique\" value=\"1\">&nbsp;\n<label for=\"constrainUnique\"><span style=\"border-bottom:1px dashed #000;\">Attribute is Unique</span><label><br />";
-      
-        html += "<p>If the above question does not apply, is the attribute required for every table entry, or is it an optional field?  If it is required, check the box below.  If it is optional, leave it blank.</p>";
-      
-        html += "<input type=\"checkbox\" id=\"constrainNotNull\" value=\"1\">&nbsp;\n<label for=\"constrainNotNull\"><span style=\"border-bottom:1px dashed #000;\">Attribute is Required</span><label><br />";
-     
-        div.innerHTML = html;
 
+      if(attr == null) {
+	finalizeArr++;
+	finalizeIdx = 0;
+	finalize("finalizeModalDiv");
+	return;
+      }
+      var attrNotNull = document.getElementById("constrainNotNull");
+      (attrNotNull == null) ? attrNotNull = null : attrNotNull = attrNotNull.checked;
+      var attrUnique = document.getElementById("constrainUnique");
+      (attrUnique == null) ? attrUnique = null : attrUnique = attrUnique.checked;
+      if(attrUnique) {
+	attr[5] = true;
+	finalizeIdx++;
+        if(finalizeIdx != attributes.length) {
+	  attr = attributes[finalizeIdx];
+	}
+      }
+      else if(attrNotNull) {
+	attr[4] = true;
+	finalizeIdx++;
+        if(finalizeIdx != attributes.length) {
+	  attr = attributes[finalizeIdx];
+	}
+      }
+      else if(attrUnique != null && attrNotNull != null) {
+	finalizeIdx++;
+        if(finalizeIdx != attributes.length) {
+	  attr = attributes[finalizeIdx];
+	}
+      }
+
+      while((attr[3] || attr[4] || attr[5]) && finalizeIdx < attributes.length-1) {
         finalizeIdx++;
+        attr = attributes[finalizeIdx];
+      }
+
+      if(finalizeIdx == attributes.length-1) {
+        if(attr[3] || attr[4] || attr[5]) finalizeIdx++; // exception: skip last attr, already constrained
+      }
+
+      if(finalizeIdx >= attributes.length) {
+        finalizeArr++;
+        finalizeIdx = 0;
+        finalize("finalizeModalDiv");
+	return;
+      }
+
+      if(attr[0].get('.Atext')[0].getText() != "sysid") {
+        finalizeAttrHTML(div, attr);
       }
       else {
-        finalizeIdx++;
-	finalizeNext(id);
+	finalizeIdx++;
+	finalize("finalizeModalDiv");
+	return;
       }
     }
-    /*
-    * Case 3: Check relations array for constraints
-    */
-    else if(finalizeArr == 3) {
+    else if(finalizeArr == 3) { // reltaion constraint
+      var one_to_one = document.getElementById("constrainOTO");
+      var many_to_many = document.getElementById("constrainMTM");
+      if(many_to_many) one_to_one = false;
+      if(one_to_one != null) {
+        one_to_one = one_to_one.checked;
+        many_to_many = many_to_many.checked;
+        rel = relations[finalizeIdx];
+        if(one_to_one) {
+          rel[3] = "one-to-one";
+          finalizeIdx++;
+        }
+        else {
+          rel[3] = "many-to-many";
+          finalizeIdx++;
+         }
+      }
 
-      // display next relation constraint (relation types for connected tables)
-      html += "<h4>Constrain Relation: " + relations[finalizeIdx].get('.text')[0].getText().toLowerCase() + "</h4>";
-      html += "<p>Does one of the attributes in the list below uniquely identify a distinct table entry?<br /><em>e.g. For a person table, a social security number is unique for a given person and identifies a distinct person.</em><br />If so, select that attribute from the list.  Otherwise, select Don't Know.</p>";
-      
-      div.innerHTML = html;
-
-      finalizeIdx++;
+      if(finalizeIdx >= relations.length) {
+        finalizeArr++;
+        finalize("finalizeModalDiv");
+        return;
+      }
+      else {
+        // display next relation constraint (relation types for connected tables)
+	rel = relations[finalizeIdx];
+        while(rel[3] != "undefined") {
+	  finalizeIdx++;
+          if(finalizeIdx < relations.length) {
+	    rel=relations[finalizeIdx];
+	  }
+	  else {
+	    finalize("finalizeModalDiv");
+	    return;
+	  }
+	}
+        finalizeRelHTML(div, rel);
+      }
     }
-
   }
-  else { // schema is fully constrained at this point
-    finalizeArr = 0; 
+  else { // database schema is fully constrained
+    finalizeArr = 1; finalizeIdx = 0;
     $('#finalizeModal').modal('hide'); // hide modal on completion of schema finalization
     // after this point we can convert our JS objects into SQL to send to RDS
   }
@@ -1937,6 +1977,202 @@ function isFinalized() {
   return finalizeArr > 3;
 }
 
+/*
+* Generates HTML for finalizing table constraints
+*/
+function finalizeTableHTML(div, tableName) {
+      var html = "";
+      html += "<h4>Constrain Table: " + tableName.toLowerCase() + "</h4>";
+      html += "<p>Does one of the attributes in the list below uniquely identify a distinct table entry?<br /><em>e.g. For a person table, a social security number is unique for a given person and identifies a distinct person.</em><br />If so, select that attribute from the list.  Otherwise, select Don't Know.</p>";
+
+      var attrs = getAttrs(tableName);
+      html += "<select id='finalizeSelector'>" + genSelectInnerHTML("finalizeSelector", attrs, 0, 0) + "</select>";
+
+      div.innerHTML = html;
+
+      // Don't know option - generate automatic sysid
+      var opt = document.createElement("option");
+      opt.text = "Don't Know";
+      var sel = document.getElementById("finalizeSelector");
+      sel.add(opt, sel.options[null]);
+      sel.selectedIndex = -1;
+}
+
+/*
+* Generates HTML for finalizing attribute constraints
+*/
+function finalizeAttrHTML(div, attr) {
+        var html = "";
+        html += "<h4>Constrain Attribute: " + attr[1].get('.text')[0].getText().toLowerCase() +  "." + attr[0].get('.Atext')[0].getText().toLowerCase() + "</h4>";
+        html += "<p>Is the above attribute unique for all table entries?<br /><em>e.g. For a user accounts table, an email address is unique for every user account entry.</em><br />If so, check the box below.  Otherwise, leave it blank.</p>";
+
+        html += "<input type=\"checkbox\" id=\"constrainUnique\" value=\"1\">&nbsp;\n<label for=\"constrainUnique\"><span style=\"border-bottom:1px dashed #000;\">Attribute is Unique</span><label><br />";
+
+        html += "<p>If the above question does not apply, is the attribute required for every table entry, or is it an optional field?  If it is required, check the box below.  If it is optional, leave it blank.</p>";
+
+        html += "<input type=\"checkbox\" id=\"constrainNotNull\" value=\"1\">&nbsp;\n<label for=\"constrainNotNull\"><span style=\"border-bottom:1px dashed #000;\">Attribute is Required</span><label><br />";
+
+        div.innerHTML = html;
+}
+
+/*
+* Generates HTML for finalizing relation constraints
+*/
+function finalizeRelHTML(div, rel) {
+        var tname1 = rel[2][0].get('.text')[0].getText();
+	var tname2 = rel[2][1].get('.text')[0].getText();
+	var reltype = rel[3];
+
+        var html = "";
+        html += "<h4>Constrain Relation: " + rel[0].get('.Rtext')[0].getText().toLowerCase() + "</h4>";
+	html += "<p>Does an instance of <strong>" + tname1  +  "</strong> have a single corresponding instance of <strong>" + tname2 + "</strong>?<br /><em>e.g. A <strong>Person</strong> instance could be required to have a single corresponding <strong>DriversLicense</strong> instance</em>.<br />If so, make a selection below.</p>";
+
+        html += "<input type=\"checkbox\" id=\"constrainOTO\" value=\"1\">&nbsp;\n<label for=\"constrainOTO\"><span style=\"border-bottom:1px dashed #000;\">one-to-one</span><label><br />";
+
+	html += "<br /><p>Otherwise, are there several instances of <strong>" + tname1 + "</strong> that can correspond to several instances of <strong>" + tname2 + "</strong>?<br /><em>e.g. An instance of <strong>Author</strong> could have several corresponding instances of <strong>Book</strong> instance</em> (multiple books per author), and an instance of <strong>Book</strong> could also have several corresponding instances of <strong>Author</strong> (multiple authors per book).<br />If so, make a selection below.</p>";
+
+        html += "<input type=\"checkbox\" id=\"constrainMTM\" value=\"1\">&nbsp;\n<label for=\"constrainMTM\"><span style=\"border-bottom:1px dashed #000;\">many-to-many</span><label><br />";
+
+	div.innerHTML = html;
+}
+
+/********* CSV Methods *********/
+
+/*
+* Retrieve table information
+*/
+function getTableInfo(id) {
+  var attrTypes = new Array();
+  var tableName = getSelectVal(document.getElementById(id));
+  var tableAttributes = getAttrs(tableName);
+  for (var i = 0; i < tableAttributes.length; i++) {
+    var currType = findAttr(tableAttributes[i], tableName)[2];
+    attrTypes.push(currType);
+  }
+  return attrTypes;
+}
+
+/*
+* Initializes CSV Input Modal
+*/
+function initCSVInput() {
+  genSelectInnerHTML("inputCSVTableName", tables, 1);
+}
+
+/*
+* Add data from CSV
+*/
+function addCSVData() {
+  var attrTypes = getTableInfo("inputCSVTableName");
+
+  // Parse CSV file to double array
+  var csvValues = new Array();
+  var csvLines = csv.split(/\r\n|\n/);
+  for (var i = 0; i < csvLines.length; i++) {
+    //alert(csvLines[i]);
+    var entries = csvLines[i].replace(/\s+/g, '').split(',');
+    if (attrTypes.length != entries.length) {
+      alert("Entry in line: " + i + " of csv file does not match the table attributes.");
+      return false;
+    }
+    var entry = new Array()
+    for (var j = 0; j < attrTypes.length; j++) {
+      switch(attrTypes[j]) {
+        case 'text':
+          if(entries[j].match(/^[-\sa-zA-Z]*$/)) { // Currently allows for blank strings
+            entry.push(entries[j]);
+          }
+          break;
+        case 'number':
+          if(entries[j].match(/^\d+$/)) {
+            entry.push(parseInt(entries[j]));
+          }
+          break;
+        case 'date':
+          if(entries[j].match()) {
+
+          }
+      }
+    }
+    csvValues.push(entry);
+  }
+
+
+  // Sending insert statements to database
+  for (var i = 0; i < csvValues.length; i++) {
+    var insertTxt = 'INSERT INTO ' + csvTableName + '\nVALUES (';
+    for (var j = 0; j < csvValues[i].length; j++) {
+      if(attrTypes[j] == 'text') {
+        insertTxt = insertTxt + "'" + csvValues[i][j] + "'";
+      } else {
+        insertTxt = insertTxt + csvValues[i][j];
+      }
+
+      if((j+ 1) < csvValues[i].length) {
+        insertTxt = insertTxt + ', ';
+      } else {
+        insertTxt = insertTxt + ')';
+      }
+    }
+    alert(insertTxt);
+    //Send insert statement to database
+  }
+  $('#uploadModal').modal('hide');
+  return true;
+  //TODO: figure out how to only use required fields
+}
+
+/*
+* Initializes Manual Input Modal
+*/
+function initManualInput() {
+  genSelectInnerHTML("inputManualTableName", tables, 1);
+  document.getElementById("inputManualTableName").selectedIndex = -1; // need to trigger JS event
+}
+
+function manualInput() {
+  var div = document.getElementById("manualInputDiv");
+  var tableName = getSelectVal(document.getElementById("inputManualTableName"));
+  var attrTypes = getTableInfo("inputManualTableName");
+  var entries = new Array();
+  for (var i = 0; i < attrTypes.length; i++) {
+      entries.push(document.getElementById("attr" + i).value);
+  }
+  var entry = new Array();
+  for (var j = 0; j < attrTypes.length; j++) {
+      switch(attrTypes[j]) {
+        case 'text':
+          if(entries[j].match(/^[-\sa-zA-Z]*$/)) { // Currently allows for blank strings
+            entry.push(entries[j]);
+          }
+          break;
+        case 'number':
+          if(entries[j].match(/^\d+$/)) {
+            entry.push(parseInt(entries[j]));
+          }
+          break;
+        case 'date':
+          if(entries[j].match()) {
+
+          }
+      }
+  }
+  $('#manualInputModal').modal('hide'); // hide modal on save
+  var sql = "INSERT INTO " + tableName + " VALUES (";
+  for (var k = 0; k < attrTypes.length; k++) {
+    if(attrTypes[k] == 'text') {
+      sql += "\'" + entry[k] + "\'"; 
+    }
+    else {
+      sql += entry[k];
+    }
+    if(k != attrTypes.length-1) {
+      sql += ", ";
+    }
+  }
+  sql += ");";
+  alert(sql);
+}
 </script>
 
   <!-- newTableModal -->
@@ -2034,8 +2270,8 @@ function isFinalized() {
   </div>
 
   <br />
-  <div class="row">  
- 
+  <div class="row">
+
   <!-- deleteTableModal -->
   <div id="deleteTableModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="deleteTableModalLabel" aria-hidden="true">
     <div class="modal-header">
@@ -2111,7 +2347,7 @@ function isFinalized() {
       <button id="editRelBtn" class="btn btn-primary" onclick="editRelation()">Edit relation</button>
     </div>
   </div>
-  
+
   <!-- deleteRelationModal -->
     <div id="deleteRelationModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="deleteRelationModalLabel" aria-hidden="true">
       <div class="modal-header">
@@ -2139,7 +2375,7 @@ function isFinalized() {
       </div>
       <div class="modal-footer">
         <button class="btn" data-dismiss="modal">Close</button>
-        <button id="finalizeBtn" class="btn btn-primary" onclick="finalizeNext('finalizeModalDiv')">Add Constraint</button>
+        <button id="finalizeBtn" class="btn btn-primary" onclick="finalize('finalizeModalDiv')">Add Constraint</button>
       </div>
     </div>
 
@@ -2157,7 +2393,7 @@ function isFinalized() {
         <button class="btn" data-dismiss="modal">Close</button>
       </div>
     </div>
-   
+
  <!-- table info display -->
     <div class="span8">
         <div class="row-fluid">
@@ -2206,17 +2442,71 @@ function isFinalized() {
       <button class="btn" onClick="convertToJSON()">JSON</button>
       <a class="btn btn-danger" onclick="clearDiagram()">Clear Schema</a>
     </div>
-
   </div>
 
+  <p><button href="#uploadModal" data-toggle="modal" class="btn btn-primary" onclick="initCSVInput()">Upload File</button></p>
+  <p><button href="#manualInputModal" data-toggle="modal" class="btn btn-primary" onclick="initManualInput()">Manual Insertion</button></p>
+
+  <!-- CSV Input Modal -->
+  <div id="uploadModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h4 id="myModalLabel">Upload CSV File</h4>
+    </div>
+    <div class="modal-body">
+      <h5>Choose Table</h5>
+      <select id="inputCSVTableName">
+      </select>
+      <h5>Choose File</h5>
+      <form>
+        <input type="file" id="csvfile" style="display:none"/>
+        <div class="input-append">
+          <input type="text" name="subfile" id="testSubfile" class="input-xlarge">
+          <a class="btn" onclick="$('#csvfile').click();">Browse</a>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Close</button>
+      <button id="uploadBtn" class="btn btn-success" onclick="addCSVData()"><i class="icon-arrow-up icon-white"></i>Upload</button>
+    </div>
+  </div>
+
+  <!-- Manual Input Modal -->
+  <div id="manualInputModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="manualInputModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h4 id="manualInputModalLabel">Insert Data</h4>
+    </div>
+    <div class="modal-body">
+      <p>Select one of the following tables to insert data:</p>
+      <select id="inputManualTableName" onchange="genAttrsInput()">
+      </select>
+      <div id="manualInputDiv">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal">Close</button>
+      <button id="manualInputBtn" class="btn btn-success" onclick="manualInput()">Insert</button>
+    </div>
+  </div>
+      <!-- <div class="controls form-search">
+        <input type="file" name="thefile" id="thefile" class="input-xlarge" style="position: fixed; top: -100px; left: -100px;"/>
+        <input type="file" class="input-xlarge" id="input05" style="position: fixed; top: -100px; left: -100px;">
+        <input type="text" class="" disabled="" size="40">
+        <button type="button" class="btn btn-primary" id="thefile">
+          <i class="icon-arrow-up icon-white"></i> Open CSV File
+        </button>
+      </div> -->
 </div>
 <script type="text/javascript">
+
 $(document).ready( function() {
     // bind mouse wheel to affect scale
 	$('#container').bind('mousewheel', function(event, delta) {
-		
+
 		// (delta will be 1 or -1)
-		
+
 		switch( delta ) {
 			case -1:
 				viewport.zoomOut();
@@ -2227,22 +2517,22 @@ $(document).ready( function() {
 				viewport.draw();
 				break;
 		}
-		
+
 		// oh yeah, cancel the scroll!
 		event.preventDefault();
 	});
-	
+
 	var ArrowLeft = 37;
 	var ArrowRight = 39;
 	var ArrowUp = 38;
 	var ArrowDown = 40;
-	
+
 	//var xOffset = 0;
 	//var yOffset = 0;
 	$(document).keydown(function(event){
-		
+
 		var keyCode = event.keyCode;
-		
+
 		//var stageMoveX = 0;
 		//var stageMoveY = 0;
 		switch( keyCode ) {
@@ -2259,7 +2549,7 @@ $(document).ready( function() {
 				viewport.draw();
 				event.preventDefault();
 				break;
-				
+
 			case ArrowRight:
 				viewport.panRight(10);
 				updateX -= 10 * (1/viewport.scale);
@@ -2272,7 +2562,7 @@ $(document).ready( function() {
 				viewport.draw();
 				event.preventDefault();
 				break;
-				
+
 			case ArrowUp:
 				viewport.panUp(10);
 				updateY += 10 * (1/viewport.scale);
@@ -2285,7 +2575,7 @@ $(document).ready( function() {
 				viewport.draw();
 				event.preventDefault();
 				break;
-				
+
 			case ArrowDown:
 				viewport.panDown(10);
 				updateY -= 10 * (1/viewport.scale);
@@ -2299,7 +2589,7 @@ $(document).ready( function() {
 				event.preventDefault();
 				break;
 		}
-			
+
 		// oh yeah, cancel the click!
 		//event.preventDefault();
 	});

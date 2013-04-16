@@ -1,8 +1,0 @@
-=@server.name
-=@server.url
-=form_tag("/users/#{@user.id}/servers/#{@server.id}/query") do
-  =text_area_tag :query
-  =submit_tag "Submit"
--if @results != nil
-  -@results.each do |r|
-    =r 
