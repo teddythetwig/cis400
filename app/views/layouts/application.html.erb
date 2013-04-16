@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CIS400</title>
+  <%= stylesheet_link_tag    "application", :media => "all" %>
+  <%= javascript_include_tag "application" %>
+  <%= csrf_meta_tags %>
+</head>
+
+
+<!-- Navbar -->
+<div class="navbar navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container-fluid">
+      <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </a>
+      <a href="/users" class="brand">SIQL</a>
+      <div class="nav-collapse collapse">
+        <%if user_signed_in?%>
+          <div class="nav pull-right">
+            <li class="divider-vertical"></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a href="##">Help</a>
+                </li>
+                <li>
+                  <%= link_to 'Logout', destroy_user_session_path, method: :delete %>
+                </li>
+            </li>
+          </div>
+        <%else%>
+           <%= form_for(:user, :html => {:class => "navbar-form pull-right"}) do |f| %>
+            <%= f.email_field :email, :placeholder => 'Email', :class => 'span2'%>
+            <%= f.password_field :password, :placeholder => 'Password', :class => 'span2' %>
+            <%= f.submit "Sign in", :class => 'btn' %> <br/>
+            <label class="checkbox">
+              Remember me <%= f.check_box :remember_me, :id => "rememberInput" %>
+            </label>
+            <!-- Try to add a forgot your password link found in shared -->
+           <% end %>
+        <%end%>
+      </div>
+    </div> <!--/.container-fluid -->
+  </div> <!--/.navbar-inner -->
+</div> <!--/.navbar-fixed-top --><body>
+
+
+ 
+  <%= yield %>
+
+</body>
+</html>
