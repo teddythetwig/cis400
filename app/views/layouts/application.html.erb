@@ -7,7 +7,8 @@
   <%= csrf_meta_tags %>
 </head>
 
-<body>
+
+<%if user_signed_in?%>
   <!-- Navbar -->
   <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
@@ -20,7 +21,6 @@
         </a>
         <a href="/users" class="brand">SIQL</a>
         <div class="nav-collapse collapse">
-          <%if user_signed_in?%>
             <div class="nav pull-right">
               <li class="divider-vertical"></li>
               <li class="dropdown">
@@ -34,26 +34,65 @@
                   <li>
                     <%= link_to 'Logout', destroy_user_session_path, method: :delete %>
                   </li>
+                </ul>
               </li>
             </div>
-          <%else%>
-             <%= form_for(:user, :html => {:class => "navbar-form pull-right"}) do |f| %>
-              <%= f.email_field :email, :placeholder => 'Email', :class => 'span2'%>
-              <%= f.password_field :password, :placeholder => 'Password', :class => 'span2' %>
-              <%= f.submit "Sign in", :class => 'btn' %> <br/>
-              <label class="checkbox">
-                Remember me <%= f.check_box :remember_me, :id => "rememberInput" %>
-              </label>
-              <!-- Try to add a forgot your password link found in shared -->
-             <% end %>
-          <%end%>
         </div>
       </div> <!--/.container-fluid -->
     </div> <!--/.navbar-inner -->
-  </div> <!--/.navbar-fixed-top --><body>
+  </div> <!--/.navbar-fixed-top -->
+
+<%else%>
+  <%if current_page?(:controller => 'sessions', :action => 'new') %>
+    <div class="navbar-wrapper">
+      <!-- Wrap the .navbar in .container to center it within the absolutely positioned parent. -->
+      <div class="container">
+        <div class="navbar">
+          <div class="navbar-inner">
+            <!-- Responsive Navbar Part 1: Button for triggering responsive navbar (not covered in tutorial). Include responsive CSS to utilize. -->
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/users">SIQL</a>
+            <!-- Responsive Navbar Part 2: Place all navbar contents you want collapsed withing .navbar-collapse.collapse. -->
+            <div class="nav-collapse collapse">
+              <%= form_for(resource, :as => resource_name, :url => session_path(resource_name), :html => {:class => "navbar-form pull-right"}) do |f| %>
+                <%= f.email_field :email, :placeholder => 'Email', :class => 'span2'%>
+                <%= f.password_field :password, :placeholder => 'Password', :class => 'span2' %>
+                <%= f.submit "Sign in", :class => 'btn' %> <br/>
+                <% if devise_mapping.rememberable? -%>
+                  <label class="checkbox">
+                    Remember me <%= f.check_box :remember_me, :id => "rememberInput" %>
+                  </label>
+                <% end -%>
+                <!-- Try to add a forgot your password link found in shared -->
+              <% end %>
+            </div>
+          </div><!-- /.navbar-inner -->
+        </div><!-- /.navbar -->
+      </div> <!-- /.container -->
+    </div><!-- /.navbar-wrapper -->
+  <%end%>
+<%end%>
+
+<body>
+  <div class="container">
+    <% if alert %>
+      <div class="alert alert-error">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <%= alert %>
+      </div>
+    <% end %>
+    <% if notice %>
+      <div class="alert alert-success">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <%= notice %>
+      </div>
+    <% end %>
 
 
-   
   <%= yield %>
 
 </body>
