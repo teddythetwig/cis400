@@ -2063,9 +2063,10 @@ function addCSVData() {
   var csvValues = new Array();
   var csvLines = csv.split(/\r\n|\n/);
   for (var i = 0; i < csvLines.length; i++) {
-    var entries = csvLines[i].split(',|;');
+    //alert(csvLines[i]);
+    var entries = csvLines[i].replace(/\s+/g, '').split(',');
     if (attrTypes.length != entries.length) {
-      alert("Entry in line: " + i + "of csv file does not match the table attributes.");
+      alert("Entry in line: " + i + " of csv file does not match the table attributes.");
       return false;
     }
     var entry = new Array()
@@ -2107,10 +2108,10 @@ function addCSVData() {
         insertTxt = insertTxt + ')';
       }
     }
-
+    alert(insertTxt);
     //Send insert statement to database
   }
-
+  $('#uploadModal').modal('hide');
   return true;
   //TODO: figure out how to only use required fields
 }
