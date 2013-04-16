@@ -43,6 +43,7 @@
         <option>Teacher-Student</option>
         <option>Employee-Department</option>
         <option>Author-Book-Category</option>
+        <option>Advisor-Student</option>
         <option>Teacher-Student (U)</option>
         <option>Test</option>
       </select>
@@ -164,7 +165,7 @@ var tsu = { "tables" : [{ "name" : "Teacher" , "xval" : "180" , "yval" : "250" ,
 
 var test = { "tables" : [{ "name" : "testMe" , "xval" : "895" , "yval" : "385" , "attributes" : []}], "relations" : [], "viewport" : { "updateX" : "370", "updateY" : "160", "scale" : "1"} };
 
-
+var ta = { "tables" : [{ "name" : "Advisor" , "xval" : "237" , "yval" : "165" , "attributes" : [{ "name" : "aid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "109" , "yval" : "164" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "158" , "yval" : "243" }, { "name" : "office" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "291" , "yval" : "282" }]}, { "name" : "Student" , "xval" : "690" , "yval" : "193" , "attributes" : [{ "name" : "sid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "840" , "yval" : "80" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "936" , "yval" : "158" }, { "name" : "gpa" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "914" , "yval" : "242" }, { "name" : "credits" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "695" , "yval" : "290" }, { "name" : "graduation" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "820" , "yval" : "304" }]}], "relations" : [{ "name" : "Advises" , "xval" : "501" , "yval" : "163" , "attributes" : [{ "name" : "aid", "table" : "Advisor"}, { "name" : "sid", "table" : "Student"}]}], "viewport" : { "updateX" : "30", "updateY" : "30", "scale" : "1"} };
 
 /********* Creation Methods *********/
 
@@ -1154,8 +1155,8 @@ function convertFromJSON(source) {
     viewport.setZoom(parseInt(JSONObj.viewport.scale));
     viewport.draw();
   }
-  updateX = parseInt(JSONObj.viewport.updateX);
-  updateY = parseInt(JSONObj.viewport.updateY);
+  //updateX = parseInt(JSONObj.viewport.updateX);
+  //updateY = parseInt(JSONObj.viewport.updateY);
 }
 
 function testJSON() {
@@ -1165,6 +1166,9 @@ function testJSON() {
   switch (schemaSelected) {
     case 'Teacher-Student' :
       convertFromJSON(ts);
+      break;
+    case 'Advisor-Student' :
+      convertFromJSON(ta);
       break;
     case 'Author-Book-Category' :
       convertFromJSON(book);
