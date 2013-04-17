@@ -114,6 +114,7 @@ $(document).ready(function() {
 
 /********* Global Variables *********/
 
+var resp;
 // ID of the instance
 var dbInstance = '<%="#{@instance.name}"%>';
 
@@ -2168,7 +2169,14 @@ function manualInput() {
 
 function queryInput(){
   var sql = document.getElementById("query").value
-  submitQuery('<%= "/users/#{@user.id}/servers/#{@server.id}/instances/#{@instance.id}/query" %>', sql, {},(function(response){alert(response[0][0])}));
+  submitQuery('<%= "/users/#{@user.id}/servers/#{@server.id}/instances/#{@instance.id}/query" %>', sql, {},(function(response){
+    var txt = ""
+    resp = response;
+    for(var i = 0;i < response[0].length;i++){
+      txt += response[0][i].name + " ";
+    }
+    alert(txt);
+  }));
 }
 </script>
 
