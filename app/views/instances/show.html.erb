@@ -106,8 +106,8 @@ $(document).ready(function() {
   });
 });
 
-$(document).onload(function() {
- convertFromJSON(JSONJSONObj);
+$(document).ready(function() {
+ convertFromJSON(JSONObj);
 });
 
 /********* Global Variables *********/
@@ -155,7 +155,7 @@ var finalizeArr = 1;
 var viewport = new Viewport(stage);
 
 // JSON obj
-var JSONObj = '<%= "#{@instance.db_json" %>';
+var JSONObj = '<%= "#{@instance.db_json.to_s}" %>';
 
 var book = { "tables" : [{ "name" : "Book" , "xval" : "463" , "yval" : "137" , "attributes" : [{ "name" : "b_id" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "335" , "yval" : "81" }, { "name" : "title" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "444" , "yval" : "74" }, { "name" : "isbn" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "534" , "yval" : "72" }, { "name" : "publish_date" , "dataType" : "DATETIME" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "637" , "yval" : "65" }]}, { "name" : "Author" , "xval" : "148" , "yval" : "315" , "attributes" : [{ "name" : "a_id" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "41" , "yval" : "395" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "21" , "yval" : "315" }]}, { "name" : "Category" , "xval" : "766" , "yval" : "328" , "attributes" : [{ "name" : "c_id" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "1006" , "yval" : "298" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "true" , "unique" : "false" , "xval" : "940" , "yval" : "400" }]}], "relations" : [{ "name" : "Auth_Book" , "xval" : "337" , "yval" : "215" , "attributes" : [{ "name" : "a_id", "table" : "author"}, { "name" : "b_id", "table" : "Book"}]}, { "name" : "Cat_Book" , "xval" : "652" , "yval" : "216" , "attributes" : [{ "name" : "c_id", "table" : "Category"}, { "name" : "b_id", "table" : "Book"}]}], "viewport" : { "updateX" : "0", "updateY" : "0", "scale" : "1"} }
 
