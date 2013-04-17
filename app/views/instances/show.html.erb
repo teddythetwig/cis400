@@ -33,7 +33,7 @@
 <br />
 <br />
 <div class="page-header">
-  <h1>Database Creation</h1>
+  <h1>Database Manipulation</h1>
 </div>
 <div class="container">
   <div class="row-fluid">
@@ -2414,10 +2414,16 @@ function manualInput() {
 
     <!-- GUI buttons -->
     <div class="span4">
-      <div class="well well-large">
+      <div class="page-header">
         <h4>Data Addition</h4>
+      </div>
+      <div class="row-fluid">
+      <div class="span6">
         <a href="#uploadModal" data-toggle="modal" class="btn btn-primary" onclick="initCSVInput()">Upload File</a>
+      </div>
+      <div class="span6">
         <a href="#manualInputModal" data-toggle="modal" class="btn btn-primary"onclick="initManualInput()">Manual Insertion</a>
+      </div>
       </div>
       <!-- <a data-toggle="modal" href="#newTableModal" class="btn btn-primary" onclick="initNewTable()">New table</a>
       <a data-toggle="modal" href="#editTableModal" class="btn btn-warning" onclick="initEditTable()">Edit table</a>
@@ -2436,7 +2442,10 @@ function manualInput() {
       <a class="btn btn-danger" onclick="clearDiagram()">Clear Schema</a> -->
     </div>
   </div>
-
+  <div class="page-header">
+    <h3>Query</h3>
+  </div>
+  <input type="text" name="query" id="query" class="input-xlarge">
   <!-- CSV Input Modal -->
   <div id="uploadModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-header">
