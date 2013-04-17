@@ -106,8 +106,10 @@ $(document).ready(function() {
   });
 });
 
+
 $(document).ready(function() {
- convertFromJSON(JSONObj);
+  convertFromJSON(JSONObj);
+
 });
 
 /********* Global Variables *********/
@@ -1261,7 +1263,7 @@ function convertToSQL() {
             }
         }
     }
-    alert(code);
+    submitQuery('<%= "/users/#{@user.id}/servers/#{@server.id}/instances/#{@instance.id}" %>', code, convertToJSON(), (function(response){alert(response[0])}));
 }
 
 /*

@@ -106,8 +106,10 @@ $(document).ready(function() {
   });
 });
 
+
 $(document).ready(function() {
- convertFromJSON(JSONObj);
+  convertFromJSON(JSONObj);
+
 });
 
 /********* Global Variables *********/
@@ -1258,7 +1260,7 @@ function convertToSQL() {
             }
         }
     }
-    alert(code);
+    submitQuery('<%= "/users/#{@user.id}/servers/#{@server.id}/instances/#{@instance.id}" %>', code, convertToJSON(), (function(response){alert(response[0])}));
 }
 
 /*
@@ -1953,7 +1955,8 @@ function finalize(id) {
   }
   else { // database schema is fully constrained
     finalizeArr = 1; finalizeIdx = 0;
-    $('#finalizeModal').modal('hide'); // hide modal on completion of schema finalization
+    $('#finalizeModal').modal('hide');
+    convertToSQL(); // hide modal on completion of schema finalization
     // after this point we can convert our JS objects into SQL to send to RDS
   }
 }
@@ -2408,7 +2411,12 @@ function manualInput() {
 
     <!-- GUI buttons -->
     <div class="span4">
-      <a data-toggle="modal" href="#newTableModal" class="btn btn-primary" onclick="initNewTable()">New table</a>
+      <div class="well well-large">
+        <h4>Data Addition</h4>
+        <a href="#uploadModal" data-toggle="modal" class="btn btn-primary" onclick="initCSVInput()">Upload File</a>
+        <a href="#manualInputModal" data-toggle="modal" class="btn btn-primary"onclick="initManualInput()">Manual Insertion</a>
+      </div>
+      <!-- <a data-toggle="modal" href="#newTableModal" class="btn btn-primary" onclick="initNewTable()">New table</a>
       <a data-toggle="modal" href="#editTableModal" class="btn btn-warning" onclick="initEditTable()">Edit table</a>
       <a data-toggle="modal" href="#deleteTableModal"  class="btn btn-danger" onclick="initDelTable()">Delete table</a>
       <br /><br />
@@ -2422,12 +2430,9 @@ function manualInput() {
       <br /><br />
       <a data-toggle="modal" href="#finalizeModal" class="btn btn-success" onclick="initFinalize()">Finalize</a>
       <a data-toggle="modal" href="#DBCode" class="btn" onClick="convertToCode()">Show Code</a>
-      <a class="btn btn-danger" onclick="clearDiagram()">Clear Schema</a>
+      <a class="btn btn-danger" onclick="clearDiagram()">Clear Schema</a> -->
     </div>
   </div>
-
-  <p><button href="#uploadModal" data-toggle="modal" class="btn btn-primary" onclick="initCSVInput()">Upload File</button></p>
-  <p><button href="#manualInputModal" data-toggle="modal" class="btn btn-primary" onclick="initManualInput()">Manual Insertion</button></p>
 
   <!-- CSV Input Modal -->
   <div id="uploadModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
