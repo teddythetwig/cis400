@@ -1390,7 +1390,7 @@ function convertToCode() {
             }
         }
     }
-    code = code + '</p>'
+    code = code + '</p>';
     document.getElementById("DBCodeMySQL").innerHTML = code;
 }
 
@@ -2089,7 +2089,7 @@ function addCSVData() {
       if((j+ 1) < csvValues[i].length) {
         insertTxt = insertTxt + ', ';
       } else {
-        insertTxt = insertTxt + ')';
+        insertTxt = insertTxt + ')%3B';
       }
     }
     alert(insertTxt);
@@ -2148,7 +2148,7 @@ function manualInput() {
       sql += ", ";
     }
   }
-  sql += ");";
+  sql += ")%3B";
   alert(sql);
 }
 </script>
