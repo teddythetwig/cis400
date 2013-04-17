@@ -1,7 +1,12 @@
 class InstancesController < ApplicationController
   before_filter :authenticate_user! , :current_user_and_server
-  before_filter :is_owned, :only =>[:edit, :new, :query, :update ]
+  before_filter :is_owned, :only =>[:edit, :new, :query, :update, :show ]
   before_filter :make_connection, :only => [:query, :update]
+  
+  def show
+    @instance
+  end
+  
   def index
     @instances = @server.instances 
   end

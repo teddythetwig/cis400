@@ -7,6 +7,9 @@ class Instance < ActiveRecord::Base
     self.server.make_connection
     self.server.sql.query("CREATE DATABASE #{self.name}")
   end
+  before_create do
+    db_json=""
+  end
   
   after_destroy do
     self.server.make_connection
@@ -15,7 +18,7 @@ class Instance < ActiveRecord::Base
   
   # Json values are stored in the database as a string
   def db_json
-    JSON.parse(self[:db_json])
+    JSON.parse(self[:db_json].nil? ? "{}" : self[:db_json])
   end
   
   def db_json=(value)
