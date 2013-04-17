@@ -2121,7 +2121,6 @@ function initManualInput() {
   genSelectInnerHTML("inputManualTableName", tables, 1);
   document.getElementById("inputManualTableName").selectedIndex = -1; // need to trigger JS event
 }
-
 function manualInput() {
   var div = document.getElementById("manualInputDiv");
   var tableName = getSelectVal(document.getElementById("inputManualTableName"));
@@ -2165,6 +2164,11 @@ function manualInput() {
   sql += ")%3B";
   alert(sql);
   submitQuery('<%= "/users/#{@user.id}/servers/#{@server.id}/instances/#{@instance.id}/query" %>', sql, {},(function(response){alert(response[0])}));
+}
+
+function queryInput(){
+  var sql = document.getElementById("query").value
+  submitQuery('<%= "/users/#{@user.id}/servers/#{@server.id}/instances/#{@instance.id}/query" %>', sql, {},(function(response){alert(response[0][0])}));
 }
 </script>
 
@@ -2449,6 +2453,9 @@ function manualInput() {
     <h3>Query</h3>
   </div>
   <input type="text" name="query" id="query" class="input-xlarge">
+  <div class="span6">
+        <a href="#queryModal" data-toggle="modal" class="btn btn-primary"onclick="queryInput()">Query</a>
+  </div>
   <!-- CSV Input Modal -->
   <div id="uploadModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-header">
