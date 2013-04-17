@@ -2,14 +2,16 @@ class Instance < ActiveRecord::Base
   attr_accessible :name, :server_id
   belongs_to :server
   
-  before_save do
+  before_create do
     logger.debug("creating new database at #{Time.now}")
     self.server.make_connection
     self.server.sql.query("CREATE DATABASE #{self.name}")
   end
-  before_create do
-    db_json=""
+  before_save do
+    self.db_json ||= {:tables=>[], :relations => []}.to_json
   end
+
+  
   
   after_destroy do
     self.server.make_connection
