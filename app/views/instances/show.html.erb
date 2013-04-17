@@ -1265,7 +1265,7 @@ function convertToSQL() {
             }
         }
     }
-    submitQuery('<%= "/users/#{@user.id}/servers/#{@server.id}/instances/#{@instance.id}" %>', code, convertToJSON(), (function(response){alert(response[0])}));
+    submitQuery('<%= "/users/#{@user.id}/servers/#{@server.id}/instances/#{@instance.id}/query" %>', code, convertToJSON(), (function(response){alert(response[0])}));
 }
 
 /*
@@ -1775,7 +1775,7 @@ function delRelation(e) {
 */
 function submitQuery(path, query, json, callback){
   $.ajax({url: path,
-    type: 'PUT',
+    type: 'POST',
     beforeSend: function(xhr){xhr.setRequestHeader('X-CSRF-TOKEN',$('meta[name="csrf-token"]').attr('content'))},
     data: 'query=' + query + '&json=' + json,
     success: function(response){callback(response)}
@@ -2164,6 +2164,7 @@ function manualInput() {
   }
   sql += ")%3B";
   alert(sql);
+  submitQuery('<%= "/users/#{@user.id}/servers/#{@server.id}/instances/#{@instance.id}/query" %>', sql, {},(function(response){alert(response[0])}));
 }
 </script>
 
