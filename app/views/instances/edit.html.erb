@@ -43,8 +43,7 @@
         <option>Teacher-Student</option>
         <option>Employee-Department</option>
         <option>Author-Book-Category</option>
-        <option>Teacher-Student (U)</option>
-        <option>Test</option>
+        <option>Advisor-Student</option>
       </select>
     </div>
     <div class="span2">
@@ -107,10 +106,14 @@ $(document).ready(function() {
   });
 });
 
+$(document).onload(function() {
+ convertFromJSON(JSONJSONObj);
+});
+
 /********* Global Variables *********/
 
 // ID of the instance
-var dbInstance = "test";
+var dbInstance = '<%="#{@instance.name}"%>';
 
 // Control inversion
 var invert = true;
@@ -164,6 +167,7 @@ var tsu = { "tables" : [{ "name" : "Teacher" , "xval" : "180" , "yval" : "250" ,
 
 var test = { "tables" : [{ "name" : "testMe" , "xval" : "895" , "yval" : "385" , "attributes" : []}], "relations" : [], "viewport" : { "updateX" : "370", "updateY" : "160", "scale" : "1"} };
 
+var ta = { "tables" : [{ "name" : "Advisor" , "xval" : "237" , "yval" : "165" , "attributes" : [{ "name" : "aid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "109" , "yval" : "164" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "158" , "yval" : "243" }, { "name" : "office" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "291" , "yval" : "282" }]}, { "name" : "Student" , "xval" : "690" , "yval" : "193" , "attributes" : [{ "name" : "sid" , "dataType" : "INTEGER" , "primary" : "true" , "notnull" : "false" , "unique" : "false" , "xval" : "840" , "yval" : "80" }, { "name" : "name" , "dataType" : "VARCHAR(256)" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "936" , "yval" : "158" }, { "name" : "gpa" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "914" , "yval" : "242" }, { "name" : "credits" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "695" , "yval" : "290" }, { "name" : "graduation" , "dataType" : "INTEGER" , "primary" : "false" , "notnull" : "false" , "unique" : "false" , "xval" : "820" , "yval" : "304" }]}], "relations" : [{ "name" : "Advises" , "xval" : "501" , "yval" : "163" , "attributes" : [{ "name" : "aid", "table" : "Advisor"}, { "name" : "sid", "table" : "Student"}]}], "viewport" : { "updateX" : "30", "updateY" : "30", "scale" : "1"} };
 
 
 /********* Creation Methods *********/
@@ -370,10 +374,6 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
     //Adds connection line
     var line = new Kinetic.Line({
         name: name,
-        // points: [group.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
-        //          group.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY,
-        //          table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
-        //          table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY],
         points: [group.getX()+group.origX+group.getChildren()[0].getWidth()/2-updateX,
                  group.getY()+group.origY+group.getChildren()[0].getHeight()/2-updateY,
                  table.getX()+table.origX+table.getChildren()[0].getWidth()/2-updateX,
@@ -389,14 +389,10 @@ function createAttr(name, type, tableName, primary, notNull, unique, rectX, rect
     attrLines.push(lineGroup);
 
     //Add group to stage
-    //layer.add(group);
-    //layer.add(line);
-    //stage.add(layer);
     viewport.add(group,1150);
     viewport.add(line,1150, true); // add line to bottom
 
-    //line.moveToBottom();
-    //layer.draw();
+
     viewport.draw();
 }
 
@@ -496,10 +492,6 @@ function createRelation(rname, tableArr, relX, relY){
         var currTable = rTables[i];
         var line = new Kinetic.Line({
             name: rname,
-            // points: [group.getX()+group.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
-            //      group.getY()+group.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY,
-            //      currTable.getX()+currTable.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
-            //      currTable.getY()+currTable.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY],
             points: [group.getX()+group.origX+group.getChildren()[0].getWidth()/2-updateX,
                  group.getY()+group.origY+group.getChildren()[0].getHeight()/2-updateY,
                  currTable.getX()+currTable.origX+currTable.getChildren()[0].getWidth()/2-updateX,
@@ -535,11 +527,6 @@ function update() {
             var table = relations[i][2][j];
             var line = lines[j];
 
-            // line.setPoints([table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
-            //      table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY,
-            //      rel.getX()+rel.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
-            //      rel.getY()+rel.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY]);
-
             line.setPoints([table.getX()+table.origX+table.getChildren()[0].getWidth()/2-updateX,
                  table.getY()+table.origY+table.getChildren()[0].getHeight()/2-updateY,
                  rel.getX()+rel.origX+rel.getChildren()[0].getWidth()/2-updateX,
@@ -555,10 +542,6 @@ function update() {
         var line = attrLines[i][0];
         var table = attrLines[i][1];
         var attr = attrLines[i][2];
-        // line.setPoints([attr.getX()+attr.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
-        //          attr.getY()+attr.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY,
-        //          table.getX()+table.getChildren()[0].getWidth()/2+stage.getWidth() / 2 - 50-updateX,
-        //          table.getY()+table.getChildren()[0].getHeight()/2+stage.getHeight() / 2 - 25-updateY]);
 
         line.setPoints([attr.getX()+attr.origX+attr.getChildren()[0].getWidth()/2-updateX,
                  attr.getY()+attr.origY+attr.getChildren()[0].getHeight()/2-updateY,
@@ -712,12 +695,6 @@ function deleteTable(tableName) {
         relations.splice(i,1);
         i--;
       }
-         // if((relations[i][0].get('.Rtext')[0].getText().toLowerCase() == tableName.toLowerCase()) ||
-         //    (relations[i][2].get('.text')[0].getText().toLowerCase() == tableName.toLowerCase())) {
-         //     relations[i][0].remove();
-         //     relations.splice(i,1);
-	        //    i--;
-         // }
     }
 
     // Delete table from tables array
@@ -1154,29 +1131,22 @@ function convertFromJSON(source) {
     viewport.setZoom(parseInt(JSONObj.viewport.scale));
     viewport.draw();
   }
-  updateX = parseInt(JSONObj.viewport.updateX);
-  updateY = parseInt(JSONObj.viewport.updateY);
 }
 
 function testJSON() {
-  //var e = document.getElementById("schemaSelect");
-  //var schemaSelected = e.options[e.selectedIndex].value;
   var schemaSelected = getSelectVal(document.getElementById("schemaSelect"));
   switch (schemaSelected) {
     case 'Teacher-Student' :
       convertFromJSON(ts);
+      break;
+    case 'Advisor-Student' :
+      convertFromJSON(ta);
       break;
     case 'Author-Book-Category' :
       convertFromJSON(book);
       break;
     case 'Employee-Department' :
       convertFromJSON(ed);
-      break;
-    case 'Teacher-Student (U)' :
-      convertFromJSON(tsu);
-      break;
-    case 'Test' :
-      convertFromJSON(test);
       break;
     default :
       alert("Schema not selected");
@@ -2161,7 +2131,7 @@ function manualInput() {
   var sql = "INSERT INTO " + tableName + " VALUES (";
   for (var k = 0; k < attrTypes.length; k++) {
     if(attrTypes[k] == 'text') {
-      sql += "\'" + entry[k] + "\'"; 
+      sql += "\'" + entry[k] + "\'";
     }
     else {
       sql += entry[k];
@@ -2437,67 +2407,10 @@ function manualInput() {
       <a data-toggle="modal" href="#deleteRelationModal" class="btn btn-danger" onclick="initDelRelation()">Disconnect</a>
       <br /><br />
       <a data-toggle="modal" href="#finalizeModal" class="btn btn-success" onclick="initFinalize()">Finalize</a>
-      <!-- <a class="btn" onclick="convertToSQL()">Convert</a> --> <!-- Should be called in Finalize when modal is complete -->
       <a data-toggle="modal" href="#DBCode" class="btn" onClick="convertToCode()">Show Code</a>
-      <button class="btn" onClick="convertToJSON()">JSON</button>
       <a class="btn btn-danger" onclick="clearDiagram()">Clear Schema</a>
     </div>
   </div>
-
-  <p><button href="#uploadModal" data-toggle="modal" class="btn btn-primary" onclick="initCSVInput()">Upload File</button></p>
-  <p><button href="#manualInputModal" data-toggle="modal" class="btn btn-primary" onclick="initManualInput()">Manual Insertion</button></p>
-
-  <!-- CSV Input Modal -->
-  <div id="uploadModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h4 id="myModalLabel">Upload CSV File</h4>
-    </div>
-    <div class="modal-body">
-      <h5>Choose Table</h5>
-      <select id="inputCSVTableName">
-      </select>
-      <h5>Choose File</h5>
-      <form>
-        <input type="file" id="csvfile" style="display:none"/>
-        <div class="input-append">
-          <input type="text" name="subfile" id="testSubfile" class="input-xlarge">
-          <a class="btn" onclick="$('#csvfile').click();">Browse</a>
-        </div>
-      </form>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" data-dismiss="modal">Close</button>
-      <button id="uploadBtn" class="btn btn-success" onclick="addCSVData()"><i class="icon-arrow-up icon-white"></i>Upload</button>
-    </div>
-  </div>
-
-  <!-- Manual Input Modal -->
-  <div id="manualInputModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="manualInputModalLabel" aria-hidden="true">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h4 id="manualInputModalLabel">Insert Data</h4>
-    </div>
-    <div class="modal-body">
-      <p>Select one of the following tables to insert data:</p>
-      <select id="inputManualTableName" onchange="genAttrsInput()">
-      </select>
-      <div id="manualInputDiv">
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" data-dismiss="modal">Close</button>
-      <button id="manualInputBtn" class="btn btn-success" onclick="manualInput()">Insert</button>
-    </div>
-  </div>
-      <!-- <div class="controls form-search">
-        <input type="file" name="thefile" id="thefile" class="input-xlarge" style="position: fixed; top: -100px; left: -100px;"/>
-        <input type="file" class="input-xlarge" id="input05" style="position: fixed; top: -100px; left: -100px;">
-        <input type="text" class="" disabled="" size="40">
-        <button type="button" class="btn btn-primary" id="thefile">
-          <i class="icon-arrow-up icon-white"></i> Open CSV File
-        </button>
-      </div> -->
 </div>
 <script type="text/javascript">
 
